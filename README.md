@@ -15,9 +15,11 @@
 
 ## 共享源
 
-只读接入同级目录 `学习Agent_new`（课程体系 / 知识树 / 海马体 / API 密钥）。  
-跨仓说明见 `docs/letter_to_learningAgent_new.md`。  
-对方可 `SHARED_ACCESS: denied` 拒绝。
+只读接入同级目录 `学习Agent_new`（课程体系 / 知识树 / 海马体 / 本地 API 密钥）。  
+可用环境变量 `ZIZHAO_SHARED_ROOT` 覆盖路径（本机配置，勿写进仓库）。  
+跨仓说明见 `docs/letter_to_learningAgent_new.md`。
+
+**脱敏**：本仓不含 API Key、`settings.json`、`storage/`、`backups/`、用户绝对路径。
 
 ## 快速开始
 
