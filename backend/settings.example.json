@@ -1,0 +1,12 @@
+{
+  "material_recent_days": 30,
+  "material_dedup_threshold": 0.6,
+  "material_pick_strategy": "round_robin",
+  "material_generate_timeout": 90,
+  "material_domains": ["philosophy", "history", "classics", "shared_curriculum"],
+  "api_password": "",
+  "port": 8010,
+  "night_patrol_enabled": true,
+  "night_patrol_start": "01:00",
+  "night_patrol_end": "05:00"
+}

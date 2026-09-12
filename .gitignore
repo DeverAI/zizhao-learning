@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# Local runtime data — never commit
+backend/storage/
+*.db
+*.db-shm
+*.db-wal
+**/settings.json
+!**/settings.example.json
+hippocampus/
+
+# Local audit backups & logs — never publish
+backups/
+*.log
+backend/Err.log
+
+# Secrets / personal keys (never)
+All_Apis.txt
+api_keys.py
+.env
+.env.*
+*.pem
+*.key
+
+# Machine-local notes
+*.local.md
+local_config.md
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
