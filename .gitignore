@@ -28,9 +28,14 @@ api_keys.py
 *.pem
 *.key
 
-# Machine-local notes
-*.local.md
-local_config.md
+# Local agent notes (not product code)
+AGENT.txt
+audit_probe.py
+backend/audit_probe.py
+backend/audit_probe_r03.py
+
+# Device provision blobs with passkeys
+backend/storage/device_provision/
 
 # OS
 .DS_Store

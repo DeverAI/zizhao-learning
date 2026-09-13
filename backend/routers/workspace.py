@@ -3,9 +3,10 @@ from __future__ import annotations
 
 from typing import Optional
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel
 
+from routers.auth import current_user
 from services import agent_tools, persona, recitation, upload_service
 
 router = APIRouter(prefix="/api", tags=["workspace"])
@@ -24,6 +25,7 @@ async def upload(
     source: str = Form(""),
     tags: str = Form(""),
     note: str = Form(""),
+    user: dict = Depends(current_user),
 ):
     content = await file.read()
     tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else []
@@ -36,6 +38,7 @@ async def upload(
             source=source,
             tags=tag_list,
             note=note,
+            user_id=user["id"],
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
@@ -43,18 +46,18 @@ async def upload(
 
 
 @router.get("/upload/list")
-async def upload_list(framework: Optional[str] = None):
-    return {"items": upload_service.list_uploads(framework)}
+async def upload_list(framework: Optional[str] = None, user: dict = Depends(current_user)):
+    return {"items": upload_service.list_uploads(framework, user_id=user["id"])}
 
 
 @router.get("/profile")
-async def get_profile():
-    return persona.load_profile()
+async def get_profile(user: dict = Depends(current_user)):
+    return persona.load_profile(user["id"])
 
 
 @router.post("/profile/reset")
-async def reset_profile():
-    persona.save_profile(persona.DEFAULT_PROFILE)
+async def reset_profile(user: dict = Depends(current_user)):
+    persona.save_profile(persona.DEFAULT_PROFILE, user["id"])
     return {"ok": True}
 
 

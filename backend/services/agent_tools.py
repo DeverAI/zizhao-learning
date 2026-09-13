@@ -117,7 +117,8 @@ def tool_calculator(args: dict) -> dict:
 
 
 def tool_profile_note(args: dict) -> dict:
-    profile = persona.load_profile()
+    uid = str(args.get("user_id") or "")
+    profile = persona.load_profile(uid)
     note = str(args.get("note") or args.get("text") or "").strip()
     trait = str(args.get("trait") or "").strip()
     avoid = str(args.get("avoid") or "").strip()
@@ -136,23 +137,25 @@ def tool_profile_note(args: dict) -> dict:
     if int(profile.get("stats", {}).get("turns") or 0) >= 4:
         if profile["impression"]["stage"] == "stranger":
             profile["impression"]["stage"] = "observed"
-    persona.save_profile(profile)
+    persona.save_profile(profile, uid)
     return {
         "ok": True,
+        "user_id": uid,
         "stage": profile["impression"]["stage"],
         "detail_level": profile["preferences"]["detail_level"],
     }
 
 
 def tool_set_agenda(args: dict) -> dict:
-    profile = persona.load_profile()
+    uid = str(args.get("user_id") or "")
+    profile = persona.load_profile(uid)
     persona.set_agenda(
         profile,
         focus=str(args.get("focus") or ""),
         next_action=str(args.get("next_action") or ""),
         deadline=str(args.get("deadline") or ""),
     )
-    persona.save_profile(profile)
+    persona.save_profile(profile, uid)
     return {"ok": True, "agenda": profile.get("agenda")}
 
 
@@ -163,6 +166,66 @@ def tool_refresh_material(args: dict) -> dict:
         "should_refresh": True,
         "domain": args.get("domain") or "any",
     }
+
+
+def tool_timetable_read(args: dict) -> dict:
+    from services import timetable_service
+
+    # user_id 由 agent 层注入；工具本身允许显式传入（服务端鉴权在路由层）
+    user_id = str(args.get("user_id") or "")
+    if not user_id:
+        return {"ok": False, "error": "user_id required"}
+    return {
+        "ok": True,
+        "items": timetable_service.list_items(user_id),
+        "block": timetable_service.as_prompt_block(user_id),
+    }
+
+
+def tool_timetable_write(args: dict) -> dict:
+    from services import timetable_service
+
+    user_id = str(args.get("user_id") or "")
+    text = str(args.get("text") or "")
+    if not user_id or not text:
+        return {"ok": False, "error": "user_id and text required"}
+    return timetable_service.bulk_from_text(user_id, text)
+
+
+def tool_resident_search(args: dict) -> dict:
+    from services import resident_service
+
+    user_id = str(args.get("user_id") or "")
+    q = str(args.get("query") or args.get("q") or "")
+    if not user_id:
+        return {"ok": False, "error": "user_id required"}
+    items = resident_service.search(user_id, q, limit=12)
+    return {
+        "ok": True,
+        "count": len(items),
+        "items": [
+            {
+                "id": x.get("id"),
+                "kind": x.get("kind"),
+                "title": x.get("title"),
+                "preview": (x.get("body") or "")[:160],
+            }
+            for x in items
+        ],
+    }
+
+
+def tool_resident_add(args: dict) -> dict:
+    from services import resident_service
+
+    user_id = str(args.get("user_id") or "")
+    title = str(args.get("title") or "")
+    body = str(args.get("body") or "")
+    kind = str(args.get("kind") or "note")
+    if not user_id or not title:
+        return {"ok": False, "error": "user_id and title required"}
+    item = resident_service.add(user_id, title, body, kind=kind)
+    return {"ok": True, "id": item.get("id"), "title": item.get("title")}
 
 
 def tool_challenge_material(args: dict) -> dict:
@@ -374,6 +437,53 @@ TOOL_SPECS: list[dict] = [
             },
         },
     },
+    {
+        "name": "timetable_read",
+        "description": "读取用户本周时间表。",
+        "parameters": {
+            "type": "object",
+            "properties": {"user_id": {"type": "string"}},
+            "required": ["user_id"],
+        },
+    },
+    {
+        "name": "timetable_write",
+        "description": "按文本批量写入时间表，每行「周X HH:MM-HH:MM 标题」。",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "user_id": {"type": "string"},
+                "text": {"type": "string"},
+            },
+            "required": ["user_id", "text"],
+        },
+    },
+    {
+        "name": "resident_search",
+        "description": "检索本仓常驻资料（不依赖邻仓）。",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "user_id": {"type": "string"},
+                "query": {"type": "string"},
+            },
+            "required": ["user_id"],
+        },
+    },
+    {
+        "name": "resident_add",
+        "description": "把对话中的要点存为常驻资料。",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "user_id": {"type": "string"},
+                "title": {"type": "string"},
+                "body": {"type": "string"},
+                "kind": {"type": "string"},
+            },
+            "required": ["user_id", "title"],
+        },
+    },
 ]
 
 HANDLERS: dict[str, Callable[[dict], dict]] = {
@@ -385,6 +495,10 @@ HANDLERS: dict[str, Callable[[dict], dict]] = {
     "refresh_material": tool_refresh_material,
     "challenge_material": tool_challenge_material,
     "segment_material_text": tool_segment_text,
+    "timetable_read": tool_timetable_read,
+    "timetable_write": tool_timetable_write,
+    "resident_search": tool_resident_search,
+    "resident_add": tool_resident_add,
 }
 
 

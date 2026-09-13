@@ -110,7 +110,10 @@ def save_upload(
     source: str = "",
     tags: Optional[list[str]] = None,
     note: str = "",
+    user_id: str = "",
 ) -> dict:
+    from config import STORAGE_DIR as _ST
+
     ensure_upload_dirs()
     if framework not in FRAMEWORKS:
         framework = "素材"
@@ -120,9 +123,11 @@ def save_upload(
     if len(content) > 20 * 1024 * 1024:
         raise ValueError("file too large (>20MB)")
 
+    safe_uid = re.sub(r"[^\w-]", "_", user_id or "anon")[:40] or "anon"
     uid = uuid.uuid4().hex[:12]
     safe_name = f"{_slug(filename)}_{uid}{ext}"
-    dest_dir = os.path.join(UPLOAD_DIR, framework)
+    dest_dir = os.path.join(_ST, "uploads", safe_uid, framework)
+    os.makedirs(dest_dir, exist_ok=True)
     dest = os.path.join(dest_dir, safe_name)
     with open(dest, "wb") as f:
         f.write(content)
@@ -132,6 +137,7 @@ def save_upload(
     source = source or f"upload:{framework}/{safe_name}"
     item = {
         "id": uid,
+        "user_id": user_id or "",
         "filename": filename,
         "path": dest,
         "ext": ext,
@@ -215,15 +221,16 @@ def _seed_recitation_from_text(upload_id: str, title: str, text: str, source: st
     atomic_write_json(path, existing + items)
 
 
-def list_uploads(framework: Optional[str] = None) -> list[dict]:
+def list_uploads(framework: Optional[str] = None, user_id: str = "") -> list[dict]:
     items = load_index()
+    if user_id:
+        items = [x for x in items if (x.get("user_id") or "") == user_id]
     if framework:
         items = [x for x in items if x.get("framework") == framework]
-    # 不返回完整正文
     out = []
     for x in items:
         y = dict(x)
-        y.pop("path", None)  # 路径对前端可选
+        y.pop("path", None)
         out.append(y)
     return out
 

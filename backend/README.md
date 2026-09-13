@@ -1,30 +1,9 @@
-# 自招素材系统 · 后端
+# 自招学习 · 平台后端
 
-面向上海中考自主招生的每日素材服务。  
-**资料共享 / 记忆共享来源**：左邻右舍 `../学习Agent_new`（只读，不复制其数据）。  
-跨仓告知信：`学习Agent_new/updates/20260912_自招系统共享调用告知.md`（副本 `docs/letter_to_learningAgent_new.md`）。
+多组件学习平台：自招素材 / 英语背诵 / 古诗文 / 时间表 / 资料库 / 设备。  
+可选只读共享同级 `学习Agent_new`；**本仓常驻资料与时间表不依赖邻仓**。
 
-## 产品硬约定
-
-1. 不讨好；情绪支持仅限绝望档；默认催办事  
-2. 渐进画像 stranger → observed → known，从提问方式学  
-3. 前台无 Markdown（防 `**` 显示成「美元美元星号」）  
-4. 无密钥/关 LLM 时 `degraded=true`，禁止伪造成功  
-5. 邻仓先搜再读、限量摘要，禁止一次倾倒全仓  
-
-## 共享源
-
-| 类型 | 路径 | 用途 |
-|------|------|------|
-| 课程体系 | `学习Agent_new/backend/data/curriculum_cn_junior.json` | `band=自招` 灌计划表 |
-| 知识树 | `.../storage/knowledge_tree.json` | 检索 |
-| 海马体 | `.../hippocampus/profile.json` | 薄弱点注入 |
-| 密钥 | `.../settings.json` | LLM（不落日志明文） |
-
-拒绝方式：告知信头 `SHARED_ACCESS: denied`，或 `*_REVOKED.md`，或 AGENTS.md 声明。  
-本地画像/增量只写本仓，不回写共享海马体。
-
-## 启动
+## 快速开始
 
 ```powershell
 cd backend
@@ -32,65 +11,60 @@ pip install -r requirements.txt
 python -m uvicorn main:app --host 127.0.0.1 --port 8010
 ```
 
-- 工作台：http://127.0.0.1:8010/  
-- OpenAPI：http://127.0.0.1:8010/docs  
-
-## Agent 工具
-
-`search_shared` · `read_shared_excerpt` · `calculator` · `profile_note` · `set_agenda` · `refresh_material` · `challenge_material` · `segment_material_text`
-
-## 找茬与补漏
-
-- `POST /api/material/challenge`：定义边界/出处/反例/考法/行动，多轮抬杠  
-- `POST /api/material/plan/seed_gap`：海马体弱项 → 补漏计划  
-- `POST /api/material/plan/recycle`：计划耗尽后回收  
-- `POST /api/material/segment`：正文分段（TTS 未接时 `audio_ready=false`）  
-- `GET /api/material/archive/{id}/body`：归档正文回读  
+- 前端：http://127.0.0.1:8010/
+- OpenAPI：http://127.0.0.1:8010/docs
 
 ## 鉴权
 
-`settings.json` 里 `api_password` **非空**时，除 `/` `/docs` `/static` `/api/system/health` 外需  
-`Authorization: Bearer <password>`。本地留空则开放。
+| 方式 | 说明 |
+|------|------|
+| 邮箱验证码 | send-code → login；未配 SMTP 写 local outbox |
+| PassKey | begin/finish/login（简化挑战流） |
+| ESP 设备 | provision 一次性 PassKey → device/login 换 sid |
+| 会话 | HttpOnly Cookie `zsid` = `sid.hmac` |
 
-## 上传收纳
-
-`POST /api/upload`：PNG/JPG/TXT/MD/PDF/DOC/DOCX（≤20MB）  
-框架：讲解 / 素材 / 三观 / 知识体系 / 英语背诵  
-
-- 素材 → 进 `material_plan`  
-- 英语背诵 → 自动切段进背诵库  
-- 图片不假装 OCR  
-
-## 英语背诵
-
-- `GET /api/recitation/next`  
-- `POST /api/recitation/grade`（规则找茬；可选 LLM 点评）  
+限流分桶（default/auth/upload）。SQL 参数化。`ZIZHAO_SESSION_SECRET` 生产必改。
 
 ## 主要 API
 
-| 方法 | 路径 |
-|------|------|
-| GET | `/api/material/today` |
-| POST | `/api/material/chat` |
-| POST | `/api/material/refresh` |
-| POST | `/api/upload` |
-| GET | `/api/profile` |
-| GET | `/api/shared/status` |
+- `GET /api/home` 组件主页  
+- `POST /api/components/toggle|request`  
+- `GET/POST /api/timetable` · `POST /api/timetable/bulk`  
+- `GET/POST /api/resident` 常驻资料  
+- `POST /api/media/upload` OCR/文本/MP3 · `GET /api/media/{id}/download`  
+- `POST /api/material/today|chat|challenge` 自招链路  
+- `POST /api/auth/device/*` ESP  
 
-## 去重三层
+## 脱敏
 
-L1 硬键 `domain|source|title` → L2 Jaccard≥0.6 → L3 prompt 负例
+不含 API Key、`settings.json`、`storage/`、用户绝对路径。
+
+## 审核门控（硬约定）
+
+- 当日素材必须 **多轮挑刺** 直到 `review_status=passed`  
+- **未通过禁止出音频**；离线包 `audio_ready=false` 时板子禁播  
+- `POST /api/review/run` 手动；夜间巡检自动审全用户  
+
+## 自注册 API（OpenAI 兼容）
+
+主页「自注册 API」：文本模型 + TTS 各一个。  
+`GET/POST /api/settings/apis*`；生成/对话/TTS **优先用户 Key**，再共享 fallback。
+
+## 设备
+
+- 登录：`/api/auth/device/login`  
+- 离线：`/api/offline/manifest|bundle`（登录后自动下载缓存）  
+- 开关机：`/api/device/power` 默认 04:30 关 / 06:00 开 / 开机 15min 无活动再关  
+- 现场配网：AP `Zizhao-Setup-*` + `/api/device/onsite-config`  
+- 10 分钟无操作音量最小（板端，见 `hardware/`）  
 
 ## 测试
 
 ```powershell
-python -m unittest test_material_system test_agent_stack test_audit_fixes -v
+python -m unittest test_review_gate test_offline_api test_multiuser test_r03_fixes test_platform test_material_system test_audit_fixes test_agent_stack -v
+# 活体 LLM（需已配置自注册 Key）：
+# $env:RUN_LLM_LIVE='1'; python -m unittest test_llm_live -v
 ```
 
-深度检修记录：`updates/20260912_深度检修R01.md`  
-备份目录：`backups/audit_r01_20260912/`
-
-## 对应技术方案
-
-P1–P4/P6 主链路 + Agent + 上传收纳 + 背诵 + 画像 + 补漏灌种 + 找茬 + 文本分段；  
-P5 MP3 文件生成仍未接 TTS（不伪造）。
+记录：`updates/20260912_R05审核门控与设备策略.md`  
+License：AGPL-3.0

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Cookie, Header, HTTPException
 from pydantic import BaseModel, Field
 
 from services import agent_bridge, material_service
@@ -55,28 +55,62 @@ async def material_health():
     }
 
 
+def _optional_user_id(
+    zsid: Optional[str] = Cookie(default=None),
+    x_zizhao_sid: Optional[str] = Header(default=None, alias="X-Zizhao-Sid"),
+) -> str:
+    from services import auth_service, security
+
+    raw = (zsid or x_zizhao_sid or "").strip()
+    sid = security.verify_session_token(raw)
+    if not sid:
+        return ""
+    resolved = auth_service.resolve_sid(sid)
+    if not resolved or not resolved.get("user"):
+        return ""
+    return resolved["user"]["id"]
+
+
 @router.get("/today")
-async def today(domain: Optional[str] = None):
-    mat = await material_service.get_or_create_today(force_domain=domain)
+async def today(domain: Optional[str] = None, user_id: str = Depends(_optional_user_id)):
+    mat = await material_service.get_or_create_today(force_domain=domain, user_id=user_id)
     return _public_material(mat)
 
 
 @router.post("/refresh")
-async def refresh(body: RefreshBody | None = None):
+async def refresh(body: RefreshBody | None = None, user_id: str = Depends(_optional_user_id)):
     domain = body.domain if body else None
-    mat = await material_service.refresh_material(domain)
+    mat = await material_service.refresh_material(domain, user_id=user_id)
     return _public_material(mat)
 
 
 @router.post("/chat")
-async def chat(body: ChatBody):
+async def chat(
+    body: ChatBody,
+    zsid: Optional[str] = Cookie(default=None),
+    x_zizhao_sid: Optional[str] = Header(default=None, alias="X-Zizhao-Sid"),
+):
     session_id = body.session_id or "default"
-    from services import agent_chat
+    from services import agent_chat, auth_service, security
+
+    user_id = ""
+    raw = (zsid or x_zizhao_sid or "").strip()
+    sid = security.verify_session_token(raw)
+    if sid:
+        resolved = auth_service.resolve_sid(sid)
+        if resolved and resolved.get("user"):
+            user_id = resolved["user"]["id"]
+            # 会话按用户隔离，避免三人共用 session_id=web
+            if session_id in {"web", "default", ""}:
+                session_id = f"{user_id}:web"
+            elif not session_id.startswith(user_id):
+                session_id = f"{user_id}:{session_id}"
 
     result = await agent_chat.agent_chat(
         session_id=session_id,
         message=body.message,
         material_id=body.material_id,
+        user_id=user_id,
     )
     return result
 
@@ -145,18 +179,22 @@ async def archive_body(material_id: str):
 
 
 @router.post("/feedback")
-async def feedback(body: FeedbackBody):
+async def feedback(body: FeedbackBody, user_id: str = Depends(_optional_user_id)):
     mat = db.get_material(body.material_id)
     if not mat:
         raise HTTPException(status_code=404, detail="material not found")
+    # 隔离：只能评价自己的素材（user_id 空=兼容旧全局行）
+    if user_id and mat.get("user_id") and mat.get("user_id") != user_id:
+        raise HTTPException(status_code=403, detail="forbidden")
     vote = (body.vote or "").lower()
     if vote not in {"up", "down", "skip"}:
         raise HTTPException(status_code=400, detail="vote must be up/down/skip")
     db.update_material_feedback(body.material_id, vote)
-    # 记忆增量：up/down 影响本地记忆镜像
     delta = {"up": 0.05, "down": -0.05, "skip": -0.02}.get(vote, 0.0)
     topic = mat.get("title") or mat.get("domain") or "unknown"
-    agent_bridge.write_local_memory_delta(topic, delta, reason=f"material_feedback:{vote}")
+    agent_bridge.write_local_memory_delta(
+        topic, delta, reason=f"material_feedback:{vote}", user_id=user_id or mat.get("user_id") or ""
+    )
     if vote in {"down", "skip"} and mat.get("plan_id"):
         db.mark_plan_skipped(mat["plan_id"], note=body.reason or vote)
     return {
@@ -164,6 +202,7 @@ async def feedback(body: FeedbackBody):
         "material_id": body.material_id,
         "vote": vote,
         "memory_delta": delta,
+        "user_id": user_id,
     }
 
 

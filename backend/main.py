@@ -23,9 +23,14 @@ from config import (
     load_settings,
 )
 from models import database as db
+from routers import auth as auth_router
 from routers import material as material_router
+from routers import platform as platform_router
+from routers import quiz as quiz_router
+from routers import review as review_router
 from routers import shared as shared_router
 from routers import system as system_router
+from routers import user_api as user_api_router
 from routers import workspace as workspace_router
 from services import material_service
 
@@ -56,6 +61,13 @@ async def _night_archive_loop():
             last_date = today
             result = material_service.run_archive_once()
             print(f"[night-archive] {result}")
+            try:
+                from services import review_service
+
+                rev = await review_service.review_all_users_optimize()
+                print(f"[night-review] {rev.get('count')} users")
+            except Exception as rev_exc:  # noqa: BLE001
+                print(f"[night-review] error: {rev_exc}")
         except asyncio.CancelledError:
             raise
         except Exception as exc:  # noqa: BLE001 — 后台巡检不应拖垮主服务
@@ -79,9 +91,9 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="自招素材系统",
-    version="0.1.0",
-    description="每日自招素材 + 素材挂载对话；资料/记忆共享自 学习Agent_new",
+    title="自招学习平台",
+    version="0.2.0",
+    description="多组件自招/补漏/背诵平台；可选共享 学习Agent_new；PassKey/ESP 设备",
     lifespan=lifespan,
 )
 
@@ -93,14 +105,44 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-_OPEN_PATHS = {"/", "/docs", "/openapi.json", "/redoc", "/api/system/health"}
+_OPEN_PATHS = {
+    "/",
+    "/docs",
+    "/openapi.json",
+    "/redoc",
+    "/api/system/health",
+}
+
+
+def _path_open(path: str) -> bool:
+    if path in _OPEN_PATHS:
+        return True
+    if path.startswith("/static"):
+        return True
+    # 登录/注册/设备握手需要在无 Bearer 时可用；业务仍靠 sid
+    if path.startswith("/api/auth/"):
+        return True
+    if path in {"/api/shared/status", "/api/components/catalog"}:
+        return True
+    return False
 
 
 @app.middleware("http")
 async def optional_bearer_auth(request: Request, call_next):
-    """settings.api_password 非空时启用 Bearer；空则本地开放（默认）。"""
+    """可选全局 Bearer；平台接口另用 sid Cookie（Depends current_user）。"""
+    # 全局简单限流（防 DDoS 粗挡）
+    from services import security
+
+    try:
+        security.check_rate_limit("default", security.client_ip(request))
+    except security.RateLimitError as exc:
+        return JSONResponse(
+            {"detail": "rate limited", "retry_after": exc.retry_after},
+            status_code=429,
+            headers={"Retry-After": str(exc.retry_after)},
+        )
     pwd = str(load_settings().get("api_password") or "").strip()
-    if not pwd or request.url.path in _OPEN_PATHS or request.url.path.startswith("/static"):
+    if not pwd or _path_open(request.url.path):
         return await call_next(request)
     auth = request.headers.get("Authorization") or ""
     token = auth[7:].strip() if auth.lower().startswith("bearer ") else ""
@@ -108,6 +150,12 @@ async def optional_bearer_auth(request: Request, call_next):
         return JSONResponse({"detail": "unauthorized", "degraded": False}, status_code=401)
     return await call_next(request)
 
+
+app.include_router(auth_router.router)
+app.include_router(platform_router.router)
+app.include_router(quiz_router.router)
+app.include_router(review_router.router)
+app.include_router(user_api_router.router)
 app.include_router(material_router.router)
 app.include_router(shared_router.router)
 app.include_router(system_router.router)

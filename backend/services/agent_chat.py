@@ -37,12 +37,45 @@ def _maybe_tool_from_text(text: str) -> list[dict]:
     return []
 
 
-async def _chat_once(messages: list[dict], tools: bool = True) -> tuple[str, bool, str, dict]:
+async def _chat_once(messages: list[dict], tools: bool = True, user_id: str = "") -> tuple[str, bool, str, dict]:
     """返回 (content, ok, provider, raw_message)。"""
     from config import ENABLE_LLM_GENERATION
 
     if not ENABLE_LLM_GENERATION:
         return "", False, "disabled", {}
+    import httpx
+
+    # 用户自注册 Key 优先（无 tools 时走 generator；带 tools 用同一 Key）
+    if user_id:
+        try:
+            from services import user_api_service
+
+            cred = user_api_service.get_text_creds(user_id)
+            if cred:
+                schemas = agent_tools.openai_tool_schemas() if tools else None
+                payload: dict[str, Any] = {
+                    "model": cred["model"],
+                    "messages": messages,
+                    "temperature": 0.4,
+                }
+                if schemas:
+                    payload["tools"] = schemas
+                    payload["tool_choice"] = "auto"
+                try:
+                    async with httpx.AsyncClient(timeout=90) as client:
+                        resp = await client.post(
+                            user_api_service.compose_chat_url(cred["base_url"]),
+                            headers={"Authorization": f"Bearer {cred['api_key']}"},
+                            json=payload,
+                        )
+                        if resp.status_code < 400:
+                            msg = (resp.json().get("choices") or [{}])[0].get("message") or {}
+                            return msg.get("content") or "", True, "user_api", msg
+                except (httpx.HTTPError, KeyError, IndexError, TypeError, ValueError):
+                    pass
+        except Exception:  # noqa: BLE001
+            pass
+
     creds = agent_bridge.get_ai_credentials()
     if not creds:
         return "", False, "none", {}
@@ -104,30 +137,46 @@ async def agent_chat(
     message: str,
     material_id: Optional[str] = None,
     max_rounds: int = 4,
+    user_id: str = "",
 ) -> dict:
     mid = material_id or db.get_session_material(session_id)
     if not mid:
-        material = await material_service.get_or_create_today()
+        material = await material_service.get_or_create_today(user_id=user_id)
         mid = material["id"]
     else:
-        material = db.get_material(mid) or await material_service.get_or_create_today()
+        material = db.get_material(mid) or await material_service.get_or_create_today(user_id=user_id)
         mid = material["id"]
 
     db.bind_session_material(session_id, mid)
 
-    profile = persona.load_profile()
+    profile = persona.load_profile(user_id)
     profile = persona.observe_from_message(profile, message)
-    persona.save_profile(profile)
+    persona.save_profile(profile, user_id)
 
     db.save_chat(session_id, mid, "user", message)
 
     history = db.list_chat(session_id, limit=16)
+    resident_block = ""
+    if user_id:
+        try:
+            from services import resident_service, timetable_service
+
+            resident_block = (
+                "\n\n【本仓常驻资料】\n"
+                + resident_service.as_prompt_block(user_id, q="", limit=6)
+                + "\n\n【本周时间表】\n"
+                + timetable_service.as_prompt_block(user_id)
+                + f"\n\n当前登录 user_id={user_id}（timetable_*/resident_* 工具请使用此 id）"
+            )
+        except Exception:  # noqa: BLE001
+            resident_block = ""
     system = (
-        persona.persona_system_block(profile)
+        persona.persona_system_block(profile, user_id=user_id)
         + "\n\n"
         + persona.detail_instruction(profile.get("preferences", {}).get("detail_level"))
         + "\n\n"
         + material_service.chat_system_prompt(material)
+        + resident_block
         + "\n\n当前议程："
         + json.dumps(profile.get("agenda") or {}, ensure_ascii=False)
     )
@@ -141,8 +190,22 @@ async def agent_chat(
     degraded = True
     refreshed = False
 
+    def _inject_uid(args: dict | str) -> dict | str:
+        """为本仓工具自动补 user_id，避免模型漏参。"""
+        if not user_id:
+            return args
+        try:
+            import json as _json
+
+            data = _json.loads(args) if isinstance(args, str) else dict(args or {})
+        except _json.JSONDecodeError:
+            return args
+        if isinstance(data, dict) and not data.get("user_id"):
+            data["user_id"] = user_id
+        return data
+
     for _ in range(max_rounds):
-        content, ok, provider, msg = await _chat_once(messages, tools=True)
+        content, ok, provider, msg = await _chat_once(messages, tools=True, user_id=user_id)
         calls = _parse_tool_calls(msg) if ok else []
         if not calls and content:
             calls = _maybe_tool_from_text(content)
@@ -175,7 +238,7 @@ async def agent_chat(
             }
         )
         for call in calls:
-            result = agent_tools.dispatch(call["name"], call["arguments"])
+            result = agent_tools.dispatch(call["name"], _inject_uid(call["arguments"]))
             tool_trail.append({"name": call["name"], "ok": result.get("ok"), "summary": str(result)[:200]})
             # 统计
             stats = profile.setdefault("stats", {})
@@ -200,7 +263,7 @@ async def agent_chat(
                     "content": agent_tools.compact_tool_result(call["name"], result),
                 }
             )
-        persona.save_profile(profile)
+        persona.save_profile(profile, user_id)
         # 继续下一轮，让模型消费工具结果
         final_text = ""
         degraded = False
@@ -213,7 +276,7 @@ async def agent_chat(
                 "content": "根据以上工具结果，用纯文本直接回答用户，并给出下一步行动。不要调用工具。",
             }
         )
-        content, ok, provider, _ = await _chat_once(messages, tools=False)
+        content, ok, provider, _ = await _chat_once(messages, tools=False, user_id=user_id)
         if ok and content:
             final_text = persona.strip_markdown(content)
             degraded = False
@@ -226,7 +289,7 @@ async def agent_chat(
     final_text = final_text.replace("**", "").replace("__", "")
 
     db.save_chat(session_id, mid, "assistant", final_text)
-    persona.save_profile(profile)
+    persona.save_profile(profile, user_id)
 
     return {
         "session_id": session_id,

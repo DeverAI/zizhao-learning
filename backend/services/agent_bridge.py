@@ -28,27 +28,33 @@ def _read_json(path: str, default: Any) -> Any:
 
 
 def _access_denied() -> bool:
-    letter = os.path.join(SHARED_AGENT_ROOT, "updates", "20260912_自招系统共享调用告知.md")
-    # 兼容正本改名或显式拒绝
-    for name in os.listdir(os.path.join(SHARED_AGENT_ROOT, "updates")) if os.path.isdir(os.path.join(SHARED_AGENT_ROOT, "updates")) else []:
-        if name.endswith("_REVOKED.md") and "自招" in name:
-            return True
+    """仅当存在明确拒绝信号时返回 True。
+
+    注意：告知信里可能**解释**如何撤销，因此不能子串匹配 SHARED_ACCESS: denied，
+    必须是独立成行的状态标记。
+    """
+    updates_dir = os.path.join(SHARED_AGENT_ROOT, "updates")
+    if os.path.isdir(updates_dir):
+        for name in os.listdir(updates_dir):
+            if name.endswith("_REVOKED.md") and "自招" in name:
+                return True
+    letter = os.path.join(updates_dir, "20260912_自招系统共享调用告知.md")
     try:
         if os.path.exists(letter):
             with open(letter, encoding="utf-8") as f:
-                head = f.read(800)
-            if "SHARED_ACCESS: denied" in head:
-                return True
+                for line in f:
+                    if line.strip() == "SHARED_ACCESS: denied":
+                        return True
     except OSError:
         pass
-    # AGENTS.md 声明
     agents = os.path.join(SHARED_AGENT_ROOT, "AGENTS.md")
     try:
         if os.path.exists(agents):
             with open(agents, encoding="utf-8") as f:
-                text = f.read()
-            if "禁止邻仓自招" in text or "SHARED_ACCESS: denied" in text:
-                return True
+                for line in f:
+                    s = line.strip()
+                    if s == "SHARED_ACCESS: denied" or s == "禁止邻仓自招系统读取":
+                        return True
     except OSError:
         pass
     return False
@@ -224,45 +230,52 @@ def weak_topics(max_n: int = 8) -> list[dict]:
     return items[:max_n]
 
 
-def teaching_context(domain: str = "", title: str = "") -> dict:
+def teaching_context(domain: str = "", title: str = "", user_id: str = "") -> dict:
     """给生成/对话用的记忆上下文。"""
     mem = load_shared_memory(apply_decay=True)
     weak = weak_topics(5)
+    local = load_local_memory_delta(user_id)
     return {
         "baseline_style": mem.get("meta", {}).get("preferred_style", "conceptual"),
         "best_study_time": mem.get("meta", {}).get("best_study_time", ""),
         "weak_topics": weak,
+        "local_deltas": local.get("topics", {}),
         "focus_title": title,
         "domain": domain,
+        "user_id": user_id,
     }
 
 
-def write_local_memory_delta(topic: str, delta: float, reason: str = "") -> dict:
-    """把自招学习反馈写到本地镜像（不直接改共享海马体，避免双写冲突）。
-
-    共享记忆仍以 学习Agent_new 为源；本地只记增量，供 adaptive 策略与审计。
-    """
+def write_local_memory_delta(topic: str, delta: float, reason: str = "", user_id: str = "") -> dict:
+    """按用户写本地增量（三人分用，不写共享海马体）。"""
     from config import STORAGE_DIR, atomic_write_json
+    import re
 
-    path = os.path.join(STORAGE_DIR, "memory_delta.json")
+    uid = re.sub(r"[^\w-]", "_", user_id or "anon")[:64] or "anon"
+    path = os.path.join(STORAGE_DIR, "memory_delta", f"{uid}.json")
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     data = _read_json(path, {"topics": {}})
     topics = data.setdefault("topics", {})
-    item = topics.setdefault(
-        topic,
-        {"mastery_delta": 0.0, "history": []},
-    )
+    item = topics.setdefault(topic, {"mastery_delta": 0.0, "history": []})
     item["mastery_delta"] = float(item.get("mastery_delta") or 0.0) + float(delta)
     hist = item.setdefault("history", [])
-    hist.append(
-        {
-            "date": datetime.now(timezone.utc).isoformat(),
-            "delta": float(delta),
-            "reason": reason or "",
-        }
-    )
+    hist.append({"date": datetime.now(timezone.utc).isoformat(), "delta": float(delta), "reason": reason or ""})
     item["history"] = hist[-50:]
     atomic_write_json(path, data)
-    return {"topic": topic, "mastery_delta": item["mastery_delta"]}
+    return {"topic": topic, "mastery_delta": item["mastery_delta"], "user_id": uid}
+
+
+def load_local_memory_delta(user_id: str = "") -> dict:
+    from config import STORAGE_DIR
+    import re
+
+    uid = re.sub(r"[^\w-]", "_", user_id or "anon")[:64] or "anon"
+    path = os.path.join(STORAGE_DIR, "memory_delta", f"{uid}.json")
+    data = _read_json(path, {"topics": {}})
+    if not isinstance(data, dict):
+        return {"topics": {}}
+    data.setdefault("topics", {})
+    return data
 
 
 def get_ai_credentials() -> dict:
@@ -279,6 +292,16 @@ def get_ai_credentials() -> dict:
         model = settings.get(f"{name}_model") or ""
         if key:
             creds[name] = {"api_key": key, "base_url": base, "model": model}
+    # 小米 token-plan / 常规
+    xiaomi_key = settings.get("xiaomi_token_plan_api_key") or ""
+    xiaomi_base = settings.get("xiaomi_token_plan_base_url") or "https://token-plan-cn.xiaomimimo.com/v1"
+    xiaomi_model = settings.get("xiaomi_vision_model") or "mimo-v2.5"
+    if xiaomi_key:
+        creds["xiaomi"] = {
+            "api_key": xiaomi_key,
+            "base_url": xiaomi_base,
+            "model": xiaomi_model,
+        }
     custom = settings.get("custom_apis") or []
     if isinstance(custom, list):
         for i, item in enumerate(custom):

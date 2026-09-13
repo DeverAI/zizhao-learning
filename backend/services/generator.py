@@ -166,21 +166,65 @@ def _parse_json_block(text: str) -> dict:
     return {}
 
 
-async def _chat_completion(messages: list[dict], temperature: float = 0.4) -> tuple[str, bool, str]:
-    """返回 (content, ok, provider)。"""
+async def _chat_completion(
+    messages: list[dict],
+    temperature: float = 0.4,
+    user_id: str = "",
+) -> tuple[str, bool, str]:
+    """返回 (content, ok, provider)。优先用户自注册 OpenAI Key。"""
     from config import ENABLE_LLM_GENERATION
 
     if not ENABLE_LLM_GENERATION:
         return "", False, "disabled"
+    import httpx
+
+    if user_id:
+        try:
+            from services import user_api_service
+
+            cred = user_api_service.get_text_creds(user_id)
+            if cred:
+                try:
+                    async with httpx.AsyncClient(timeout=90) as client:
+                        resp = await client.post(
+                            user_api_service.compose_chat_url(cred["base_url"]),
+                            headers={"Authorization": f"Bearer {cred['api_key']}"},
+                            json={
+                                "model": cred["model"],
+                                "messages": messages,
+                                "temperature": temperature,
+                            },
+                        )
+                        if resp.status_code < 400:
+                            content = (
+                                (resp.json().get("choices") or [{}])[0]
+                                .get("message", {})
+                                .get("content")
+                                or ""
+                            )
+                            if content:
+                                return content, True, "user_api"
+                except (httpx.HTTPError, KeyError, IndexError, TypeError, ValueError):
+                    pass
+        except Exception:  # noqa: BLE001
+            pass
+
     creds = agent_bridge.get_ai_credentials()
     if not creds:
         return "", False, "none"
-    import httpx
 
-    # 优先 deepseek / custom
-    order = [k for k in creds if k.startswith("deepseek")] + [
-        k for k in creds if k.startswith("custom")
-    ] + [k for k in creds if k not in ("deepseek",) and not k.startswith("deepseek") and not k.startswith("custom")]
+    # 优先 deepseek / custom / 小米
+    def _rank(name: str) -> int:
+        n = name.lower()
+        if n.startswith("deepseek"):
+            return 0
+        if n.startswith("custom"):
+            return 1
+        if "xiaomi" in n or "mimo" in n:
+            return 2
+        return 3
+
+    order = sorted(creds.keys(), key=_rank)
     for name in order:
         cfg = creds[name]
         base = (cfg.get("base_url") or "").rstrip("/")
@@ -260,6 +304,53 @@ def fallback_material(plan: dict, domain: str) -> dict:
     }
 
 
+async def xiaomi_web_search(query: str) -> str:
+    """小米模型联网搜索（若共享 settings 提供 token-plan）。失败返回空串，不伪造。"""
+    from config import SHARED_SETTINGS
+    import os
+
+    if not os.path.exists(SHARED_SETTINGS):
+        return ""
+    try:
+        import json
+
+        with open(SHARED_SETTINGS, encoding="utf-8-sig") as f:
+            s = json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return ""
+    key = s.get("xiaomi_token_plan_api_key") or ""
+    base = (s.get("xiaomi_token_plan_base_url") or "https://token-plan-cn.xiaomimimo.com/v1").rstrip("/")
+    model = s.get("xiaomi_vision_model") or "mimo-v2.5"
+    if not key:
+        return ""
+    import httpx
+
+    messages = [
+        {
+            "role": "user",
+            "content": (
+                "请联网检索并用要点回答（标注来源站点名，不要编造 URL）："
+                + query[:500]
+            ),
+        }
+    ]
+    try:
+        with httpx.Client(timeout=60) as client:
+            resp = client.post(
+                f"{base}/chat/completions",
+                headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+                json={"model": model, "messages": messages, "temperature": 0.3},
+            )
+            if resp.status_code < 400:
+                data = resp.json()
+                return (
+                    (data.get("choices") or [{}])[0].get("message", {}).get("content") or ""
+                )[:4000]
+    except (httpx.HTTPError, KeyError, IndexError, TypeError, ValueError):
+        return ""
+    return ""
+
+
 async def generate_from_plan(
     plan: dict,
     domain: str,
@@ -280,7 +371,16 @@ async def generate_from_plan(
         "title, source, body, key_points, followups, concept_keys, fingerprint。"
         "body 是可朗读讲解稿，800-1500字；concept_keys 为3-8个短概念词。"
         "fingerprint 形如 {person, work, concept, era, syntax}。"
+        "可结合提供的检索摘要，但 source 必须可追溯。"
     )
+    search_notes = ""
+    try:
+        from config import ENABLE_LLM_GENERATION as _llm_on
+
+        if _llm_on:
+            search_notes = await xiaomi_web_search(f"{title} {source} 自招 知识点")
+    except Exception:  # noqa: BLE001
+        search_notes = ""
     user = f"""请围绕计划条目展开一份自招素材（不要自由选题）。
 
 domain: {domain}
@@ -289,6 +389,8 @@ source_hint: {source}
 tags: {json.dumps(plan.get('tags') or [], ensure_ascii=False)}
 
 共享记忆薄弱点：{weak_line}
+
+{f"【联网检索摘要】\n{search_notes}\n" if search_notes else ""}
 
 {negative_list}
 

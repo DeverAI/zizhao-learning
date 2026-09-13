@@ -9,7 +9,16 @@ from typing import Any
 
 from config import STORAGE_DIR, atomic_write_json, ensure_dirs
 
-PROFILE_PATH = os.path.join(STORAGE_DIR, "user_profile.json")
+# 按用户隔离画像（三人分用，禁止全局共享）
+# 旧文件 STORAGE_DIR/user_profile.json 仅作迁移源，不再作为主路径
+PROFILE_DIR_NAME = "profiles"
+
+
+def _profile_path(user_id: str = "") -> str:
+    import re
+
+    uid = re.sub(r"[^\w-]", "_", (user_id or "anon").strip())[:64] or "anon"
+    return os.path.join(STORAGE_DIR, PROFILE_DIR_NAME, f"{uid}.json")
 
 # 框架决策：讲解详略与收纳去向
 FRAMEWORKS = {
@@ -57,12 +66,15 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def load_profile() -> dict:
+def load_profile(user_id: str = "") -> dict:
     ensure_dirs()
-    data = dict(DEFAULT_PROFILE)
-    if os.path.exists(PROFILE_PATH):
+    path = _profile_path(user_id)
+    import copy
+
+    data = copy.deepcopy(DEFAULT_PROFILE)
+    if os.path.exists(path):
         try:
-            with open(PROFILE_PATH, encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 raw = json.load(f)
             if isinstance(raw, dict):
                 for k, v in raw.items():
@@ -75,15 +87,19 @@ def load_profile() -> dict:
     data["impression"].setdefault("traits", [])
     data["impression"].setdefault("notes", [])
     data["impression"].setdefault("avoid", [])
+    data["user_id"] = user_id or ""
     return data
 
 
-def save_profile(data: dict) -> None:
+def save_profile(data: dict, user_id: str = "") -> None:
+    ensure_dirs()
+    path = _profile_path(user_id or str(data.get("user_id") or ""))
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     data = dict(data)
     data["updated_at"] = _now()
     if not data.get("created_at"):
         data["created_at"] = data["updated_at"]
-    atomic_write_json(PROFILE_PATH, data)
+    atomic_write_json(path, data)
 
 
 def strip_markdown(text: str) -> str:
@@ -103,8 +119,8 @@ def strip_markdown(text: str) -> str:
     return s.strip()
 
 
-def persona_system_block(profile: dict | None = None) -> str:
-    profile = profile or load_profile()
+def persona_system_block(profile: dict | None = None, user_id: str = "") -> str:
+    profile = profile or load_profile(user_id)
     imp = profile.get("impression") or {}
     pref = profile.get("preferences") or {}
     stage = imp.get("stage") or "stranger"

@@ -156,8 +156,124 @@ def init_db() -> None:
                 created_at TEXT
             );
             CREATE INDEX IF NOT EXISTS idx_chat_session ON material_chat(session_id, created_at);
+
+            CREATE TABLE IF NOT EXISTS users (
+                id TEXT PRIMARY KEY,
+                email TEXT UNIQUE,
+                display_name TEXT DEFAULT '',
+                created_at TEXT
+            );
+            CREATE TABLE IF NOT EXISTS auth_sessions (
+                sid TEXT PRIMARY KEY,
+                user_id TEXT,
+                kind TEXT DEFAULT 'user',
+                device_id TEXT DEFAULT '',
+                created_at TEXT,
+                expires_at TEXT
+            );
+            CREATE INDEX IF NOT EXISTS idx_sess_user ON auth_sessions(user_id);
+            CREATE TABLE IF NOT EXISTS email_codes (
+                email TEXT PRIMARY KEY,
+                code_hash TEXT,
+                expires_at REAL,
+                used INTEGER DEFAULT 0
+            );
+            CREATE TABLE IF NOT EXISTS passkeys (
+                credential_id TEXT PRIMARY KEY,
+                user_id TEXT,
+                public_key TEXT DEFAULT '',
+                kind TEXT DEFAULT 'web',
+                created_at TEXT
+            );
+            CREATE TABLE IF NOT EXISTS passkey_challenges (
+                user_id TEXT PRIMARY KEY,
+                challenge TEXT,
+                expires_at REAL
+            );
+            CREATE TABLE IF NOT EXISTS devices (
+                device_id TEXT PRIMARY KEY,
+                user_id TEXT,
+                name TEXT DEFAULT '',
+                passkey_hash TEXT,
+                created_at TEXT,
+                revoked INTEGER DEFAULT 0
+            );
+            CREATE TABLE IF NOT EXISTS timetable_items (
+                id TEXT PRIMARY KEY,
+                user_id TEXT,
+                title TEXT,
+                weekday INTEGER DEFAULT 0,
+                start_min INTEGER DEFAULT 0,
+                end_min INTEGER DEFAULT 0,
+                component TEXT DEFAULT '',
+                note TEXT DEFAULT '',
+                created_at TEXT
+            );
+            CREATE INDEX IF NOT EXISTS idx_tt_user ON timetable_items(user_id, weekday, start_min);
+            CREATE TABLE IF NOT EXISTS resident_items (
+                id TEXT PRIMARY KEY,
+                user_id TEXT,
+                kind TEXT DEFAULT 'note',
+                title TEXT,
+                body TEXT DEFAULT '',
+                tags TEXT DEFAULT '[]',
+                source TEXT DEFAULT '',
+                created_at TEXT,
+                updated_at TEXT
+            );
+            CREATE INDEX IF NOT EXISTS idx_res_user ON resident_items(user_id, kind);
+            CREATE TABLE IF NOT EXISTS user_components (
+                user_id TEXT,
+                component_id TEXT,
+                enabled INTEGER DEFAULT 1,
+                order_index INTEGER DEFAULT 0,
+                config TEXT DEFAULT '{}',
+                PRIMARY KEY (user_id, component_id)
+            );
+            CREATE TABLE IF NOT EXISTS component_requests (
+                id TEXT PRIMARY KEY,
+                user_id TEXT,
+                title TEXT,
+                description TEXT DEFAULT '',
+                status TEXT DEFAULT 'pending',
+                created_at TEXT
+            );
+            CREATE TABLE IF NOT EXISTS media_files (
+                id TEXT PRIMARY KEY,
+                user_id TEXT,
+                filename TEXT,
+                path TEXT,
+                kind TEXT DEFAULT 'file',
+                text_preview TEXT DEFAULT '',
+                mp3_path TEXT DEFAULT '',
+                ocr_text TEXT DEFAULT '',
+                status TEXT DEFAULT 'stored',
+                degraded INTEGER DEFAULT 0,
+                created_at TEXT
+            );
             """
         )
+        # 多用户隔离：materials.user_id（'' = 遗留/单测）
+        try:
+            conn.execute("ALTER TABLE materials ADD COLUMN user_id TEXT DEFAULT ''")
+        except sqlite3.OperationalError:
+            pass
+        try:
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_materials_user ON materials(user_id, day_key)"
+            )
+        except sqlite3.OperationalError:
+            pass
+        # 审核状态：pending/passed/failed；未 passed 不出音频
+        for col, default in (
+            ("review_status", "pending"),
+            ("review_rounds", "0"),
+            ("review_note", ""),
+        ):
+            try:
+                conn.execute(f"ALTER TABLE materials ADD COLUMN {col} TEXT DEFAULT '{default}'")
+            except sqlite3.OperationalError:
+                pass
 
 
 def _dumps(value: Any, default: Any) -> str:
@@ -328,13 +444,21 @@ def mark_plan_skipped(plan_id: str, note: str = "") -> None:
 
 # ---------------------------------------------------------------- materials
 
-def get_today_material(day_key: str) -> Optional[dict]:
+def get_today_material(day_key: str, user_id: str = "") -> Optional[dict]:
+    """按用户取今日素材；user_id 为空时取遗留全局行（兼容旧测试）。"""
     with get_conn() as conn:
-        row = conn.execute(
-            "SELECT * FROM materials WHERE day_key=? AND status IN ('active','recent') "
-            "ORDER BY created_at DESC LIMIT 1",
-            (day_key,),
-        ).fetchone()
+        if user_id:
+            row = conn.execute(
+                "SELECT * FROM materials WHERE day_key=? AND user_id=? "
+                "AND status IN ('active','recent') ORDER BY created_at DESC LIMIT 1",
+                (day_key, user_id),
+            ).fetchone()
+        else:
+            row = conn.execute(
+                "SELECT * FROM materials WHERE day_key=? AND (user_id='' OR user_id IS NULL) "
+                "AND status IN ('active','recent') ORDER BY created_at DESC LIMIT 1",
+                (day_key,),
+            ).fetchone()
     return _row_material(row) if row else None
 
 
@@ -365,21 +489,22 @@ def insert_material(data: dict) -> dict:
     now = utcnow().isoformat()
     day_key = data.get("day_key") or ""
     status = data.get("status") or "active"
+    user_id = data.get("user_id") or ""
     with get_conn() as conn:
-        # 应用层保证同一天只有一条 active/recent 占用 day_key
+        # 应用层保证：同一用户同一天只有一条 active/recent 占用 day_key
         if day_key and status in ("active", "recent"):
             conn.execute(
-                "UPDATE materials SET day_key='' WHERE day_key=? AND id!=? "
+                "UPDATE materials SET day_key='' WHERE day_key=? AND user_id=? AND id!=? "
                 "AND status IN ('active','recent')",
-                (day_key, mid),
+                (day_key, user_id, mid),
             )
         conn.execute(
             """
             INSERT INTO materials
             (id, plan_id, domain, title, source, body, key_points, followups,
              concept_keys, fingerprint, audio_path, status, feedback, day_key,
-             created_at, used_at, degraded)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+             created_at, used_at, degraded, user_id)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             """,
             (
                 mid,
@@ -399,6 +524,7 @@ def insert_material(data: dict) -> dict:
                 now,
                 data.get("used_at") or now,
                 1 if data.get("degraded") else 0,
+                user_id,
             ),
         )
     out = get_material(mid)
@@ -421,12 +547,18 @@ def update_material_feedback(material_id: str, vote: str) -> None:
         )
 
 
-def demote_old_active(except_id: str) -> None:
+def demote_old_active(except_id: str, user_id: str = "") -> None:
     with get_conn() as conn:
-        conn.execute(
-            "UPDATE materials SET status='recent' WHERE status='active' AND id != ?",
-            (except_id,),
-        )
+        if user_id:
+            conn.execute(
+                "UPDATE materials SET status='recent' WHERE status='active' AND user_id=? AND id != ?",
+                (user_id, except_id),
+            )
+        else:
+            conn.execute(
+                "UPDATE materials SET status='recent' WHERE status='active' AND id != ?",
+                (except_id,),
+            )
 
 
 # ---------------------------------------------------------------- archive
@@ -644,3 +776,396 @@ def list_audio_segments(material_id: str) -> list[dict]:
             (material_id,),
         ).fetchall()
     return [dict(r) for r in rows]
+
+
+# ---------------------------------------------------------------- platform / auth / components
+
+def insert_user(user: dict) -> None:
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT OR IGNORE INTO users (id, email, display_name, created_at) VALUES (?,?,?,?)",
+            (user["id"], user["email"], user.get("display_name") or "", user.get("created_at") or ""),
+        )
+
+
+def find_user_by_email(email: str) -> Optional[dict]:
+    with get_conn() as conn:
+        row = conn.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
+    return dict(row) if row else None
+
+
+def get_user(user_id: str) -> Optional[dict]:
+    with get_conn() as conn:
+        row = conn.execute("SELECT * FROM users WHERE id=?", (user_id,)).fetchone()
+    return dict(row) if row else None
+
+
+def put_email_code(email: str, code: str, expires_at: float) -> None:
+    import hashlib
+
+    h = hashlib.sha256(code.encode()).hexdigest()
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT INTO email_codes (email, code_hash, expires_at, used) VALUES (?,?,?,0) "
+            "ON CONFLICT(email) DO UPDATE SET code_hash=excluded.code_hash, expires_at=excluded.expires_at, used=0",
+            (email, h, expires_at),
+        )
+
+
+def consume_email_code(email: str, code: str, now: float) -> bool:
+    import hashlib
+
+    h = hashlib.sha256((code or "").encode()).hexdigest()
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT code_hash, expires_at, used FROM email_codes WHERE email=?",
+            (email,),
+        ).fetchone()
+        if not row or row["used"]:
+            return False
+        if float(row["expires_at"] or 0) < now:
+            return False
+        if row["code_hash"] != h:
+            return False
+        conn.execute("UPDATE email_codes SET used=1 WHERE email=?", (email,))
+        return True
+
+
+def insert_session(sess: dict) -> None:
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT INTO auth_sessions (sid, user_id, kind, device_id, created_at, expires_at) VALUES (?,?,?,?,?,?)",
+            (
+                sess["sid"],
+                sess.get("user_id") or "",
+                sess.get("kind") or "user",
+                sess.get("device_id") or "",
+                sess.get("created_at") or "",
+                sess.get("expires_at") or "",
+            ),
+        )
+
+
+def get_session(sid: str) -> Optional[dict]:
+    with get_conn() as conn:
+        row = conn.execute("SELECT * FROM auth_sessions WHERE sid=?", (sid,)).fetchone()
+    return dict(row) if row else None
+
+
+def delete_session(sid: str) -> None:
+    with get_conn() as conn:
+        conn.execute("DELETE FROM auth_sessions WHERE sid=?", (sid,))
+
+
+def put_pending_passkey(user_id: str, challenge: str, expires_at: float) -> None:
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT INTO passkey_challenges (user_id, challenge, expires_at) VALUES (?,?,?) "
+            "ON CONFLICT(user_id) DO UPDATE SET challenge=excluded.challenge, expires_at=excluded.expires_at",
+            (user_id, challenge, expires_at),
+        )
+
+
+def consume_pending_passkey(user_id: str, challenge: str, now: float) -> bool:
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT challenge, expires_at FROM passkey_challenges WHERE user_id=?",
+            (user_id,),
+        ).fetchone()
+        if not row or row["challenge"] != challenge:
+            return False
+        if float(row["expires_at"] or 0) < now:
+            return False
+        conn.execute("DELETE FROM passkey_challenges WHERE user_id=?", (user_id,))
+        return True
+
+
+def upsert_passkey(rec: dict) -> None:
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT INTO passkeys (credential_id, user_id, public_key, kind, created_at) VALUES (?,?,?,?,?) "
+            "ON CONFLICT(credential_id) DO UPDATE SET user_id=excluded.user_id, public_key=excluded.public_key",
+            (
+                rec["credential_id"],
+                rec["user_id"],
+                rec.get("public_key") or "",
+                rec.get("kind") or "web",
+                rec.get("created_at") or "",
+            ),
+        )
+
+
+def get_passkey(credential_id: str) -> Optional[dict]:
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT * FROM passkeys WHERE credential_id=?", (credential_id,)
+        ).fetchone()
+    return dict(row) if row else None
+
+
+def upsert_device(rec: dict) -> None:
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT INTO devices (device_id, user_id, name, passkey_hash, created_at, revoked) VALUES (?,?,?,?,?,0) "
+            "ON CONFLICT(device_id) DO UPDATE SET name=excluded.name, passkey_hash=excluded.passkey_hash, revoked=0",
+            (
+                rec["device_id"],
+                rec["user_id"],
+                rec.get("name") or "",
+                rec.get("passkey_hash") or "",
+                rec.get("created_at") or "",
+            ),
+        )
+
+
+def get_device(device_id: str) -> Optional[dict]:
+    with get_conn() as conn:
+        row = conn.execute("SELECT * FROM devices WHERE device_id=?", (device_id,)).fetchone()
+    return dict(row) if row else None
+
+
+def revoke_device(device_id: str) -> None:
+    with get_conn() as conn:
+        conn.execute("UPDATE devices SET revoked=1 WHERE device_id=?", (device_id,))
+
+
+def list_devices(user_id: str) -> list[dict]:
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT * FROM devices WHERE user_id=? ORDER BY created_at DESC", (user_id,)
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def insert_timetable(item: dict) -> str:
+    iid = item.get("id") or gen_id()
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT INTO timetable_items (id, user_id, title, weekday, start_min, end_min, component, note, created_at) "
+            "VALUES (?,?,?,?,?,?,?,?,?)",
+            (
+                iid,
+                item["user_id"],
+                item.get("title") or "",
+                int(item.get("weekday") or 0),
+                int(item.get("start_min") or 0),
+                int(item.get("end_min") or 0),
+                item.get("component") or "",
+                item.get("note") or "",
+                item.get("created_at") or utcnow().isoformat(),
+            ),
+        )
+    return iid
+
+
+def list_timetable(user_id: str) -> list[dict]:
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT * FROM timetable_items WHERE user_id=? ORDER BY weekday, start_min",
+            (user_id,),
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def delete_timetable(user_id: str, item_id: str) -> bool:
+    with get_conn() as conn:
+        cur = conn.execute(
+            "DELETE FROM timetable_items WHERE user_id=? AND id=?", (user_id, item_id)
+        )
+        return bool(cur.rowcount)
+
+
+def insert_resident(item: dict) -> str:
+    iid = item.get("id") or gen_id()
+    now = utcnow().isoformat()
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT INTO resident_items (id, user_id, kind, title, body, tags, source, created_at, updated_at) "
+            "VALUES (?,?,?,?,?,?,?,?,?)",
+            (
+                iid,
+                item["user_id"],
+                item.get("kind") or "note",
+                item.get("title") or "",
+                item.get("body") or "",
+                _dumps(item.get("tags"), []),
+                item.get("source") or "",
+                now,
+                now,
+            ),
+        )
+    return iid
+
+
+def update_resident(user_id: str, item_id: str, **fields) -> bool:
+    allowed = {"title", "body", "tags", "kind", "source"}
+    sets, vals = [], []
+    for k, v in fields.items():
+        if k not in allowed:
+            continue
+        if k == "tags":
+            v = _dumps(v, [])
+        sets.append(f"{k}=?")
+        vals.append(v)
+    if not sets:
+        return False
+    vals.extend([utcnow().isoformat(), user_id, item_id])
+    with get_conn() as conn:
+        cur = conn.execute(
+            f"UPDATE resident_items SET {', '.join(sets)}, updated_at=? WHERE user_id=? AND id=?",
+            vals,
+        )
+        return bool(cur.rowcount)
+
+
+def list_resident(user_id: str, kind: str | None = None, limit: int = 200) -> list[dict]:
+    with get_conn() as conn:
+        if kind:
+            rows = conn.execute(
+                "SELECT * FROM resident_items WHERE user_id=? AND kind=? ORDER BY updated_at DESC LIMIT ?",
+                (user_id, kind, limit),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                "SELECT * FROM resident_items WHERE user_id=? ORDER BY updated_at DESC LIMIT ?",
+                (user_id, limit),
+            ).fetchall()
+    out = []
+    for r in rows:
+        d = dict(r)
+        d["tags"] = _loads(d.get("tags"), [])
+        out.append(d)
+    return out
+
+
+def get_resident(user_id: str, item_id: str) -> Optional[dict]:
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT * FROM resident_items WHERE user_id=? AND id=?", (user_id, item_id)
+        ).fetchone()
+    if not row:
+        return None
+    d = dict(row)
+    d["tags"] = _loads(d.get("tags"), [])
+    return d
+
+
+def delete_resident(user_id: str, item_id: str) -> bool:
+    with get_conn() as conn:
+        cur = conn.execute(
+            "DELETE FROM resident_items WHERE user_id=? AND id=?", (user_id, item_id)
+        )
+        return bool(cur.rowcount)
+
+
+def set_user_components(user_id: str, items: list[dict]) -> None:
+    with get_conn() as conn:
+        conn.execute("DELETE FROM user_components WHERE user_id=?", (user_id,))
+        for i, it in enumerate(items):
+            conn.execute(
+                "INSERT INTO user_components (user_id, component_id, enabled, order_index, config) VALUES (?,?,?,?,?)",
+                (
+                    user_id,
+                    it.get("component_id") or "",
+                    1 if it.get("enabled", True) else 0,
+                    int(it.get("order_index") or i),
+                    _dumps(it.get("config"), {}),
+                ),
+            )
+
+
+def list_user_components(user_id: str) -> list[dict]:
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT * FROM user_components WHERE user_id=? ORDER BY order_index",
+            (user_id,),
+        ).fetchall()
+    out = []
+    for r in rows:
+        d = dict(r)
+        d["config"] = _loads(d.get("config"), {})
+        d["enabled"] = bool(d.get("enabled"))
+        out.append(d)
+    return out
+
+
+def insert_component_request(req: dict) -> str:
+    rid = req.get("id") or gen_id()
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT INTO component_requests (id, user_id, title, description, status, created_at) VALUES (?,?,?,?,?,?)",
+            (
+                rid,
+                req["user_id"],
+                req.get("title") or "",
+                req.get("description") or "",
+                "pending",
+                utcnow().isoformat(),
+            ),
+        )
+    return rid
+
+
+def list_component_requests(user_id: str | None = None) -> list[dict]:
+    with get_conn() as conn:
+        if user_id:
+            rows = conn.execute(
+                "SELECT * FROM component_requests WHERE user_id=? ORDER BY created_at DESC",
+                (user_id,),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                "SELECT * FROM component_requests ORDER BY created_at DESC LIMIT 100"
+            ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def insert_media_file(rec: dict) -> str:
+    mid = rec.get("id") or gen_id()
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT INTO media_files (id, user_id, filename, path, kind, text_preview, mp3_path, ocr_text, status, degraded, created_at) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+            (
+                mid,
+                rec["user_id"],
+                rec.get("filename") or "",
+                rec.get("path") or "",
+                rec.get("kind") or "file",
+                rec.get("text_preview") or "",
+                rec.get("mp3_path") or "",
+                rec.get("ocr_text") or "",
+                rec.get("status") or "stored",
+                1 if rec.get("degraded") else 0,
+                utcnow().isoformat(),
+            ),
+        )
+    return mid
+
+
+def list_media_files(user_id: str, limit: int = 100) -> list[dict]:
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT id, user_id, filename, kind, text_preview, mp3_path, status, degraded, created_at "
+            "FROM media_files WHERE user_id=? ORDER BY created_at DESC LIMIT ?",
+            (user_id, limit),
+        ).fetchall()
+    out = []
+    for r in rows:
+        d = dict(r)
+        d["degraded"] = bool(d.get("degraded"))
+        out.append(d)
+    return out
+
+
+def get_media_file(user_id: str, media_id: str) -> Optional[dict]:
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT * FROM media_files WHERE user_id=? AND id=?", (user_id, media_id)
+        ).fetchone()
+    if not row:
+        return None
+    d = dict(row)
+    d["degraded"] = bool(d.get("degraded"))
+    return d
+

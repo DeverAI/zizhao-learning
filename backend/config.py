@@ -14,6 +14,27 @@ ARCHIVE_BODY_DIR = os.path.join(MATERIALS_DIR, "archive_bodies")
 DB_PATH = os.path.join(STORAGE_DIR, "material.db")
 SETTINGS_FILE = os.path.join(BASE_DIR, "settings.json")
 SESSIONS_DIR = os.path.join(STORAGE_DIR, "sessions")
+USERS_DIR = os.path.join(STORAGE_DIR, "users")
+FILES_DIR = os.path.join(STORAGE_DIR, "files")
+MEDIA_DIR = os.path.join(STORAGE_DIR, "media")
+RESIDENT_DIR = os.path.join(STORAGE_DIR, "resident")
+TIMETABLE_DIR = os.path.join(STORAGE_DIR, "timetable")
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+EMAIL_OUTBOX = os.path.join(STORAGE_DIR, "email_outbox.json")
+
+# 会话与设备密钥（可用环境变量覆盖；生产务必改）
+SESSION_SECRET = os.environ.get("ZIZHAO_SESSION_SECRET") or "dev-only-change-me-zizhao"
+SID_COOKIE_NAME = "zsid"
+SID_TTL_DAYS = 30
+EMAIL_CODE_TTL_SEC = 600
+RATE_LIMIT = {
+    "auth": {"window_sec": 60, "max": 10},
+    "upload": {"window_sec": 60, "max": 20},
+    "chat": {"window_sec": 60, "max": 30},
+    # 前端主页会并行拉多个 GET，放宽 default
+    "default": {"window_sec": 60, "max": 600},
+}
+MAX_UPLOAD_BYTES = 20 * 1024 * 1024
 
 # 共享来源：左邻右舍的 学习Agent_new（相对路径，不写死用户目录）
 # 可用环境变量 ZIZHAO_SHARED_ROOT 覆盖为绝对路径（本机配置，勿写进仓库）
@@ -43,6 +64,23 @@ DEFAULT_SETTINGS = {
     "material_domains": ["philosophy", "history", "classics", "shared_curriculum"],
     "api_password": "",
     "port": 8010,
+    "smtp_host": "",
+    "smtp_port": 587,
+    "smtp_user": "",
+    "smtp_password": "",
+    "smtp_from": "",
+    "email_code_required": True,
+    "enable_ocr": True,
+    "enable_tts_mp3": True,
+    "material_review_max_rounds": 4,
+    "material_auto_optimize": True,
+    "material_auto_tts_after_review": True,
+    "device_power_enabled": True,
+    "device_power_off": "04:30",
+    "device_power_on": "06:00",
+    "device_boot_idle_sec": 900,
+    "device_volume_idle_sec": 600,
+    "device_volume_idle_level": 1,
 }
 
 DOMAIN_ORDER = ["philosophy", "history", "classics", "shared_curriculum"]
@@ -55,6 +93,12 @@ def ensure_dirs() -> None:
         AUDIO_DIR,
         ARCHIVE_BODY_DIR,
         SESSIONS_DIR,
+        USERS_DIR,
+        FILES_DIR,
+        MEDIA_DIR,
+        RESIDENT_DIR,
+        TIMETABLE_DIR,
+        STATIC_DIR,
     ):
         os.makedirs(path, exist_ok=True)
 
