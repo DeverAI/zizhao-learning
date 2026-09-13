@@ -110,6 +110,24 @@ async def passkey_finish(body: PasskeyFinishBody, user: dict = Depends(current_u
         raise HTTPException(status_code=exc.status, detail=str(exc)) from exc
 
 
+class PasskeyLoginBeginBody(BaseModel):
+    credential_id: str
+
+
+@router.post("/passkey/login/begin")
+async def passkey_login_begin(body: PasskeyLoginBeginBody, request: Request):
+    """登录前取一次性 challenge；客户端对 challenge 做 HMAC 后 login。"""
+    ip = security.client_ip(request)
+    try:
+        security.check_rate_limit("auth", f"pkb:{ip}")
+    except security.RateLimitError as exc:
+        raise HTTPException(status_code=429, detail="too many requests") from exc
+    try:
+        return auth_service.begin_passkey_login(body.credential_id)
+    except auth_service.AuthError as exc:
+        raise HTTPException(status_code=exc.status, detail=str(exc)) from exc
+
+
 @router.post("/passkey/login")
 async def passkey_login(body: PasskeyLoginBody, request: Request, response: Response):
     ip = security.client_ip(request)

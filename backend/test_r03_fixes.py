@@ -70,9 +70,13 @@ class R03FixTest(unittest.TestCase):
         )
         with self.assertRaises(auth_service.AuthError):
             auth_service.login_with_passkey("cred_x_123456", "chal", "forged")
-        good = security.hmac_public_key("PUBKEY", "chal")
-        u2, sid = auth_service.login_with_passkey("cred_x_123456", "chal", good)
+        begin = auth_service.begin_passkey_login("cred_x_123456")
+        chal = begin["challenge"]
+        good = security.hmac_public_key("PUBKEY", chal)
+        u2, sid = auth_service.login_with_passkey("cred_x_123456", chal, good)
         self.assertEqual(u2["id"], user["id"])
+        with self.assertRaises(auth_service.AuthError):
+            auth_service.login_with_passkey("cred_x_123456", chal, good)
 
     def test_bare_sid_rejected_by_verify(self):
         from services import security

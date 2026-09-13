@@ -216,6 +216,8 @@ def _seed_recitation_from_text(upload_id: str, title: str, text: str, source: st
                 "status": "pending",
             }
         )
+    from config import STORAGE_DIR
+
     path = os.path.join(STORAGE_DIR, "recitation_items.json")
     existing = []
     if os.path.exists(path):

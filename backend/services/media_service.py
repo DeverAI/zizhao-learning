@@ -204,7 +204,7 @@ def ingest_upload(
             "text_preview": text[:500],
             "mp3_path": mp3_path,
             "ocr_text": text if kind == "image" else "",
-            "status": "ready" if (not text_degraded or text) else "degraded",
+            "status": "ready" if ((not text_degraded) and text) else "degraded",
             "degraded": bool(text_degraded or mp3_degraded),
         }
     )

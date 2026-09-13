@@ -166,9 +166,9 @@ def grade_quiz(material_id: str, answers: list[dict], user_id: str = "") -> dict
     }
 
 
-async def coach_review(material_id: str, answers: list[dict], grade: dict) -> dict:
+async def coach_review(material_id: str, answers: list[dict], grade: dict, user_id: str = "") -> dict:
     """可选 LLM 点评；失败降级为规则结果摘要。"""
-    mat = _material(material_id)
+    mat = _material(material_id, user_id=user_id)
     prompt = (
         "你是不讨好的初三自招教练。用户刚做完小测。\n"
         f"素材：{mat.get('title')}\n"
@@ -177,7 +177,7 @@ async def coach_review(material_id: str, answers: list[dict], grade: dict) -> di
         "用纯文本：1)最大漏洞 2)今晚必须做的1件事 3)一句催办。禁止 Markdown 与夸奖。"
     )
     content, ok, provider = await generator._chat_completion(
-        [{"role": "user", "content": prompt}], temperature=0.3
+        [{"role": "user", "content": prompt}], temperature=0.3, user_id=user_id
     )
     if not ok or not content:
         return {

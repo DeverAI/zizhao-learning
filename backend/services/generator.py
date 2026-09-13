@@ -335,8 +335,8 @@ async def xiaomi_web_search(query: str) -> str:
         }
     ]
     try:
-        with httpx.Client(timeout=60) as client:
-            resp = client.post(
+        async with httpx.AsyncClient(timeout=60) as client:
+            resp = await client.post(
                 f"{base}/chat/completions",
                 headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
                 json={"model": model, "messages": messages, "temperature": 0.3},
@@ -356,6 +356,7 @@ async def generate_from_plan(
     domain: str,
     negative_list: str = "",
     memory_ctx: Optional[dict] = None,
+    user_id: str = "",
 ) -> dict:
     title = plan.get("title") or "今日素材"
     source = plan.get("source_hint") or ""
@@ -404,7 +405,8 @@ tags: {json.dumps(plan.get('tags') or [], ensure_ascii=False)}
         [
             {"role": "system", "content": system},
             {"role": "user", "content": user},
-        ]
+        ],
+        user_id=user_id,
     )
     if ok:
         data = _parse_json_block(content)

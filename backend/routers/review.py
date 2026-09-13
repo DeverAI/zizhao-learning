@@ -20,6 +20,20 @@ router = APIRouter(prefix="/api", tags=["review"])
 async def run_review(user: dict = Depends(current_user), material_id: str = ""):
     """立刻对今日（或指定）素材跑多轮挑刺；audio_allowed 仅 passed 时 true。"""
     if material_id:
+        mat = db.get_material(material_id)
+        if not mat:
+            raise HTTPException(status_code=404, detail="material not found")
+        if mat.get("user_id") and mat.get("user_id") != user["id"]:
+            raise HTTPException(status_code=403, detail="forbidden")
+        if mat.get("review_status") == "passed":
+            return {
+                "ok": True,
+                "status": "passed",
+                "material_id": material_id,
+                "audio_allowed": True,
+                "skipped": True,
+                "note": "已通过审核，不重复挑刺",
+            }
         result = await review_service.run_review_loop(material_id, user_id=user["id"])
     else:
         result = await review_service.review_today(user_id=user["id"])

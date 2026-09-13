@@ -44,5 +44,7 @@ async def grade(body: GradeBody, user: dict = Depends(current_user)):
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     if body.use_llm:
-        g["coach"] = await quiz_service.coach_review(body.material_id, body.answers, g)
+        g["coach"] = await quiz_service.coach_review(
+            body.material_id, [{"id": a.id, "text": a.text} for a in body.answers], g, user_id=user["id"]
+        )
     return g

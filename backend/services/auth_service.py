@@ -213,16 +213,27 @@ def register_passkey_finish(user_id: str, challenge: str, credential_id: str, pu
     return {"ok": True, "credential_id": cred_id}
 
 
-def login_with_passkey(credential_id: str, challenge: str, signature: str) -> tuple[dict, str]:
-    """简化 PassKey：signature 必须等于 HMAC-SHA256(public_key, challenge)。
+def begin_passkey_login(credential_id: str) -> dict:
+    """登录前必须先取服务端 challenge（一次性）。"""
+    rec = db.get_passkey(credential_id)
+    if not rec:
+        raise AuthError("unknown credential", 401)
+    challenge = secrets.token_urlsafe(32)
+    db.put_pending_passkey(rec["user_id"], challenge, _now() + 300)
+    return {"challenge": challenge, "credential_id": credential_id, "expires_in_sec": 300}
 
-    完整 WebAuthn 可后续替换；在此之前禁止“有凭据即可登录”。
-    """
+
+def login_with_passkey(credential_id: str, challenge: str, signature: str) -> tuple[dict, str]:
+    """简化 PassKey：服务端一次性 challenge + HMAC(public_key, challenge)。"""
     rec = db.get_passkey(credential_id)
     if not rec:
         raise AuthError("unknown credential", 401)
     if not challenge or not signature:
         raise AuthError("missing challenge/signature", 401)
+    # 必须使用服务端发过且未消费的 challenge（防重放）
+    owner_uid = rec.get("user_id") or ""
+    if not db.consume_pending_passkey(owner_uid, challenge, _now()):
+        raise AuthError("invalid or reused challenge", 401)
     pub = str(rec.get("public_key") or "")
     if not pub:
         raise AuthError("credential has no public_key", 401)
@@ -264,6 +275,7 @@ def revoke_device(user_id: str, device_id: str) -> dict:
     if not dev or dev.get("user_id") != user_id:
         raise AuthError("device not found", 404)
     db.revoke_device(device_id)
+    db.delete_sessions_for_device(device_id)
     return {"ok": True, "device_id": device_id}
 
 

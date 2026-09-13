@@ -87,7 +87,7 @@ async def _generate_with_dedup(plan: dict, domain: str, max_tries: int = 3, user
     last_result: Optional[dict] = None
     for attempt in range(max_tries):
         draft = await generator.generate_from_plan(
-            plan, domain, negative_list=negative, memory_ctx=memory_ctx
+            plan, domain, negative_list=negative, memory_ctx=memory_ctx, user_id=user_id
         )
         source = draft.get("source") or plan.get("source_hint") or ""
         title = draft.get("title") or plan.get("title") or ""
@@ -285,7 +285,9 @@ def chat_system_prompt(material: dict) -> str:
     keys = material.get("key_points") or []
     follows = material.get("followups") or []
     memory_ctx = agent_bridge.teaching_context(
-        domain=material.get("domain") or "", title=material.get("title") or ""
+        domain=material.get("domain") or "",
+        title=material.get("title") or "",
+        user_id=material.get("user_id") or "",
     )
     weak = memory_ctx.get("weak_topics") or []
     weak_line = "；".join(f"{w.get('topic')}" for w in weak[:5]) or "无"

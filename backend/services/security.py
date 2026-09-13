@@ -89,7 +89,8 @@ def hmac_public_key(public_key: str, challenge: str) -> str:
 
 
 def client_ip(request) -> str:
-    fwd = request.headers.get("x-forwarded-for") or ""
-    if fwd:
-        return fwd.split(",")[0].strip()[:64]
-    return (request.client.host if request.client else "unknown")[:64]
+    """直连时忽略 X-Forwarded-For，防伪造绕过限流。"""
+    client = getattr(request, "client", None)
+    if client is not None and getattr(client, "host", None):
+        return str(client.host)[:64]
+    return "unknown"

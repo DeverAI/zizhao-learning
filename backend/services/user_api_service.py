@@ -51,19 +51,32 @@ def _mask_key(key: str) -> str:
     return key[:4] + "…" + key[-4:]
 
 
+def _validate_base_url(url: str) -> str:
+    """仅允许 http(s)，降低 SSRF / 本地文件误配。"""
+    u = (url or "").strip().rstrip("/")
+    if not u:
+        raise ValueError("base_url required")
+    if not (u.startswith("https://") or u.startswith("http://")):
+        raise ValueError("base_url must be http(s)")
+    if any(x in u.lower() for x in ("localhost", "127.", "0.0.0.0", "169.254.", "[::1]")):
+        # 本机自托管 OpenAI 兼容是常见场景，允许；内网段再收紧需配置
+        pass
+    return u
+
+
 def save_user_apis(user_id: str, text: dict | None = None, tts: dict | None = None) -> dict:
     from config import atomic_write_json
 
     cur = load_user_apis(user_id)
     if text is not None:
         cur["text"] = {
-            "base_url": (text.get("base_url") or "").strip().rstrip("/"),
+            "base_url": _validate_base_url(text.get("base_url") or ""),
             "api_key": (text.get("api_key") or "").strip(),
             "model": (text.get("model") or "").strip(),
         }
     if tts is not None:
         cur["tts"] = {
-            "base_url": (tts.get("base_url") or "").strip().rstrip("/"),
+            "base_url": _validate_base_url(tts.get("base_url") or ""),
             "api_key": (tts.get("api_key") or "").strip(),
             "model": (tts.get("model") or "").strip(),
             "voice": (tts.get("voice") or "alloy").strip(),

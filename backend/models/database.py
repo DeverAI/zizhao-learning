@@ -549,16 +549,11 @@ def update_material_feedback(material_id: str, vote: str) -> None:
 
 def demote_old_active(except_id: str, user_id: str = "") -> None:
     with get_conn() as conn:
-        if user_id:
-            conn.execute(
-                "UPDATE materials SET status='recent' WHERE status='active' AND user_id=? AND id != ?",
-                (user_id, except_id),
-            )
-        else:
-            conn.execute(
-                "UPDATE materials SET status='recent' WHERE status='active' AND id != ?",
-                (except_id,),
-            )
+        # 空 uid 只动本机遗留行，绝不能 demote 所有用户
+        conn.execute(
+            "UPDATE materials SET status='recent' WHERE status='active' AND user_id=? AND id != ?",
+            (user_id, except_id),
+        )
 
 
 # ---------------------------------------------------------------- archive
@@ -878,6 +873,11 @@ def consume_pending_passkey(user_id: str, challenge: str, now: float) -> bool:
             return False
         conn.execute("DELETE FROM passkey_challenges WHERE user_id=?", (user_id,))
         return True
+
+
+def delete_sessions_for_device(device_id: str) -> None:
+    with get_conn() as conn:
+        conn.execute("DELETE FROM auth_sessions WHERE device_id=?", (device_id,))
 
 
 def upsert_passkey(rec: dict) -> None:

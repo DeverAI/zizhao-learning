@@ -100,10 +100,10 @@ async def chat(
         resolved = auth_service.resolve_sid(sid)
         if resolved and resolved.get("user"):
             user_id = resolved["user"]["id"]
-            # 会话按用户隔离，避免三人共用 session_id=web
+            # 会话按用户隔离；前缀必须 uid 或 uid:…（防 alice 读 alice2）
             if session_id in {"web", "default", ""}:
                 session_id = f"{user_id}:web"
-            elif not session_id.startswith(user_id):
+            elif session_id != user_id and not session_id.startswith(user_id + ":"):
                 session_id = f"{user_id}:{session_id}"
 
     result = await agent_chat.agent_chat(
@@ -263,5 +263,19 @@ async def progress_set(body: ProgressBody):
 
 
 @router.get("/audio/{material_id}")
-async def audio_segments(material_id: str):
-    return {"segments": db.list_audio_segments(material_id)}
+async def audio_segments(material_id: str, user_id: str = Depends(_optional_user_id)):
+    from services import review_service
+
+    mat = db.get_material(material_id)
+    if not mat:
+        raise HTTPException(status_code=404, detail="not found")
+    if user_id and mat.get("user_id") and mat.get("user_id") != user_id:
+        raise HTTPException(status_code=403, detail="forbidden")
+    if not review_service.audio_allowed(mat):
+        return {
+            "segments": [],
+            "audio_allowed": False,
+            "review_status": mat.get("review_status") or "pending",
+            "note": "审核未通过，禁止出音频",
+        }
+    return {"segments": db.list_audio_segments(material_id), "audio_allowed": True}

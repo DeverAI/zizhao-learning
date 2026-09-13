@@ -215,7 +215,10 @@ async def run_review_loop(
             status = "passed"
             set_review_status(material_id, "passed", rnd, note="挑刺通过")
             break
-        # 改写
+        # 末轮不改写（改了也没机会复审）
+        if rnd >= max_rounds:
+            history[-1]["last_round_no_rewrite"] = True
+            continue
         hints = list(llm.get("rewrite_hints") or []) + [f"修：{i}" for i in uniq[:5]]
         new_body = await _rewrite_body(mat, hints, user_id=user_id)
         if new_body and len(new_body) >= 200:
