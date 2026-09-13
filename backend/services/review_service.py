@@ -8,6 +8,7 @@
 """
 from __future__ import annotations
 
+import asyncio
 import os
 from datetime import datetime, timezone
 
@@ -39,9 +40,14 @@ def set_review_status(material_id: str, status: str, rounds: int = 0, note: str 
 
 
 def get_review_fields(mat: dict) -> dict:
+    raw_rounds = mat.get("review_rounds") or 0
+    try:
+        rounds = int(raw_rounds)
+    except (TypeError, ValueError):
+        rounds = 0
     return {
         "review_status": mat.get("review_status") or "pending",
-        "review_rounds": int(mat.get("review_rounds") or 0),
+        "review_rounds": rounds,
         "review_note": mat.get("review_note") or "",
     }
 
@@ -124,8 +130,13 @@ async def llm_critique(mat: dict, user_id: str = "", round_no: int = 1) -> dict:
             "degraded": True,
         }
     data = generator._parse_json_block(content)
+    raw_score = data.get("score")
+    try:
+        score = int(raw_score) if raw_score is not None else 0
+    except (TypeError, ValueError):
+        score = 0
     return {
-        "llm_score": int(data.get("score") or 0),
+        "llm_score": score,
         "issues": [str(x) for x in (data.get("issues") or [])],
         "rewrite_hints": [str(x) for x in (data.get("rewrite_hints") or [])],
         "provider": provider,
@@ -179,12 +190,15 @@ async def run_review_loop(
         issues = list(rule.get("issues") or []) + list(llm.get("issues") or [])
         # 去重
         uniq = list(dict.fromkeys(issues))
-        clean = rule["ok"] and (not llm.get("issues")) and (
-            llm.get("llm_score") is None or llm.get("llm_score") >= 85 or llm.get("degraded")
-        )
-        # LLM 不可用时：仅规则 ok 且非 degraded 生成 → 可过（诚实降级）
-        if llm.get("degraded"):
+        # 有刺必不 clean；LLM 挑不出且规则干净才过
+        if uniq:
+            clean = False
+        elif llm.get("degraded"):
             clean = bool(rule["ok"])
+        else:
+            clean = bool(rule["ok"]) and (
+                llm.get("llm_score") is None or int(llm.get("llm_score") or 0) >= 85
+            )
 
         history.append(
             {
@@ -272,8 +286,11 @@ async def review_all_users_optimize() -> dict:
             if mat and audio_allowed(mat):
                 body = (mat.get("body") or "")[:1500]
                 if body and not (mat.get("audio_path") or ""):
-                    path, deg, prov = media_service.synthesize_mp3(
-                        body, f"review_{mat['id']}.mp3", user_id=uid
+                    path, deg, prov = await asyncio.to_thread(
+                        media_service.synthesize_mp3,
+                        body,
+                        f"review_{mat['id']}.mp3",
+                        uid,
                     )
                     if path:
                         with db.get_conn() as conn:

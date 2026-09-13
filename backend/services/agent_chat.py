@@ -248,7 +248,9 @@ async def agent_chat(
                 stats["calc_calls"] = int(stats.get("calc_calls") or 0) + 1
             if call["name"] == "refresh_material" and result.get("should_refresh"):
                 try:
-                    material = await material_service.refresh_material(result.get("domain"))
+                    material = await material_service.refresh_material(
+                        result.get("domain"), user_id=user_id
+                    )
                     mid = material["id"]
                     db.bind_session_material(session_id, mid)
                     refreshed = True

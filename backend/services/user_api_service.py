@@ -10,12 +10,12 @@ import re
 from datetime import datetime, timezone
 from typing import Any, Optional
 
-from config import STORAGE_DIR, atomic_write_json, ensure_dirs
-
 API_DIR_NAME = "user_api"
 
 
 def _path(user_id: str) -> str:
+    from config import STORAGE_DIR
+
     uid = re.sub(r"[^\w-]", "_", user_id or "anon")[:64] or "anon"
     return os.path.join(STORAGE_DIR, API_DIR_NAME, f"{uid}.json")
 
@@ -25,6 +25,8 @@ def _now() -> str:
 
 
 def load_user_apis(user_id: str) -> dict:
+    from config import ensure_dirs
+
     ensure_dirs()
     path = _path(user_id)
     data = {"text": {}, "tts": {}, "updated_at": ""}
@@ -50,6 +52,8 @@ def _mask_key(key: str) -> str:
 
 
 def save_user_apis(user_id: str, text: dict | None = None, tts: dict | None = None) -> dict:
+    from config import atomic_write_json
+
     cur = load_user_apis(user_id)
     if text is not None:
         cur["text"] = {

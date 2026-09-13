@@ -105,41 +105,44 @@ async def _generate_with_dedup(plan: dict, domain: str, max_tries: int = 3, user
 async def get_or_create_today(force_domain: Optional[str] = None, user_id: str = "") -> dict:
     settings = load_settings()
     day_key = beijing_today()
+    existing = db.get_today_material(day_key, user_id=user_id)
+    if existing:
+        existing["reused"] = True
+        return existing
+
+    ensure_seed_plan()
+    picked: Optional[dict] = None
+    last_err: Optional[dict] = None
+    for _ in range(5):
+        plan = db.pick_next_plan(force_domain)
+        if not plan:
+            break
+        # 网络生成期间绝不持 threading.Lock（会堵死事件循环）
+        result = await _generate_with_dedup(plan, force_domain or plan["domain"], user_id=user_id)
+        if result and result.get("body"):
+            picked = {**result, "plan": plan}
+            break
+        db.mark_plan_skipped(plan["id"], note="同质或重复，已跳过")
+        last_err = result
+
+    if not picked:
+        recents = [m for m in db.list_recent_materials() if (m.get("user_id") or "") == (user_id or "")] or (
+            db.list_recent_materials() if not user_id else []
+        )
+        if recents:
+            fallback = recents[0]
+            fallback["reused"] = True
+            fallback["note"] = "今日生成失败，返回最近素材作回顾"
+            fallback["degraded"] = True
+            return fallback
+        raise RuntimeError(f"无法生成今日素材：{last_err}")
+
+    plan = picked.pop("plan")
     with _material_lock:
         existing = db.get_today_material(day_key, user_id=user_id)
         if existing:
             existing["reused"] = True
             return existing
-
-        ensure_seed_plan()
-        picked: Optional[dict] = None
-        last_err: Optional[dict] = None
-        for _ in range(5):
-            plan = db.pick_next_plan(force_domain)
-            if not plan:
-                break
-            result = await _generate_with_dedup(plan, force_domain or plan["domain"], user_id=user_id)
-            if result and result.get("body"):
-                picked = {**result, "plan": plan}
-                break
-            # 重复则跳过该 plan 条目
-            db.mark_plan_skipped(plan["id"], note="同质或重复，已跳过")
-            last_err = result
-
-        if not picked:
-            # 降级：返回该用户最近一条 recent 作为昨日回顾，不留空
-            recents = [m for m in db.list_recent_materials() if (m.get("user_id") or "") == (user_id or "")] or (
-                db.list_recent_materials() if not user_id else []
-            )
-            if recents:
-                fallback = recents[0]
-                fallback["reused"] = True
-                fallback["note"] = "今日生成失败，返回最近素材作回顾"
-                fallback["degraded"] = True
-                return fallback
-            raise RuntimeError(f"无法生成今日素材：{last_err}")
-
-        plan = picked.pop("plan")
         db.demote_old_active(except_id="", user_id=user_id)
         material = db.insert_material(
             {
@@ -167,13 +170,12 @@ async def get_or_create_today(force_domain: Optional[str] = None, user_id: str =
 
 
 async def refresh_material(domain: Optional[str] = None, user_id: str = "") -> dict:
-    """主动换素材：同一把锁内完成 demote + 强制生成，避免竞态。"""
-    with _material_lock:
-        day_key = beijing_today()
-        existing = db.get_today_material(day_key, user_id=user_id)
-        if existing:
-            db.update_material_status(existing["id"], "recent")
-        return await _create_forced(domain=domain, user_id=user_id)
+    """主动换素材：生成期间不持锁，只在写库时短锁。"""
+    day_key = beijing_today()
+    existing = db.get_today_material(day_key, user_id=user_id)
+    if existing:
+        db.update_material_status(existing["id"], "recent")
+    return await _create_forced(domain=domain, user_id=user_id)
 
 
 async def _create_forced(domain: Optional[str] = None, user_id: str = "") -> dict:
@@ -192,8 +194,12 @@ async def _create_forced(domain: Optional[str] = None, user_id: str = "") -> dic
     if not picked:
         raise RuntimeError("refresh 失败：无可用计划或生成重复")
     plan = picked.pop("plan")
-    db.demote_old_active(except_id="", user_id=user_id)
-    material = db.insert_material(
+    with _material_lock:
+        existing = db.get_today_material(day_key, user_id=user_id)
+        if existing:
+            db.update_material_status(existing["id"], "recent")
+        db.demote_old_active(except_id="", user_id=user_id)
+        material = db.insert_material(
         {
             "plan_id": plan.get("id") or "",
             "domain": picked.get("domain") or plan.get("domain"),
