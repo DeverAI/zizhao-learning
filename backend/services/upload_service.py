@@ -8,15 +8,24 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
-from config import STORAGE_DIR, atomic_write_json, ensure_dirs
+from config import atomic_write_json, ensure_dirs
 from models import database as db
 from services import persona
 
-UPLOAD_DIR = os.path.join(STORAGE_DIR, "uploads")
-INDEX_PATH = os.path.join(STORAGE_DIR, "upload_index.json")
 ALLOWED_EXT = {".png", ".jpg", ".jpeg", ".webp", ".txt", ".md", ".pdf", ".doc", ".docx"}
-# 框架：讲解 / 素材 / 三观 / 知识体系 / 英语背诵
 FRAMEWORKS = list(persona.FRAMEWORKS.keys())
+
+
+def _upload_dir() -> str:
+    from config import STORAGE_DIR
+
+    return os.path.join(STORAGE_DIR, "uploads")
+
+
+def _index_path() -> str:
+    from config import STORAGE_DIR
+
+    return os.path.join(STORAGE_DIR, "upload_index.json")
 
 
 def _now() -> str:
@@ -25,19 +34,20 @@ def _now() -> str:
 
 def ensure_upload_dirs() -> None:
     ensure_dirs()
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    os.makedirs(_upload_dir(), exist_ok=True)
     for fw in FRAMEWORKS:
-        os.makedirs(os.path.join(UPLOAD_DIR, fw), exist_ok=True)
+        os.makedirs(os.path.join(_upload_dir(), fw), exist_ok=True)
 
 
 def load_index() -> list[dict]:
     ensure_upload_dirs()
-    if not os.path.exists(INDEX_PATH):
+    path = _index_path()
+    if not os.path.exists(path):
         return []
     try:
         import json
 
-        with open(INDEX_PATH, encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             data = json.load(f)
         return data if isinstance(data, list) else []
     except (json.JSONDecodeError, OSError):
@@ -45,7 +55,7 @@ def load_index() -> list[dict]:
 
 
 def save_index(items: list[dict]) -> None:
-    atomic_write_json(INDEX_PATH, items[-500:])
+    atomic_write_json(_index_path(), items[-500:])
 
 
 def _slug(name: str) -> str:

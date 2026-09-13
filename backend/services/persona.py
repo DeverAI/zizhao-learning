@@ -7,15 +7,14 @@ import re
 from datetime import datetime, timezone
 from typing import Any
 
-from config import STORAGE_DIR, atomic_write_json, ensure_dirs
+from config import atomic_write_json, ensure_dirs
 
 # 按用户隔离画像（三人分用，禁止全局共享）
-# 旧文件 STORAGE_DIR/user_profile.json 仅作迁移源，不再作为主路径
 PROFILE_DIR_NAME = "profiles"
 
 
 def _profile_path(user_id: str = "") -> str:
-    import re
+    from config import STORAGE_DIR
 
     uid = re.sub(r"[^\w-]", "_", (user_id or "anon").strip())[:64] or "anon"
     return os.path.join(STORAGE_DIR, PROFILE_DIR_NAME, f"{uid}.json")

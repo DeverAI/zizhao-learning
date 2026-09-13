@@ -12,7 +12,7 @@ import asyncio
 import os
 from datetime import datetime, timezone
 
-from config import STORAGE_DIR, atomic_write_json, beijing_today, ensure_dirs, load_settings
+from config import atomic_write_json, beijing_today, ensure_dirs, load_settings
 from models import database as db
 from services import generator, persona
 
@@ -22,6 +22,8 @@ def _now() -> str:
 
 
 def _review_path(day_key: str, user_id: str = "") -> str:
+    from config import STORAGE_DIR
+
     ensure_dirs()
     import re
 

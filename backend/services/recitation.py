@@ -7,11 +7,21 @@ import random
 from datetime import datetime, timezone
 from typing import Optional
 
-from config import STORAGE_DIR, atomic_write_json, ensure_dirs
+from config import atomic_write_json, ensure_dirs
 from services import agent_bridge, persona
 
-ITEMS_PATH = os.path.join(STORAGE_DIR, "recitation_items.json")
-LOG_PATH = os.path.join(STORAGE_DIR, "recitation_log.json")
+
+def _items_path() -> str:
+    from config import STORAGE_DIR
+
+    return os.path.join(STORAGE_DIR, "recitation_items.json")
+
+
+def _log_path() -> str:
+    from config import STORAGE_DIR
+
+    return os.path.join(STORAGE_DIR, "recitation_log.json")
+
 
 DEFAULT_ITEMS = [
     {
@@ -47,28 +57,28 @@ def _now() -> str:
 
 def load_items() -> list[dict]:
     ensure_dirs()
-    if os.path.exists(ITEMS_PATH):
+    if os.path.exists(_items_path()):
         try:
-            with open(ITEMS_PATH, encoding="utf-8") as f:
+            with open(_items_path(), encoding="utf-8") as f:
                 data = json.load(f)
             if isinstance(data, list) and data:
                 return data
         except (json.JSONDecodeError, OSError):
             pass
     items = [dict(x) for x in DEFAULT_ITEMS]
-    atomic_write_json(ITEMS_PATH, items)
+    atomic_write_json(_items_path(), items)
     return items
 
 
 def save_items(items: list[dict]) -> None:
-    atomic_write_json(ITEMS_PATH, items)
+    atomic_write_json(_items_path(), items)
 
 
 def load_log() -> list[dict]:
-    if not os.path.exists(LOG_PATH):
+    if not os.path.exists(_log_path()):
         return []
     try:
-        with open(LOG_PATH, encoding="utf-8") as f:
+        with open(_log_path(), encoding="utf-8") as f:
             data = json.load(f)
         return data if isinstance(data, list) else []
     except (json.JSONDecodeError, OSError):
@@ -138,7 +148,7 @@ def grade_attempt(item_id: str, user_text: str) -> dict:
             "ok": ok,
         }
     )
-    atomic_write_json(LOG_PATH, log[-200:])
+    atomic_write_json(_log_path(), log[-200:])
 
     return {
         "ok": True,
