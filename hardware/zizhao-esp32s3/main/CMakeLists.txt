@@ -1,0 +1,22 @@
+idf_component_register(
+    SRCS
+        "main.c"
+        "net_http.c"
+        "power_policy.c"
+        "volume_guard.c"
+        "offline_store.c"
+        "provision_ap.c"
+        "nvs_creds.c"
+    INCLUDE_DIRS "."
+    REQUIRES
+        nvs_flash
+        esp_wifi
+        esp_http_client
+        esp_timer
+        esp_event
+        esp_netif
+        fatfs
+        sdmmc
+        driver
+        esp_adc
+)

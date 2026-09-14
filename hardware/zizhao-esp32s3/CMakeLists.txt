@@ -1,0 +1,5 @@
+# zizhao ESP32-S3 firmware
+cmake_minimum_required(VERSION 3.16)
+
+include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+project(zizhao_esp32s3)
