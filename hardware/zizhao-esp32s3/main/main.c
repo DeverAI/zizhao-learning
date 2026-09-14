@@ -25,6 +25,7 @@
 #include "clock_sync.h"
 #include "ota_bg.h"
 #include "eink_display.h"
+#include "download_mgr.h"
 
 static const char *TAG = "zizhao";
 
@@ -140,18 +141,19 @@ void app_main(void)
         clock_sync_sntp();
         if (net_http_login(&s_creds, s_sid, sizeof(s_sid))) {
             ESP_LOGI(TAG, "login ok");
-            char buf[16384];
-            if (net_http_get_bundle(s_sid, s_creds.server_url, buf, sizeof(buf))) {
-                offline_store_save_text("today", buf, strlen(buf));
-                s_audio_ready = strstr(buf, "\"audio_ready\": true") != NULL
-                                 || strstr(buf, "\"audio_ready\":true") != NULL;
+            dl_mgr_init();
+            dl_state_t st = {0};
+            snprintf(st.day_key, sizeof(st.day_key), "today");
+            if (dl_mgr_sync_once(s_sid, s_creds.server_url, &st)) {
+                s_audio_ready = st.audio_allowed;
+                eink_show_status("今日已缓存", st.audio_allowed ? "含音频" : "仅文字", st.last_error);
+            } else {
+                eink_show_status("离线模式", "用上次缓存", st.last_error);
             }
             char pol[512];
             if (net_http_get_power_policy(s_sid, s_creds.server_url, pol, sizeof(pol))) {
                 power_policy_parse_json(pol, &s_policy);
             }
-            /* 后台静默固件检查：无 UI、失败不影响使用 */
-            ota_bg_check_and_update(s_sid, s_creds.server_url);
         }
     }
 

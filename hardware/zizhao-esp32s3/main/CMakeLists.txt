@@ -11,6 +11,7 @@ idf_component_register(
         "clock_sync.c"
         "ota_bg.c"
         "eink_display.c"
+        "download_mgr.c"
     INCLUDE_DIRS "."
     REQUIRES
         nvs_flash

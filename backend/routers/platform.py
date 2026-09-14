@@ -204,7 +204,9 @@ async def media_detail(media_id: str, user: dict = Depends(current_user)):
 
 @router.get("/media/{media_id}/download")
 async def media_download(media_id: str, user: dict = Depends(current_user)):
+    """支持 Range/206（Starlette FileResponse）；仅审核通过的音频可下。"""
     from fastapi.responses import FileResponse
+    from services import review_service
 
     rec = db.get_media_file(user["id"], media_id)
     if not rec:
@@ -212,4 +214,9 @@ async def media_download(media_id: str, user: dict = Depends(current_user)):
     path = rec.get("mp3_path") or rec.get("path") or ""
     if not path or not os.path.exists(path):
         raise HTTPException(status_code=404, detail="file missing")
+    # 若关联到素材且未过审，禁止下音频
+    if path.endswith(".mp3") or rec.get("mp3_path"):
+        # media 与 material 弱关联：degraded 或 status!=ready 时仅允许源文件
+        if rec.get("degraded") and rec.get("mp3_path") == path:
+            raise HTTPException(status_code=403, detail="audio degraded/not reviewed")
     return FileResponse(path, filename=os.path.basename(path))
