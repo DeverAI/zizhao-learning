@@ -1,13 +1,10 @@
-/* 自招学习板 · 微雪 ESP32-S3-ePaper-3.97 主程序
+/* 自招学习板 · 微雪 ESP32-S3-ePaper-3.97 主程序 v2
  *
- * 流程：NVS 凭据 → 无 PassKey 则 AP 配网 → WiFi → device/login
- *      → offline manifest/bundle（仅 review passed 才有音频）
- *      → 播放循环 + volume_guard + power_policy
- *
- * 引脚以官方 wiki 为准；此处 SD SPI 用了常见 39/40/41/42，联调改。
+ * 按键 / 时钟 / 后台静默 OTA（无用户升级入口）/ 离线包 / 电源 / 音量
  */
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_log.h"
@@ -24,6 +21,10 @@
 #include "volume_guard.h"
 #include "offline_store.h"
 #include "provision_ap.h"
+#include "buttons.h"
+#include "clock_sync.h"
+#include "ota_bg.h"
+#include "eink_display.h"
 
 static const char *TAG = "zizhao";
 
@@ -33,8 +34,15 @@ static power_policy_t s_policy;
 static int64_t s_boot_us;
 static int64_t s_last_act_us;
 static bool s_audio_ready = false;
+static bool s_playing = false;
+static int s_seg = 0;
+static int s_vol = 12;
 
-static void mark_act(void) { s_last_act_us = esp_timer_get_time(); }
+static void mark_act(void)
+{
+    s_last_act_us = esp_timer_get_time();
+    volume_guard_mark_activity();
+}
 
 static void wifi_sta_start(const zizhao_creds_t *c)
 {
@@ -52,13 +60,58 @@ static void wifi_sta_start(const zizhao_creds_t *c)
 
 static void graceful_shutdown(void)
 {
-    ESP_LOGW(TAG, "graceful shutdown");
-    /* 1 停播 2 progress 3 关 WiFi 4 RTC 深睡 */
-    net_http_report_progress(s_sid, s_creds.server_url, 0, 0, 0);
+    eink_show_message("按时关机");
+    net_http_report_progress(s_sid, s_creds.server_url, 0, s_seg, 0);
     esp_wifi_stop();
     uint64_t us = power_policy_us_until_boot(&s_policy, time(NULL));
     esp_sleep_enable_timer_wakeup(us);
     esp_deep_sleep_start();
+}
+
+static void handle_button(btn_event_t ev)
+{
+    if (ev == BTN_NONE) return;
+    mark_act();
+    switch (ev) {
+    case BTN_PLAY_PAUSE:
+        s_playing = !s_playing;
+        eink_show_status(s_playing ? "播放" : "暂停", s_audio_ready ? "音频就绪" : "仅文字", "");
+        break;
+    case BTN_NEXT_SEG:
+        s_seg++;
+        eink_show_status("下一段", "", "");
+        break;
+    case BTN_PREV_SEG:
+        if (s_seg > 0) s_seg--;
+        eink_show_status("上一段", "", "");
+        break;
+    case BTN_REFRESH_MATERIAL:
+        eink_show_status("换素材…", "", "");
+        /* TODO: POST /api/material/refresh */
+        break;
+    case BTN_VOLUME_UP:
+        if (s_vol < 15) s_vol++;
+        eink_show_status("音量", "", "");
+        break;
+    case BTN_VOLUME_DOWN:
+        if (s_vol > 0) s_vol--;
+        eink_show_status("音量", "", "");
+        break;
+    case BTN_TALK:
+        eink_show_status("对话…", "", "");
+        break;
+    default:
+        break;
+    }
+}
+
+static void refresh_clock_page(void)
+{
+    char hm[8], full[32];
+    clock_format_hm(hm, sizeof(hm));
+    clock_format_full(full, sizeof(full), time(NULL));
+    /* 未校时也显示 RTC 时间，避免白屏 */
+    eink_show_clock(hm, full, "自招学习");
 }
 
 void app_main(void)
@@ -69,9 +122,11 @@ void app_main(void)
     volume_guard_init(12, 1, 600);
     power_policy_defaults(&s_policy);
     offline_store_init();
+    buttons_init();
+    eink_init();
 
     if (!nvs_creds_load(&s_creds) || !nvs_creds_has_passkey(&s_creds)) {
-        ESP_LOGW(TAG, "no PassKey — start onsite AP provision");
+        eink_show_message("请现场配网");
         provision_ap_start();
         while (!nvs_creds_has_passkey(&s_creds)) {
             nvs_creds_load(&s_creds);
@@ -82,6 +137,7 @@ void app_main(void)
     if (nvs_creds_ready_for_sta(&s_creds)) {
         wifi_sta_start(&s_creds);
         vTaskDelay(pdMS_TO_TICKS(3000));
+        clock_sync_sntp();
         if (net_http_login(&s_creds, s_sid, sizeof(s_sid))) {
             ESP_LOGI(TAG, "login ok");
             char buf[16384];
@@ -89,26 +145,46 @@ void app_main(void)
                 offline_store_save_text("today", buf, strlen(buf));
                 s_audio_ready = strstr(buf, "\"audio_ready\": true") != NULL
                                  || strstr(buf, "\"audio_ready\":true") != NULL;
-                ESP_LOGI(TAG, "bundle cached audio_ready=%d", (int)s_audio_ready);
             }
             char pol[512];
             if (net_http_get_power_policy(s_sid, s_creds.server_url, pol, sizeof(pol))) {
                 power_policy_parse_json(pol, &s_policy);
             }
-        } else {
-            ESP_LOGW(TAG, "login failed — offline cache only");
+            /* 后台静默固件检查：无 UI、失败不影响使用 */
+            ota_bg_check_and_update(s_sid, s_creds.server_url);
         }
     }
 
-    /* 主循环骨架：按键/播放/电源 */
+    refresh_clock_page();
+    int last_min = -1;
+    int64_t last_ota_check = esp_timer_get_time();
+
     for (;;) {
-        int vol = volume_guard_tick();
-        (void)vol;
+        handle_button(buttons_poll());
+        s_vol = volume_guard_tick();
+
         time_t now = time(NULL);
+        struct tm tmv;
+        localtime_r(&now, &tmv);
+        if (tmv.tm_min != last_min) {
+            last_min = tmv.tm_min;
+            refresh_clock_page(); /* 每分钟一刷，墨水屏可承受 */
+        }
+
         if (power_policy_should_sleep(&s_policy, now, s_boot_us, s_last_act_us)) {
             graceful_shutdown();
         }
-        /* TODO: I2S 播 MP3；仅 s_audio_ready 时允许 */
-        vTaskDelay(pdMS_TO_TICKS(500));
+
+        /* 每 6 小时后台查一次固件（绝不走按键） */
+        if (s_sid[0] && (esp_timer_get_time() - last_ota_check) > 6LL * 3600LL * 1000000LL) {
+            last_ota_check = esp_timer_get_time();
+            ota_bg_check_and_update(s_sid, s_creds.server_url);
+        }
+
+        if (s_playing && s_audio_ready) {
+            mark_act();
+            /* TODO: I2S 下一段 MP3 */
+        }
+        vTaskDelay(pdMS_TO_TICKS(200));
     }
 }

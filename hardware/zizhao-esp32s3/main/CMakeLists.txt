@@ -7,16 +7,22 @@ idf_component_register(
         "offline_store.c"
         "provision_ap.c"
         "nvs_creds.c"
+        "buttons.c"
+        "clock_sync.c"
+        "ota_bg.c"
+        "eink_display.c"
     INCLUDE_DIRS "."
     REQUIRES
         nvs_flash
         esp_wifi
         esp_http_client
+        esp_https_ota
+        esp_app_format
         esp_timer
         esp_event
         esp_netif
         fatfs
         sdmmc
         driver
-        esp_adc
+        esp_sntp
 )

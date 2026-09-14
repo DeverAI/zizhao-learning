@@ -1,5 +1,26 @@
 # 自招学习板固件（微雪 ESP32-S3-ePaper-3.97）
 
+## 按键（无升级入口）
+
+| 动作 | 事件 |
+|------|------|
+| 拨轮按下 | 播放/暂停 |
+| 拨轮上/下 | 音量 ± |
+| PWR | 换素材 |
+
+**没有「检查更新 / 升级固件」按钮或菜单。**
+
+## 时钟
+
+SNTP（`ntp.aliyun.com`，UTC+8）→ 每分钟刷新 `HH:MM` + 日期（墨水屏静态，断电仍可见）。
+
+## 固件更新（仅后台静默）
+
+- 约每 6h 拉 `GET /api/device/firmware/latest`（需已登录）  
+- 有新版本才 OTA；失败只记日志  
+- 服务端：`storage/firmware/manifest.json` + `firmware.bin`  
+- `policy: background_only_no_user_ui`
+
 ## 编译
 
 ```powershell
