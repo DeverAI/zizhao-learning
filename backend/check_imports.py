@@ -30,7 +30,9 @@ MODULES = [
     "services.upload_service",
     "services.material_service",
     "services.agent_chat",
+    "services.english_vocab",
     "routers.auth",
+    "routers.english_tools",
     "routers.material",
     "routers.platform",
     "routers.quiz",
@@ -50,6 +52,8 @@ NEED_PATHS = [
     "/api/settings/apis/text",
     "/api/device/power",
     "/api/home",
+    "/api/english/card",
+    "/api/tools/calc",
 ]
 
 

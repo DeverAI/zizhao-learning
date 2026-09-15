@@ -81,6 +81,8 @@ DEFAULT_SETTINGS = {
     "device_boot_idle_sec": 900,
     "device_volume_idle_sec": 600,
     "device_volume_idle_level": 1,
+    "material_mp3_min_sec": 90,
+    "material_mp3_max_sec": 300,
 }
 
 DOMAIN_ORDER = ["philosophy", "history", "classics", "shared_curriculum"]

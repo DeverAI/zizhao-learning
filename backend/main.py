@@ -25,6 +25,7 @@ from config import (
 from models import database as db
 from routers import auth as auth_router
 from routers import device_fw as device_fw_router
+from routers import english_tools as english_tools_router
 from routers import material as material_router
 from routers import platform as platform_router
 from routers import quiz as quiz_router
@@ -154,6 +155,7 @@ async def optional_bearer_auth(request: Request, call_next):
 
 app.include_router(auth_router.router)
 app.include_router(device_fw_router.router)
+app.include_router(english_tools_router.router)
 app.include_router(platform_router.router)
 app.include_router(quiz_router.router)
 app.include_router(review_router.router)

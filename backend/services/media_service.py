@@ -77,6 +77,14 @@ def ocr_image(path: str) -> tuple[str, bool]:
     )
 
 
+def _mp3_char_budget() -> tuple[int, int]:
+    """按配置约束 MP3 时长（约 4.5 字/秒中文）。默认 90–300 秒。"""
+    settings = load_settings()
+    mn = int(settings.get("material_mp3_min_sec", 90))
+    mx = int(settings.get("material_mp3_max_sec", 300))
+    return max(400, mn * 5), max(600, mx * 5)
+
+
 def synthesize_mp3(text: str, out_name: str, user_id: str = "") -> tuple[str, bool, str]:
     """返回 (path, degraded, provider). 优先用户自注册 TTS。"""
     from config import AUDIO_DIR
@@ -88,6 +96,12 @@ def synthesize_mp3(text: str, out_name: str, user_id: str = "") -> tuple[str, bo
     text = (text or "").strip()
     if not text:
         return "", True, "empty"
+    lo, hi = _mp3_char_budget()
+    if len(text) < lo // 2:
+        # 太短不单独成音频，交给段落合并
+        pass
+    if len(text) > hi:
+        text = text[:hi]
     out_path = os.path.join(AUDIO_DIR, out_name)
 
     # 1) 用户自注册 OpenAI 兼容 TTS
