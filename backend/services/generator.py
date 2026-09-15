@@ -370,7 +370,7 @@ async def generate_from_plan(
         "你是上海中考自主招生备考教练，擅长哲学、历史、高中古诗文与初中拔高知识点。"
         "输出严格 JSON，不要 markdown。字段："
         "title, source, body, key_points, followups, concept_keys, fingerprint。"
-        "body 是可朗读讲解稿，800-1500字；concept_keys 为3-8个短概念词。"
+        "body 是可朗读讲解稿，1800-3500字（约对应 MP3 5–12 分钟，体育课可听完）；concept_keys 为3-8个短概念词。"
         "fingerprint 形如 {person, work, concept, era, syntax}。"
         "可结合提供的检索摘要，但 source 必须可追溯。"
     )

@@ -151,19 +151,13 @@ def next_card(
         "mode": mode,
         "bank_id": bank_id,
         "source": source,
-        "hint_sentence": (card.get("sentence") or "")[:120] if mode == "en2cn" else "",
+        # 不在卡面给整句，避免直接泄露答案；模糊时走 /english/vague
+        "has_sentence": bool(card.get("sentence")),
     }
     return {
         "ok": True,
         "card": show,
-        "answer": {
-            "word": word,
-            "cn": card.get("cn"),
-            "pos": card.get("pos") or "",
-            "sentence": card.get("sentence") or "",
-            "freq": card.get("freq") or 0,
-            "bank_id": bank_id,
-        },
+        # 故意不返回 answer；揭示走 reveal_answer
         "progress": {
             "known": sum(1 for v in status.values() if v == "known"),
             "vague": sum(1 for v in status.values() if v == "vague"),

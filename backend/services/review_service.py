@@ -151,7 +151,8 @@ async def _rewrite_body(mat: dict, hints: list[str], user_id: str = "") -> str:
         {
             "role": "user",
             "content": (
-                "改写初三自招讲解稿。纯文本，禁止 Markdown，800-1200字，保留出处。\n"
+                "改写初三自招讲解稿。纯文本，禁止 Markdown，1800-3500字，保留出处。"
+                "目标朗读至少 300 秒（体育课长听），禁止缩成提纲。\n"
                 f"原标题：{mat.get('title')}\n原出处：{mat.get('source')}\n"
                 f"原正文：\n{(mat.get('body') or '')[:2500]}\n"
                 f"必须处理：{hints}\n只输出改写正文。"
@@ -289,7 +290,7 @@ async def review_all_users_optimize() -> dict:
         for uid in users:
             mat = db.get_today_material(day, user_id=uid)
             if mat and audio_allowed(mat):
-                body = (mat.get("body") or "")[:1500]
+                body = mat.get("body") or ""
                 if body and not (mat.get("audio_path") or ""):
                     path, deg, prov = await asyncio.to_thread(
                         media_service.synthesize_mp3,

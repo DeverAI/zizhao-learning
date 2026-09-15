@@ -81,8 +81,11 @@ DEFAULT_SETTINGS = {
     "device_boot_idle_sec": 900,
     "device_volume_idle_sec": 600,
     "device_volume_idle_level": 1,
-    "material_mp3_min_sec": 90,
-    "material_mp3_max_sec": 300,
+    # 体育课/长听：300s 是下限，不是上限（用户 2026-09-15 明确）
+    "material_mp3_min_sec": 300,
+    "material_mp3_max_sec": 900,
+    "material_body_min_chars": 1500,
+    "material_body_max_chars": 4500,
 }
 
 DOMAIN_ORDER = ["philosophy", "history", "classics", "shared_curriculum"]

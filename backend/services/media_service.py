@@ -78,15 +78,59 @@ def ocr_image(path: str) -> tuple[str, bool]:
 
 
 def _mp3_char_budget() -> tuple[int, int]:
-    """按配置约束 MP3 时长（约 4.5 字/秒中文）。默认 90–300 秒。"""
+    """约 5 字/秒中文。体育课：下限 300s≈1500字，上限 900s≈4500字。"""
     settings = load_settings()
-    mn = int(settings.get("material_mp3_min_sec", 90))
-    mx = int(settings.get("material_mp3_max_sec", 300))
-    return max(400, mn * 5), max(600, mx * 5)
+    mn = int(settings.get("material_mp3_min_sec", 300))
+    mx = int(settings.get("material_mp3_max_sec", 900))
+    if mn < 300:
+        mn = 300
+    if mx < mn:
+        mx = mn
+    return mn * 5, mx * 5
+
+
+def _tts_chunk(text: str, size: int = 1600) -> list[str]:
+    """按句边界切块，避免 TTS API 单次 input 过短截断长稿。"""
+    text = (text or "").strip()
+    if len(text) <= size:
+        return [text] if text else []
+    parts = re.split(r"(?<=[。！？!?.])", text)
+    chunks: list[str] = []
+    buf = ""
+    for p in parts:
+        if len(buf) + len(p) <= size:
+            buf += p
+        else:
+            if buf.strip():
+                chunks.append(buf.strip())
+            buf = p
+    if buf.strip():
+        chunks.append(buf.strip())
+    # 超长句再硬切
+    out: list[str] = []
+    for c in chunks:
+        while len(c) > size:
+            out.append(c[:size])
+            c = c[size:]
+        if c:
+            out.append(c)
+    return out
+
+
+def _concat_mp3(parts: list[str], dest: str) -> bool:
+    """简单二进制拼接 MP3（同参数 TTS 输出通常可拼）。"""
+    try:
+        with open(dest, "wb") as out:
+            for p in parts:
+                with open(p, "rb") as f:
+                    out.write(f.read())
+        return os.path.getsize(dest) > 1000
+    except OSError:
+        return False
 
 
 def synthesize_mp3(text: str, out_name: str, user_id: str = "") -> tuple[str, bool, str]:
-    """返回 (path, degraded, provider). 优先用户自注册 TTS。"""
+    """分段 TTS 再拼接，保证 ≥300s 文稿能成完整音频。"""
     from config import AUDIO_DIR
 
     ensure_dirs()
@@ -97,83 +141,105 @@ def synthesize_mp3(text: str, out_name: str, user_id: str = "") -> tuple[str, bo
     if not text:
         return "", True, "empty"
     lo, hi = _mp3_char_budget()
-    if len(text) < lo // 2:
-        # 太短不单独成音频，交给段落合并
-        pass
     if len(text) > hi:
         text = text[:hi]
     out_path = os.path.join(AUDIO_DIR, out_name)
+    chunks = _tts_chunk(text)
+    if not chunks:
+        return "", True, "empty"
 
-    # 1) 用户自注册 OpenAI 兼容 TTS
-    if user_id:
+    def _call_user(chunk: str) -> bytes | None:
         try:
             from services import user_api_service
 
             cred = user_api_service.get_tts_creds(user_id)
-            if cred:
-                import httpx
-
-                url = user_api_service.compose_tts_url(cred["base_url"])
-                try:
-                    with httpx.Client(timeout=60) as client:
-                        resp = client.post(
-                            url,
-                            headers={"Authorization": f"Bearer {cred['api_key']}"},
-                            json={
-                                "model": cred["model"],
-                                "input": text[:2000],
-                                "voice": cred.get("voice") or "alloy",
-                                "response_format": "mp3",
-                            },
-                        )
-                        if resp.status_code < 400 and resp.content:
-                            with open(out_path, "wb") as f:
-                                f.write(resp.content)
-                            return out_path, False, "user_tts"
-                except Exception:  # noqa: BLE001
-                    pass
-        except Exception:  # noqa: BLE001
-            pass
-
-    from config import SHARED_SETTINGS
-    import json
-
-    xiaomi_key = ""
-    try:
-        if os.path.exists(SHARED_SETTINGS):
-            with open(SHARED_SETTINGS, encoding="utf-8-sig") as f:
-                s = json.load(f)
-            xiaomi_key = s.get("xiaomi_token_plan_api_key") or s.get("xiaomi_api_key") or ""
-    except (json.JSONDecodeError, OSError):
-        xiaomi_key = ""
-
-    if xiaomi_key:
-        try:
+            if not cred:
+                return None
             import httpx
 
-            url = "https://token-plan-cn.xiaomimimo.com/v1/audio/speech"
-            headers = {"Authorization": f"Bearer {xiaomi_key}", "Content-Type": "application/json"}
-            payload = {
-                "model": "mimo-v2.5-tts",
-                "input": text[:2000],
-                "voice": "mimo_default",
-                "response_format": "mp3",
-            }
-            with httpx.Client(timeout=60) as client:
-                resp = client.post(url, headers=headers, json=payload)
+            with httpx.Client(timeout=90) as client:
+                resp = client.post(
+                    user_api_service.compose_tts_url(cred["base_url"]),
+                    headers={"Authorization": f"Bearer {cred['api_key']}"},
+                    json={
+                        "model": cred["model"],
+                        "input": chunk,
+                        "voice": cred.get("voice") or "alloy",
+                        "response_format": "mp3",
+                    },
+                )
                 if resp.status_code < 400 and resp.content:
-                    with open(out_path, "wb") as f:
-                        f.write(resp.content)
-                    return out_path, False, "xiaomi_tts"
+                    return resp.content
         except Exception:  # noqa: BLE001
+            return None
+        return None
+
+    def _call_xiaomi(chunk: str) -> bytes | None:
+        from config import SHARED_SETTINGS
+        import json as _json
+
+        try:
+            if not os.path.exists(SHARED_SETTINGS):
+                return None
+            with open(SHARED_SETTINGS, encoding="utf-8-sig") as f:
+                s = _json.load(f)
+            key = s.get("xiaomi_token_plan_api_key") or s.get("xiaomi_api_key") or ""
+            if not key:
+                return None
+            import httpx
+
+            with httpx.Client(timeout=90) as client:
+                resp = client.post(
+                    "https://token-plan-cn.xiaomimimo.com/v1/audio/speech",
+                    headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+                    json={
+                        "model": "mimo-v2.5-tts",
+                        "input": chunk,
+                        "voice": "mimo_default",
+                        "response_format": "mp3",
+                    },
+                )
+                if resp.status_code < 400 and resp.content:
+                    return resp.content
+        except Exception:  # noqa: BLE001
+            return None
+        return None
+
+    tmp_dir = os.path.join(AUDIO_DIR, "_parts")
+    os.makedirs(tmp_dir, exist_ok=True)
+    part_files: list[str] = []
+    provider = ""
+    for i, chunk in enumerate(chunks):
+        audio = None
+        if user_id:
+            audio = _call_user(chunk)
+            if audio:
+                provider = "user_tts"
+        if not audio:
+            audio = _call_xiaomi(chunk)
+            if audio:
+                provider = "xiaomi_tts"
+        if not audio:
+            # 中途失败：保留已有段拼接，标记 degraded
+            break
+        pf = os.path.join(tmp_dir, f"{out_name}.{i:03d}.mp3")
+        with open(pf, "wb") as f:
+            f.write(audio)
+        part_files.append(pf)
+
+    if not part_files:
+        meta = out_path + ".txt"
+        try:
+            with open(meta, "w", encoding="utf-8") as f:
+                f.write(text)
+        except OSError:
             pass
-    meta = out_path + ".txt"
-    try:
-        with open(meta, "w", encoding="utf-8") as f:
-            f.write(text[:2000])
-    except OSError:
-        pass
-    return "", True, "tts_unavailable"
+        return "", True, "tts_unavailable"
+
+    if _concat_mp3(part_files, out_path):
+        degraded = len(part_files) < len(chunks)
+        return out_path, degraded, provider or "partial"
+    return "", True, "concat_failed"
 
 
 def ingest_upload(
@@ -204,8 +270,9 @@ def ingest_upload(
     text = security.sanitize_text(text, 30000)
     mp3_path, mp3_degraded, provider = "", True, "skipped"
     if make_mp3 and text and not text.startswith("（OCR"):
+        # 全文交给 synthesize_mp3（内部按 300–900s 预算分段）
         mp3_path, mp3_degraded, provider = synthesize_mp3(
-            text[:1500], f"{safe_uid}_{fid}.mp3", user_id=user_id
+            text, f"{safe_uid}_{fid}.mp3", user_id=user_id
         )
 
     kind = "image" if ext in {".png", ".jpg", ".jpeg", ".webp", ".bmp"} else "document"

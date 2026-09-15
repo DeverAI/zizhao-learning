@@ -54,16 +54,20 @@ class EnglishVocabTest(unittest.TestCase):
 
         card = english_vocab.next_card("u1", "gaokao", "en2cn", "new", "freq")
         self.assertTrue(card["ok"])
-        word = card["answer"]["word"]
+        self.assertNotIn("answer", card, "卡面不得泄露答案")
+        word = card.get("card", {}).get("word")
+        if not word:
+            word = english_vocab.bank_items("gaokao")[0]["word"]
         r = english_vocab.grade_card("u1", "gaokao", word, "wrong")
         self.assertTrue(r["in_wrong_bank"])
-        # wrong source 应能抽到
         c2 = english_vocab.next_card("u1", "gaokao", "cn2en", "wrong", "freq")
         self.assertTrue(c2["ok"])
-        # known 移出错词
         english_vocab.grade_card("u1", "gaokao", word, "known")
         stats = english_vocab.bank_stats("u1")
         self.assertGreaterEqual(stats["known"], 1)
+        rev = english_vocab.reveal_answer("gaokao", word)
+        self.assertTrue(rev["ok"])
+        self.assertEqual(rev["answer"]["word"], word)
 
     def test_vague_options(self):
         from services import english_vocab

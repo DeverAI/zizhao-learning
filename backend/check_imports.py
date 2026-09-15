@@ -53,6 +53,7 @@ NEED_PATHS = [
     "/api/device/power",
     "/api/home",
     "/api/english/card",
+    "/api/english/reveal",
     "/api/tools/calc",
 ]
 

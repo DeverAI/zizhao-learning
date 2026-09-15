@@ -37,7 +37,18 @@ async def next_card(
     sort: str = "freq",
     user: dict = Depends(current_user),
 ):
+    """只出卡面，不带 answer（防泄露）。揭示用 /english/reveal。"""
     return english_vocab.next_card(user["id"], bank_id, mode, source, sort)
+
+
+@router.get("/english/reveal")
+async def reveal(bank_id: str = "gaokao", word: str = "", user: dict = Depends(current_user)):
+    if not word:
+        raise HTTPException(status_code=400, detail="word required")
+    try:
+        return english_vocab.reveal_answer(bank_id, word)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 class GradeBody(BaseModel):
