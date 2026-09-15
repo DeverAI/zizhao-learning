@@ -89,32 +89,116 @@ def _mp3_char_budget() -> tuple[int, int]:
     return mn * 5, mx * 5
 
 
-def _tts_chunk(text: str, size: int = 1600) -> list[str]:
-    """按句边界切块，避免 TTS API 单次 input 过短截断长稿。"""
-    text = (text or "").strip()
+# 句末强断；中文/英文/数字小数点保护在下面单独处理
+_SENT_END = re.compile(r"(?<=[。！？!?；;])|(?<=[a-z0-9][.!?])(?=\s|$)")
+# 逗号/顿号/冒号等软断（仅在超长句时用）
+_SOFT_BREAK = re.compile(r"(?<=[，、,;；:：])|(?<=\s—\s)|(?<=\s-\s)")
+# 英文单词边界（最后手段）
+_WORD_BREAK = re.compile(r"(?<=[A-Za-z0-9])(?=\s+[A-Za-z0-9])")
+
+
+def _split_keep_seps(text: str, pattern: re.Pattern) -> list[str]:
+    parts = pattern.split(text)
+    return [p for p in parts if p and p.strip()]
+
+
+def _tts_chunk(text: str, size: int = 1600, min_size: int = 120) -> list[str]:
+    """TTS 分段：优先段落 → 句末 → 软标点 → 英文词边界。
+
+    禁止随手按固定长度硬切；单句超长也必须尽量落在标点/空格上，
+    避免把词、短语、小数点从中间截断导致合成怪音。
+    """
+    text = (text or "").replace("\r\n", "\n").strip()
+    if not text:
+        return []
     if len(text) <= size:
-        return [text] if text else []
-    parts = re.split(r"(?<=[。！？!?.])", text)
-    chunks: list[str] = []
-    buf = ""
-    for p in parts:
-        if len(buf) + len(p) <= size:
-            buf += p
+        return [text]
+
+    # 1) 段落
+    paras = [p.strip() for p in re.split(r"\n\s*\n|\n", text) if p.strip()]
+
+    def pack(units: list[str], hard: bool) -> list[str]:
+        chunks: list[str] = []
+        buf = ""
+        for u in units:
+            cand = (buf + u) if buf else u
+            if len(cand) <= size:
+                buf = cand
+            else:
+                if buf.strip():
+                    chunks.append(buf.strip())
+                # 单 unit 仍超长：交给上层再细切
+                buf = u if not hard or len(u) <= size else u
+        if buf.strip():
+            chunks.append(buf.strip())
+        return chunks
+
+    # 2) 段落内按句末切，再打包
+    sent_units: list[str] = []
+    for para in paras:
+        if len(para) <= size:
+            sent_units.append(para)
         else:
-            if buf.strip():
-                chunks.append(buf.strip())
-            buf = p
-    if buf.strip():
-        chunks.append(buf.strip())
-    # 超长句再硬切
-    out: list[str] = []
+            sents = _split_keep_seps(para, _SENT_END)
+            if not sents:
+                sents = [para]
+            sent_units.extend(sents)
+
+    chunks = pack(sent_units, hard=False)
+
+    # 3) 仍超长的 chunk：软标点
+    refined: list[str] = []
     for c in chunks:
-        while len(c) > size:
-            out.append(c[:size])
-            c = c[size:]
-        if c:
+        if len(c) <= size:
+            refined.append(c)
+            continue
+        soft = _split_keep_seps(c, _SOFT_BREAK)
+        if soft:
+            refined.extend(pack(soft, hard=False))
+        else:
+            refined.append(c)
+
+    # 4) 还超长：英文词边界；中文最后才在 punctuation 后已有单位上再拼
+    final: list[str] = []
+    for c in refined:
+        if len(c) <= size:
+            final.append(c)
+            continue
+        words = _split_keep_seps(c, _WORD_BREAK)
+        if words:
+            final.extend(pack(words, hard=False))
+        else:
+            # 纯中文无空格超长句：按 size 切，但保证不切断在数字/小数点中间
+            i = 0
+            while i < len(c):
+                j = min(i + size, len(c))
+                if j < len(c):
+                    # 回退到最近的标点
+                    window = c[i:j]
+                    cut = max(
+                        window.rfind("。"),
+                        window.rfind("，"),
+                        window.rfind("；"),
+                        window.rfind("、"),
+                        window.rfind("！"),
+                        window.rfind("？"),
+                    )
+                    if cut >= min_size // 2:
+                        j = i + cut + 1
+                final.append(c[i:j].strip())
+                i = j
+
+    # 去掉过碎的尾段（并回前一段）
+    out: list[str] = []
+    for c in final:
+        c = c.strip()
+        if not c:
+            continue
+        if out and len(c) < min_size and len(out[-1]) + len(c) <= size:
+            out[-1] = (out[-1] + c).strip()
+        else:
             out.append(c)
-    return out
+    return out or [text[:size]]
 
 
 def _concat_mp3(parts: list[str], dest: str) -> bool:
