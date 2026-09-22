@@ -1,0 +1,177 @@
+[0;33mW (43404) axp: AXP@0x34 no reply (probe#9 err=ESP_FAIL idESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x15 (USB_UART_CHIP_RESET),boot:0x8 (SPI_FAST_FLASH_BOOT)
+Saved PC:0x4037cb96
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce3818,len:0x18dc
+load:0x403c9700,len:0x4
+load:0x403c9704,len:0xda4
+load:0x403cc700,len:0x30e8
+entry 0x403c9934
+[0;32mI (26) boot: ESP-IDF v5.1.6 2nd stage bootloader[0m
+[0;32mI (27) boot: compile time Sep 19 2026 15:53:25[0m
+[0;32mI (27) boot: Multicore bootloader[0m
+[0;32mI (30) boot: chip revision: v0.2[0m
+[0;32mI (34) qio_mode: Enabling default flash chip QIO[0m
+[0;32mI (39) boot.esp32s3: Boot SPI Speed : 80MHz[0m
+[0;32mI (44) boot.esp32s3: SPI Mode       : QIO[0m
+[0;32mI (48) boot.esp32s3: SPI Flash Size : 8MB[0m
+[0;32mI (53) boot: Enabling RNG early entropy source...[0m
+[0;32mI (59) boot: Partition Table:[0m
+[0;32mI (62) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (69) boot:  0 nvs              WiFi data        01 02 00009000 0000c000[0m
+[0;32mI (77) boot:  1 otadata          OTA data         01 00 00015000 00002000[0m
+[0;32mI (84) boot:  2 phy_init         RF data          01 01 00017000 00001000[0m
+[0;32mI (92) boot:  3 ota_0            OTA app          00 10 00020000 00300000[0m
+[0;32mI (99) boot:  4 ota_1            OTA app          00 11 00320000 00300000[0m
+[0;32mI (107) boot: End of partition table[0m
+[0;32mI (111) esp_image: segment 0: paddr=00020020 vaddr=3c0c0020 size=3ac28h (240680) map[0m
+[0;32mI (156) esp_image: segment 1: paddr=0005ac50 vaddr=3fc9c500 size=047c0h ( 18368) load[0m
+[0;32mI (160) esp_image: segment 2: paddr=0005f418 vaddr=40374000 size=00c00h (  3072) load[0m
+[0;32mI (162) esp_image: segment 3: paddr=00060020 vaddr=42000020 size=beb1ch (781084) map[0m
+[0;32mI (289) esp_image: segment 4: paddr=0011eb44 vaddr=40374c00 size=178b4h ( 96436) load[0m
+[0;32mI (308) esp_image: segment 5: paddr=00136400 vaddr=600fe000 size=00070h (   112) load[0m
+[0;32mI (318) boot: Loaded app from partition at offset 0x20000[0m
+[0;32mI (318) boot: Disabling RNG early entropy source...[0m
+[0;32mI (330) cpu_start: Multicore app[0m
+[0;32mI (330) cpu_start: Pro cpu up.[0m
+[0;32mI (330) cpu_start: Starting app cpu, entry point is 0x4037583c[0m
+[0;32mI (0) cpu_start: App cpu up.[0m
+[0;32mI (348) cpu_start: Pro cpu start user code[0m
+[0;32mI (348) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (348) cpu_start: Application information:[0m
+[0;32mI (351) cpu_start: Project name:     zizhao_esp32s3[0m
+[0;32mI (357) cpu_start: App version:      1.0.0[0m
+[0;32mI (361) cpu_start: Compile time:     Sep 19 2026 15:53:02[0m
+[0;32mI (367) cpu_start: ELF file SHA256:  574f6c825049572e...[0m
+[0;32mI (373) cpu_start: ESP-IDF:          v5.1.6[0m
+[0;32mI (378) cpu_start: Min chip rev:     v0.0[0m
+[0;32mI (383) cpu_start: Max chip rev:     v0.99 [0m
+[0;32mI (388) cpu_start: Chip rev:         v0.2[0m
+[0;32mI (393) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (400) heap_init: At 3FCAA290 len 0003F480 (253 KiB): DRAM[0m
+[0;32mI (406) heap_init: At 3FCE9710 len 00005724 (21 KiB): STACK/DRAM[0m
+[0;32mI (413) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM[0m
+[0;32mI (419) heap_init: At 600FE070 len 00001F78 (7 KiB): RTCRAM[0m
+[0;32mI (426) spi_flash: detected chip: gd[0m
+[0;32mI (429) spi_flash: flash io: qio[0m
+[0;32mI (434) sleep: Configure to isolate all GPIO pins in sleep state[0m
+[0;32mI (440) sleep: Enable automatic switching of GPIO sleep configuration[0m
+[0;32mI (447) app_start: Starting scheduler on CPU0[0m
+[0;32mI (452) app_start: Starting scheduler on CPU1[0m
+[0;32mI (452) main_task: Started on CPU0[0m
+[0;32mI (462) main_task: Calling app_main()[0m
+[0;32mI (488) zizhao: board MAC 70:04:1D:D8:75:8C[0m
+[0;33mW (657) axp: AXP@0x34 no reply (probe#1 err=ESP_FAIL id=0x00) | known 0x18/0x51/0x70/0x6A/0x6B: ACK=0 NACK=5 TMO=0 other=0 [none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4） | PWR_OUT pu=1 pd=0 → PWR_OUT 悬空（PMIC 没驱动这个脚，定不了案）[0m
+[0;33mW (677) axp: bus scan 0x08-0x77: ACK=0 NACK=112 TMO=0 other=0 acked:[none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4）[0m
+[0;33mW (707) axp: pull compare (cfg err=ESP_OK/ESP_OK): pullUP SDA=1 SCL=1 | pullDOWN SDA=1 SCL=0[0m
+[0;33mW (707) axp: pull verdict: SDA=外部驱动为高 | SCL=悬空(只由内部电阻定电平) → 不对称：只有 SDA 那一路被外部驱动为高，SCL 只跟内部 45K 走 ⇒ '缺上拉'这一件事只落在 SCL 那一路。这一行**不**证明板上没有 4.7K：它只证明该路此刻没有强于 45K 的上拉源，'4.7K 在但那一轨 0V'与'这一根不是 SCL'仍分不开（后者由位碰的角色对调档判）[0m
+[0;33mW (745) axp: bitbang sda41/scl42 fast~100kHz (half=5us, OD+45K): SCL rel=1 low=0 9clk_high=0/9 | SDA rel=1 low=0 after9=1 | probed[0x34 0x18 0x51 0x70 0x6A ] ack=0 → SCL 要 >1 个半周期才抬到位 ⇒ 这一档速度边沿不合格，NACK 不能算器件的账[0m
+[0;33mW (773) axp: bitbang sda41/scl42 slow~20kHz (half=25us, OD+45K): SCL rel=1 low=0 9clk_high=9/9 | SDA rel=1 low=0 after9=1 | probed[0x34 0x18 0x51 0x70 0x6A ] ack=0 → 时钟抬得起来、没人应答 ⇒ 与硬件驱动那一路读到的全 NACK 同型（注意：9/9 是在高相末尾采的，只证明 ≤半周期内过了阈值，不证明 ≤1µs ⇒ 边沿质量仍未排除，看 PP-SCL 那一行）[0m
+[0;33mW (903) axp: bitbang sda41/scl42 slow full-scan 0x08-0x77: ACK=0 NACK=112 acked:[none] → 不经过任何驱动、角色也试过对调的这条路 112 个地址无一应答 ⇒ 驱动 v2/legacy 之争与焊盘角色都已排除；**仍未**排除的是主机侧上升沿质量（45K 内部上拉的 RC 斜坡），那一维由 PP-SCL 那一行判[0m
+[0;33mW (929) axp: bitbang swapped sda42/scl41 slow~20kHz (half=25us, OD+45K): SCL rel=1 low=0 9clk_high=9/9 | SDA rel=1 low=0 after9=1 | probed[0x34 0x18 0x51 0x70 0x6A ] ack=0 → 时钟抬得起来、没人应答 ⇒ 与硬件驱动那一路读到的全 NACK 同型（注意：9/9 是在高相末尾采的，只证明 ≤半周期内过了阈值，不证明 ≤1µs ⇒ 边沿质量仍未排除，看 PP-SCL 那一行）[0m
+[0;33mW (1059) axp: bitbang swapped sda42/scl41 slow full-scan 0x08-0x77: ACK=0 NACK=112 acked:[none] → 不经过任何驱动、角色也试过对调的这条路 112 个地址无一应答 ⇒ 驱动 v2/legacy 之争与焊盘角色都已排除；**仍未**排除的是主机侧上升沿质量（45K 内部上拉的 RC 斜坡），那一维由 PP-SCL 那一行判[0m
+[0;33mW (1179) axp: bitbang sda41/scl42 PP-SCL(原=cap2→设成=已设最弱档 回读=cap0 复原=OK, half=25us, 9clk_high=9/9): 推挽段 ACK=0 NACK=112 首ACK=none | 同址开漏复现=没测 | OD 段(该地址之后) ACK=0 NACK=0 → 把时钟主动推高、边沿不再受上拉限制，112 个地址仍无一应答 ⇒ 主机侧连边沿质量这一维也实测排除；0 应答只剩器件侧解释（没通电 / 没出复位 / 不在这张地址表）[0m
+[0;33mW (1209) epd: panel rail not confirmed (AXP unreachable or ALDO3 off): 接电池 + 按住电源键 2 秒后松开（没反应再按满 4 秒）；再看 axp 行的 ACK/NACK/TMO 定案[0m
+[0;33mW (1226) eink: panel off at boot, background watch will retry[0m
+[0;31mE (1233) sdmmc_io: sdmmc_io_reset: unexpected return: 0x108[0m
+[0;31mE (1239) vfs_fat_sdmmc: sdmmc_card_init failed (0x108).[0m
+[0;33mW (1245) offline: SD mount fail ESP_ERR_INVALID_RESPONSE — offline text only in NVS/RAM[0m
+[0;32mI (1253) btn: buttons ready (wheel u/d/press + boot)[0m
+[0;32mI (1259) eink: MSG 请现场配网[0m
+[0;32mI (1263) pp: pp rom version: e7ae62f[0m
+[0;32mI (1267) net80211: net80211 rom version: e7ae62f[0m
+I (1274) wifi:wifi driver task: 3fcb74c0, prio:23, stack:6656, core=0
+I (1291) wifi:wifi firmware version: 02461b5
+I (1292) wifi:wifi certification version: v7.0
+I (1292) wifi:config NVS flash: enabled
+I (1292) wifi:config nano formating: disabled
+I (1296) wifi:Init data frame dynamic rx buffer num: 32
+I (1301) wifi:Init static rx mgmt buffer num: 5
+I (1306) wifi:Init management short buffer num: 32
+I (1310) wifi:Init dynamic tx buffer num: 32
+I (1314) wifi:Init static tx FG buffer num: 2
+I (1318) wifi:Init static rx buffer size: 1600
+I (1322) wifi:Init static rx buffer num: 10
+I (1326) wifi:Init dynamic rx buffer num: 32
+[0;32mI (1331) wifi_init: rx ba win: 6[0m
+[0;32mI (1334) wifi_init: tcpip mbox: 32[0m
+[0;32mI (1338) wifi_init: udp mbox: 6[0m
+[0;32mI (1342) wifi_init: tcp mbox: 6[0m
+[0;32mI (1346) wifi_init: tcp tx win: 5760[0m
+[0;32mI (1350) wifi_init: tcp rx win: 5760[0m
+[0;32mI (1354) wifi_init: tcp mss: 1440[0m
+[0;32mI (1358) wifi_init: WiFi IRAM OP enabled[0m
+[0;32mI (1363) wifi_init: WiFi RX IRAM OP enabled[0m
+[0;32mI (1372) phy_init: phy_version 680,a6008b2,Jun  4 2024,16:41:10[0m
+I (1411) wifi:mode : softAP (70:04:1d:d8:75:8d)
+I (1414) wifi:Total power save buffer number: 16
+I (1414) wifi:Init max length of beacon: 752/752
+I (1414) wifi:Init max length of beacon: 752/752
+[0;32mI (1418) esp_netif_lwip: DHCP server started on interface WIFI_AP_DEF with IP: 192.168.4.1[0m
+[0;33mW (1428) prov: SoftAP Zizhao-Setup-758D / pwd <redacted-prov-pass> — 配网页 http://192.168.4.1/[0m
+[0;32mI (1435) eink: MSG 热点:Zizhao-Setup-758D 密码:<redacted-prov-pass> 打开192.168.4.1[0m
+[0;33mW (6400) axp: AXP@0x34 no reply (probe#2 err=ESP_FAIL id=0x00) | known 0x18/0x51/0x70/0x6A/0x6B: ACK=0 NACK=5 TMO=0 other=0 [none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4） | PWR_OUT pu=1 pd=0 → PWR_OUT 悬空（PMIC 没驱动这个脚，定不了案）[0m
+[0;33mW (6421) axp: bus scan 0x08-0x77: ACK=0 NACK=112 TMO=0 other=0 acked:[none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4）[0m
+[0;33mW (6450) axp: pull compare (cfg err=ESP_OK/ESP_OK): pullUP SDA=1 SCL=1 | pullDOWN SDA=1 SCL=0[0m
+[0;33mW (6450) axp: pull verdict: SDA=外部驱动为高 | SCL=悬空(只由内部电阻定电平) → 不对称：只有 SDA 那一路被外部驱动为高，SCL 只跟内部 45K 走 ⇒ '缺上拉'这一件事只落在 SCL 那一路。这一行**不**证明板上没有 4.7K：它只证明该路此刻没有强于 45K 的上拉源，'4.7K 在但那一轨 0V'与'这一根不是 SCL'仍分不开（后者由位碰的角色对调档判）[0m
+[0;33mW (6489) axp: bitbang sda41/scl42 fast~100kHz (half=5us, OD+45K): SCL rel=1 low=0 9clk_high=0/9 | SDA rel=1 low=0 after9=1 | probed[0x34 0x18 0x51 0x70 0x6A ] ack=0 → SCL 要 >1 个半周期才抬到位 ⇒ 这一档速度边沿不合格，NACK 不能算器件的账[0m
+[0;33mW (6517) axp: bitbang sda41/scl42 slow~20kHz (half=25us, OD+45K): SCL rel=1 low=0 9clk_high=9/9 | SDA rel=1 low=0 after9=1 | probed[0x34 0x18 0x51 0x70 0x6A ] ack=0 → 时钟抬得起来、没人应答 ⇒ 与硬件驱动那一路读到的全 NACK 同型（注意：9/9 是在高相末尾采的，只证明 ≤半周期内过了阈值，不证明 ≤1µs ⇒ 边沿质量仍未排除，看 PP-SCL 那一行）[0m
+[0;33mW (6647) axp: bitbang sda41/scl42 slow full-scan 0x08-0x77: ACK=0 NACK=112 acked:[none] → 不经过任何驱动、角色也试过对调的这条路 112 个地址无一应答 ⇒ 驱动 v2/legacy 之争与焊盘角色都已排除；**仍未**排除的是主机侧上升沿质量（45K 内部上拉的 RC 斜坡），那一维由 PP-SCL 那一行判[0m
+[0;33mW (6673) axp: bitbang swapped sda42/scl41 slow~20kHz (half=25us, OD+45K): SCL rel=1 low=0 9clk_high=9/9 | SDA rel=1 low=0 after9=1 | probed[0x34 0x18 0x51 0x70 0x6A ] ack=0 → 时钟抬得起来、没人应答 ⇒ 与硬件驱动那一路读到的全 NACK 同型（注意：9/9 是在高相末尾采的，只证明 ≤半周期内过了阈值，不证明 ≤1µs ⇒ 边沿质量仍未排除，看 PP-SCL 那一行）[0m
+[0;33mW (6803) axp: bitbang swapped sda42/scl41 slow full-scan 0x08-0x77: ACK=0 NACK=112 acked:[none] → 不经过任何驱动、角色也试过对调的这条路 112 个地址无一应答 ⇒ 驱动 v2/legacy 之争与焊盘角色都已排除；**仍未**排除的是主机侧上升沿质量（45K 内部上拉的 RC 斜坡），那一维由 PP-SCL 那一行判[0m
+[0;33mW (6824) axp: bitbang sda41/scl42 PP-SCL 跳过（原因=本上电周期已跑过一次（= `bb_setup` 成功、SCL 真的被配成推挽并起过时钟；R42 P2-⑥ 之后，那两道'还没把 SCL 推起来就 return'的出口不再算数））→ 主机侧「上升沿质量」这一维本轮仍未实测[0m
+[0;33mW (6852) epd: panel rail not confirmed (AXP unreachable or ALDO3 off): 接电池 + 按住电源键 2 秒后松开（没反应再按满 4 秒）；再看 axp 行的 ACK/NACK/TMO 定案[0m
+[0;33mW (12037) axp: AXP@0x34 no reply (probe#3 err=ESP_FAIL id=0x00) | known 0x18/0x51/0x70/0x6A/0x6B: ACK=0 NACK=5 TMO=0 other=0 [none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4） | PWR_OUT pu=1 pd=0 → PWR_OUT 悬空（PMIC 没驱动这个脚，定不了案）[0m
+[0;33mW (12058) axp: bus scan 0x08-0x77: ACK=0 NACK=112 TMO=0 other=0 acked:[none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4）[0m
+[0;33mW (12087) axp: pull compare (cfg err=ESP_OK/ESP_OK): pullUP SDA=1 SCL=1 | pullDOWN SDA=1 SCL=0[0m
+[0;33mW (12087) axp: pull verdict: SDA=外部驱动为高 | SCL=悬空(只由内部电阻定电平) → 不对称：只有 SDA 那一路被外部驱动为高，SCL 只跟内部 45K 走 ⇒ '缺上拉'这一件事只落在 SCL 那一路。这一行**不**证明板上没有 4.7K：它只证明该路此刻没有强于 45K 的上拉源，'4.7K 在但那一轨 0V'与'这一根不是 SCL'仍分不开（后者由位碰的角色对调档判）[0m
+[0;33mW (12126) axp: bitbang sda41/scl42 fast~100kHz (half=5us, OD+45K): SCL rel=1 low=0 9clk_high=0/9 | SDA rel=1 low=0 after9=1 | probed[0x34 0x18 0x51 0x70 0x6A ] ack=0 → SCL 要 >1 个半周期才抬到位 ⇒ 这一档速度边沿不合格，NACK 不能算器件的账[0m
+[0;33mW (12154) axp: bitbang sda41/scl42 slow~20kHz (half=25us, OD+45K): SCL rel=1 low=0 9clk_high=9/9 | SDA rel=1 low=0 after9=1 | probed[0x34 0x18 0x51 0x70 0x6A ] ack=0 → 时钟抬得起来、没人应答 ⇒ 与硬件驱动那一路读到的全 NACK 同型（注意：9/9 是在高相末尾采的，只证明 ≤半周期内过了阈值，不证明 ≤1µs ⇒ 边沿质量仍未排除，看 PP-SCL 那一行）[0m
+[0;33mW (12284) axp: bitbang sda41/scl42 slow full-scan 0x08-0x77: ACK=0 NACK=112 acked:[none] → 不经过任何驱动、角色也试过对调的这条路 112 个地址无一应答 ⇒ 驱动 v2/legacy 之争与焊盘角色都已排除；**仍未**排除的是主机侧上升沿质量（45K 内部上拉的 RC 斜坡），那一维由 PP-SCL 那一行判[0m
+[0;33mW (12310) axp: bitbang swapped sda42/scl41 slow~20kHz (half=25us, OD+45K): SCL rel=1 low=0 9clk_high=9/9 | SDA rel=1 low=0 after9=1 | probed[0x34 0x18 0x51 0x70 0x6A ] ack=0 → 时钟抬得起来、没人应答 ⇒ 与硬件驱动那一路读到的全 NACK 同型（注意：9/9 是在高相末尾采的，只证明 ≤半周期内过了阈值，不证明 ≤1µs ⇒ 边沿质量仍未排除，看 PP-SCL 那一行）[0m
+[0;33mW (12441) axp: bitbang swapped sda42/scl41 slow full-scan 0x08-0x77: ACK=0 NACK=112 acked:[none] → 不经过任何驱动、角色也试过对调的这条路 112 个地址无一应答 ⇒ 驱动 v2/legacy 之争与焊盘角色都已排除；**仍未**排除的是主机侧上升沿质量（45K 内部上拉的 RC 斜坡），那一维由 PP-SCL 那一行判[0m
+[0;33mW (12462) axp: bitbang sda41/scl42 PP-SCL 跳过（原因=本上电周期已跑过一次（= `bb_setup` 成功、SCL 真的被配成推挽并起过时钟；R42 P2-⑥ 之后，那两道'还没把 SCL 推起来就 return'的出口不再算数））→ 主机侧「上升沿质量」这一维本轮仍未实测[0m
+[0;33mW (12490) epd: panel rail not confirmed (AXP unreachable or ALDO3 off): 接电池 + 按住电源键 2 秒后松开（没反应再按满 4 秒）；再看 axp 行的 ACK/NACK/TMO 定案[0m
+[0;33mW (17620) axp: AXP@0x34 no reply (probe#4 err=ESP_FAIL id=0x00) | known 0x18/0x51/0x70/0x6A/0x6B: ACK=0 NACK=5 TMO=0 other=0 [none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4） | PWR_OUT pu=1 pd=0 → PWR_OUT 悬空（PMIC 没驱动这个脚，定不了案）[0m
+[0;33mW (17641) epd: panel rail not confirmed (AXP unreachable or ALDO3 off): 接电池 + 按住电源键 2 秒后松开（没反应再按满 4 秒）；再看 axp 行的 ACK/NACK/TMO 定案[0m
+[0;33mW (22771) axp: AXP@0x34 no reply (probe#5 err=ESP_FAIL id=0x00) | known 0x18/0x51/0x70/0x6A/0x6B: ACK=0 NACK=5 TMO=0 other=0 [none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4） | PWR_OUT pu=1 pd=0 → PWR_OUT 悬空（PMIC 没驱动这个脚，定不了案）[0m
+[0;33mW (22792) epd: panel rail not confirmed (AXP unreachable or ALDO3 off): 接电池 + 按住电源键 2 秒后松开（没反应再按满 4 秒）；再看 axp 行的 ACK/NACK/TMO 定案[0m
+[0;33mW (27922) axp: AXP@0x34 no reply (probe#6 err=ESP_FAIL id=0x00) | known 0x18/0x51/0x70/0x6A/0x6B: ACK=0 NACK=5 TMO=0 other=0 [none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4） | PWR_OUT pu=1 pd=0 → PWR_OUT 悬空（PMIC 没驱动这个脚，定不了案）[0m
+[0;33mW (27943) epd: panel rail not confirmed (AXP unreachable or ALDO3 off): 接电池 + 按住电源键 2 秒后松开（没反应再按满 4 秒）；再看 axp 行的 ACK/NACK/TMO 定案[0m
+[0;33mW (33072) axp: AXP@0x34 no reply (probe#7 err=ESP_FAIL id=0x00) | known 0x18/0x51/0x70/0x6A/0x6B: ACK=0 NACK=5 TMO=0 other=0 [none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4） | PWR_OUT pu=1 pd=0 → PWR_OUT 悬空（PMIC 没驱动这个脚，定不了案）[0m
+[0;33mW (33093) epd: panel rail not confirmed (AXP unreachable or ALDO3 off): 接电池 + 按住电源键 2 秒后松开（没反应再按满 4 秒）；再看 axp 行的 ACK/NACK/TMO 定案[0m
+[0;33mW (38223) axp: AXP@0x34 no reply (probe#8 err=ESP_FAIL id=0x00) | known 0x18/0x51/0x70/0x6A/0x6B: ACK=0 NACK=5 TMO=0 other=0 [none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4） | PWR_OUT pu=1 pd=0 → PWR_OUT 悬空（PMIC 没驱动这个脚，定不了案）[0m
+[0;33mW (38244) epd: panel rail not confirmed (AXP unreachable or ALDO3 off): 接电池 + 按住电源键 2 秒后松开（没反应再按满 4 秒）；再看 axp 行的 ACK/NACK/TMO 定案[0m
+[0;33mW (43373) axp: AXP@0x34 no reply (probe#9 err=ESP_FAIL id=0x00) | known 0x18/0x51/0x70/0x6A/0x6B: ACK=0 NACK=5 TMO=0 other=0 [none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4） | PWR_OUT pu=1 pd=0 → PWR_OUT 悬空（PMIC 没驱动这个脚，定不了案）[0m
+[0;33mW (43394) epd: panel rail not confirmed (AXP unreachable or ALDO3 off): 接电池 + 按住电源键 2 秒后松开（没反应再按满 4 秒）；再看 axp 行的 ACK/NACK/TMO 定案[0m
+[0;33mW (48523) axp: AXP@0x34 no reply (probe#10 err=ESP_FAIL id=0x00) | known 0x18/0x51/0x70/0x6A/0x6B: ACK=0 NACK=5 TMO=0 other=0 [none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4） | PWR_OUT pu=1 pd=0 → PWR_OUT 悬空（PMIC 没驱动这个脚，定不了案）[0m
+[0;33mW (48544) epd: panel rail not confirmed (AXP unreachable or ALDO3 off): 接电池 + 按住电源键 2 秒后松开（没反应再按满 4 秒）；再看 axp 行的 ACK/NACK/TMO 定案[0m
+[0;33mW (53674) axp: AXP@0x34 no reply (probe#11 err=ESP_FAIL id=0x00) | known 0x18/0x51/0x70/0x6A/0x6B: ACK=0 NACK=5 TMO=0 other=0 [none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4） | PWR_OUT pu=1 pd=0 → PWR_OUT 悬空（PMIC 没驱动这个脚，定不了案）[0m
+[0;33mW (53695) epd: panel rail not confirmed (AXP unreachable or ALDO3 off): 接电池 + 按住电源键 2 秒后松开（没反应再按满 4 秒）；再看 axp 行的 ACK/NACK/TMO 定案[0m
+[0;33mW (58825) axp: AXP@0x34 no reply (probe#12 err=ESP_FAIL id=0x00) | known 0x18/0x51/0x70/0x6A/0x6B: ACK=0 NACK=5 TMO=0 other=0 [none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4） | PWR_OUT pu=1 pd=0 → PWR_OUT 悬空（PMIC 没驱动这个脚，定不了案）[0m
+[0;33mW (58886) epd: passive BUSY sample (rail unconfirmed, 其余脚未驱动): stayed HIGH (40ms) → 面板没在驱动这根脚，本轮不碰任何其他引脚[0m
+[0;33mW (58890) eink: watch 11 / probe #12: panel still off — 接电池 + 按住电源键 2 秒后松开，没反应再按满 4 秒 (watch stack free=3408/6144 B)[0m
+[0;33mW (64018) axp: AXP@0x34 no reply (probe#13 err=ESP_FAIL id=0x00) | known 0x18/0x51/0x70/0x6A/0x6B: ACK=0 NACK=5 TMO=0 other=0 [none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4） | PWR_OUT pu=1 pd=0 → PWR_OUT 悬空（PMIC 没驱动这个脚，定不了案）[0m
+[0;33mW (64039) epd: panel rail not confirmed (AXP unreachable or ALDO3 off): 接电池 + 按住电源键 2 秒后松开（没反应再按满 4 秒）；再看 axp 行的 ACK/NACK/TMO 定案[0m
+[0;33mW (69169) axp: AXP@0x34 no reply (probe#14 err=ESP_FAIL id=0x00) | known 0x18/0x51/0x70/0x6A/0x6B: ACK=0 NACK=5 TMO=0 other=0 [none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4） | PWR_OUT pu=1 pd=0 → PWR_OUT 悬空（PMIC 没驱动这个脚，定不了案）[0m
+[0;33mW (69190) epd: panel rail not confirmed (AXP unreachable or ALDO3 off): 接电池 + 按住电源键 2 秒后松开（没反应再按满 4 秒）；再看 axp 行的 ACK/NACK/TMO 定案[0m
+[0;33mW (74320) axp: AXP@0x34 no reply (probe#15 err=ESP_FAIL id=0x00) | known 0x18/0x51/0x70/0x6A/0x6B: ACK=0 NACK=5 TMO=0 other=0 [none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4） | PWR_OUT pu=1 pd=0 → PWR_OUT 悬空（PMIC 没驱动这个脚，定不了案）[0m
+[0;33mW (74341) epd: panel rail not confirmed (AXP unreachable or ALDO3 off): 接电池 + 按住电源键 2 秒后松开（没反应再按满 4 秒）；再看 axp 行的 ACK/NACK/TMO 定案[0m
+[0;33mW (79471) axp: AXP@0x34 no reply (probe#16 err=ESP_FAIL id=0x00) | known 0x18/0x51/0x70/0x6A/0x6B: ACK=0 NACK=5 TMO=0 other=0 [none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4） | PWR_OUT pu=1 pd=0 → PWR_OUT 悬空（PMIC 没驱动这个脚，定不了案）[0m
+[0;33mW (79492) epd: panel rail not confirmed (AXP unreachable or ALDO3 off): 接电池 + 按住电源键 2 秒后松开（没反应再按满 4 秒）；再看 axp 行的 ACK/NACK/TMO 定案[0m
+[0;33mW (84622) axp: AXP@0x34 no reply (probe#17 err=ESP_FAIL id=0x00) | known 0x18/0x51/0x70/0x6A/0x6B: ACK=0 NACK=5 TMO=0 other=0 [none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4） | PWR_OUT pu=1 pd=0 → PWR_OUT 悬空（PMIC 没驱动这个脚，定不了案）[0m
+[0;33mW (84643) epd: panel rail not confirmed (AXP unreachable or ALDO3 off): 接电池 + 按住电源键 2 秒后松开（没反应再按满 4 秒）；再看 axp 行的 ACK/NACK/TMO 定案[0m
+[0;33mW (89773) axp: AXP@0x34 no reply (probe#18 err=ESP_FAIL id=0x00) | known 0x18/0x51/0x70/0x6A/0x6B: ACK=0 NACK=5 TMO=0 other=0 [none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4） | PWR_OUT pu=1 pd=0 → PWR_OUT 悬空（PMIC 没驱动这个脚，定不了案）[0m
+[0;33mW (89794) epd: panel rail not confirmed (AXP unreachable or ALDO3 off): 接电池 + 按住电源键 2 秒后松开（没反应再按满 4 秒）；再看 axp 行的 ACK/NACK/TMO 定案[0m
+[0;33mW (94924) axp: AXP@0x34 no reply (probe#19 err=ESP_FAIL id=0x00) | known 0x18/0x51/0x70/0x6A/0x6B: ACK=0 NACK=5 TMO=0 other=0 [none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4） | PWR_OUT pu=1 pd=0 → PWR_OUT 悬空（PMIC 没驱动这个脚，定不了案）[0m
+[0;33mW (94945) epd: panel rail not confirmed (AXP unreachable or ALDO3 off): 接电池 + 按住电源键 2 秒后松开（没反应再按满 4 秒）；再看 axp 行的 ACK/NACK/TMO 定案[0m
+[0;33mW (100075) axp: AXP@0x34 no reply (probe#20 err=ESP_FAIL id=0x00) | known 0x18/0x51/0x70/0x6A/0x6B: ACK=0 NACK=5 TMO=0 other=0 [none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4） | PWR_OUT pu=1 pd=0 → PWR_OUT 悬空（PMIC 没驱动这个脚，定不了案）[0m
+[0;33mW (100096) epd: panel rail not confirmed (AXP unreachable or ALDO3 off): 接电池 + 按住电源键 2 秒后松开（没反应再按满 4 秒）；再看 axp 行的 ACK/NACK/TMO 定案[0m
+[0;33mW (105226) axp: AXP@0x34 no reply (probe#21 err=ESP_FAIL id=0x00) | known 0x18/0x51/0x70/0x6A/0x6B: ACK=0 NACK=5 TMO=0 other=0 [none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4） | PWR_OUT pu=1 pd=0 → PWR_OUT 悬空（PMIC 没驱动这个脚，定不了案）[0m
+[0;33mW (105247) epd: panel rail not confirmed (AXP unreachable or ALDO3 off): 接电池 + 按住电源键 2 秒后松开（没反应再按满 4 秒）；再看 axp 行的 ACK/NACK/TMO 定案[0m
+[0;33mW (110377) axp: AXP@0x34 no reply (probe#22 err=ESP_FAIL id=0x00) | known 0x18/0x51/0x70/0x6A/0x6B: ACK=0 NACK=5 TMO=0 other=0 [none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4） | PWR_OUT pu=1 pd=0 → PWR_OUT 悬空（PMIC 没驱动这个脚，定不了案）[0m
+[0;33mW (110398) epd: panel rail not confirmed (AXP unreachable or ALDO3 off): 接电池 + 按住电源键 2 秒后松开（没反应再按满 4 秒）；再看 axp 行的 ACK/NACK/TMO 定案[0m
+[0;33mW (115528) axp: AXP@0x34 no reply (probe#23 err=ESP_FAIL id=0x00) | known 0x18/0x51/0x70/0x6A/0x6B: ACK=0 NACK=5 TMO=0 other=0 [none] → 全部 NACK ⇒ 波形发得出去、这些地址无人应答（不洗清引脚表，也不等于总线上没器件，见 §13.4） | PWR_OUT pu=1 pd=0 → PWR_OUT 悬空（PMIC 没驱动这个脚，定不了案）[0m
+[0;33mW (115549) epd: panel rail not confirmed (AXP unreachable or ALDO3 off): 接电池 + 按住电源键 2 秒后松开（没反应再按满 4 秒）；再看 axp 行的 ACK/NACK/TMO 定案[0m

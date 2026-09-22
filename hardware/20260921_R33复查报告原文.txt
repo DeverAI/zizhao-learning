@@ -1,0 +1,617 @@
+R33 空上下文复查报告 —— 复核对象：R32（终版 bin `0x113e40`，源码 = `hardware/zizhao-esp32s3/main/`）
+专员：上下文故障检测（空上下文）
+本轮我没有仪器、两块板都不在 USB 总线上（连续 19 次复查只有 4 个蓝牙 COM），因此下面没有任何一条依赖"你去量一下"。
+凡是只有量电平/波形才能定案的，我一律标 **（需要仪器）** 并放进「不确定」。
+
+============================================================
+〇、取证方法交代（我真正读过 / 真正跑过的命令）
+============================================================
+
+【真读过的源码（全文或指定区间逐行）】
+  C:\Users\david\Documents\all_projects\自招学习\hardware\zizhao-esp32s3\main\epd_driver.c        （1029 行）
+  C:\Users\david\Documents\all_projects\自招学习\hardware\zizhao-esp32s3\main\epd_driver.h
+  C:\Users\david\Documents\all_projects\自招学习\hardware\zizhao-esp32s3\main\axp_panel_power.c    （460 行）
+  C:\Users\david\Documents\all_projects\自招学习\hardware\zizhao-esp32s3\main\eink_display.c
+  C:\Users\david\Documents\all_projects\自招学习\hardware\zizhao-esp32s3\main\power_policy.c
+  C:\Users\david\Documents\all_projects\自招学习\hardware\zizhao-esp32s3\main\main.c（app_main 前 20 行 + graceful_shutdown + 配网失败分支）
+【真读过的文档】
+  hardware\烧录须知.md（【〇】判读表 L29-178 逐行）
+  hardware\20260919_墨水屏点屏排查记录.md §二十（20.4）与 §二十一（21.0-21.7）
+  todo.md 第 44、46、47、48-51、52、54-63 条；done.md §十四 相关段
+  updates\20260921_墨水屏收尾R32.md
+【真读过的第三方文件（ESP-IDF 5.1.6 本机）+ 厂商例程】
+  C:\esp\esp-idf\components\driver\gpio\gpio.c
+  C:\esp\esp-idf\components\soc\esp32s3\include\soc\soc_caps.h
+  C:\esp\esp-idf\components\driver\spi\gpspi\spi_master.c
+  C:\esp\esp-idf\components\driver\spi\spi_common.c
+  C:\esp\esp-idf\components\driver\i2c\i2c.c
+  C:\esp\vendor_demo\ESP32-S3_e-Paper-3.97\ESP-IDF\01_E-Paper_Example\components\epaper_port\epaper_port.c
+  C:\esp\vendor_demo\ESP32-S3_e-Paper-3.97\ESP-IDF\08_ESP32-S3_e-Paper-3.97\components\epaper_port\epaper_port.c
+  ...\08_ESP32-S3_e-Paper-3.97\components\axpPower\src\XPowersAXP2101.tpp
+  ...\08_ESP32-S3_e-Paper-3.97\components\axpPower\src\REG\AXP2101Constants.h
+  C:\esp\zproj\sdkconfig（构建树，不是 defaults）
+【跑过的 grep（逐条，报告里每个行号都由这些命令在写作的此刻给出；命令原文照抄）】
+  1) cd "C:/Users/david/Documents/all_projects/自招学习/hardware/zizhao-esp32s3/main"
+     grep -n 'pre_high\|hi_run\|seen_high' epd_driver.c
+  2) grep -n '0\.85s\|5\.0s' epd_driver.c
+  3) grep -n '' epd_driver.c | sed -n '25,60p'
+     grep -n '' epd_driver.c | sed -n '140,205p'
+     grep -n '' epd_driver.c | sed -n '206,238p'
+     grep -n '' epd_driver.c | sed -n '239,288p'
+     grep -n '' epd_driver.c | sed -n '303,325p'
+     grep -n '' epd_driver.c | sed -n '326,350p'
+     grep -n '' epd_driver.c | sed -n '570,663p'
+     grep -n '' epd_driver.c | sed -n '665,752p'
+     grep -n '' epd_driver.c | sed -n '753,770p'
+     grep -n '' epd_driver.c | sed -n '770,800p'
+     grep -n '' epd_driver.c | sed -n '856,935p'
+     grep -n '' epd_driver.c | sed -n '370,383p'   （P1-1 成本段引的 epd_wait_idle(300) 那一段）
+     grep -n '' epd_driver.c | sed -n '62,82p'     （s_bus_ok/s_ready/s_probing/s_cmd_dropped 的声明与注释）
+     grep -n 'atomic_store' epd_driver.c
+     grep -n 'epd_pins_release()\|epd_pins_release_if_unverified()' epd_driver.c
+  4) grep -n 'static void epd_reset' -A 16 epd_driver.c
+  5) grep -n 'epd_panel_init()\|epd_busy_passive_low(' epd_driver.c
+  6) grep -n 'PANEL_PROBES_PER_LIVENESS\|PASSIVE_VETO_OVERRIDE' epd_driver.c
+  7) grep -n 'attempt < 5\|acked = \|vTaskDelay(pdMS_TO_TICKS(20))' axp_panel_power.c
+  8) grep -n 'axp_write_reg\|axp_read_reg' axp_panel_power.c
+  9) grep -n 'pdMS_TO_TICKS' axp_panel_power.c
+ 10) grep -n 'full_diag\|s_probes' axp_panel_power.c
+ 11) grep -rn 'axp_enable_panel_rail' .
+ 12) grep -rn 'epd_panel_probe\|epd_init(' .
+ 13) grep -n 'xSemaphoreTake\|xSemaphoreGive' eink_display.c
+ 14) grep -n 'PANEL_WATCH_FAST_TRIES\|PANEL_WATCH_STEP_MS\|PANEL_WATCH_SLOW_MS' eink_display.c
+ 15) grep -n '' eink_display.c | sed -n '340,392p' ；sed -n '495,522p'
+ 16) grep -rn 'ESP_LOGD' .   ；grep -rn 'esp_log_level_set\|LOG_LOCAL_LEVEL' .
+ 17) grep -rn --exclude-dir=build --exclude-dir=managed_components 'task_wdt' .
+ 18) cd "C:/Users/david/Documents/all_projects/自招学习"
+     grep -rn "0\.85" --include="*.c" --include="*.h" --include="*.md" .
+     grep -n '^### \|^## \|...' todo.md ；sed -n '96,150p' todo.md ；sed -n '236,285p' todo.md
+     grep -n ':226\|:246' hardware/20260919_墨水屏点屏排查记录.md
+     grep -n '' hardware/20260919_墨水屏点屏排查记录.md | sed -n '875,880p'
+     grep -n '' hardware/烧录须知.md | sed -n '70,100p' ；sed -n '100,135p' ；sed -n '170,178p'
+     grep -rn '从未证实' hardware/烧录须知.md hardware/zizhao-esp32s3/main/
+ 19) for d in backups/*/main; do printf "%s: " "$d"; grep -n 'if (!acked) vTaskDelay' "$d/axp_panel_power.c" | cut -d: -f1; done
+ 20) cd "C:/esp/esp-idf"
+     grep -n 'esp_err_t gpio_reset_pin' -A 16 components/driver/gpio/gpio.c
+     grep -n 'esp_err_t gpio_config' -A 12 components/driver/gpio/gpio.c
+     grep -n '' components/driver/gpio/gpio.c | sed -n '347,362p'
+     grep -rn 'SOC_GPIO_VALID_GPIO_MASK\|SOC_GPIO_VALID_OUTPUT_GPIO_MASK\|SOC_GPIO_VALID_DIGITAL_IO_PAD' components/soc/esp32s3/include/soc/soc_caps.h
+ 21) cd "C:/esp/vendor_demo/ESP32-S3_e-Paper-3.97/ESP-IDF"
+     ls -d */
+     grep -rn 'EPD_Power_ON' --include=epaper_port.c .
+     grep -rn 'enapwrstate(ALDO3)' .
+     grep -n '' 08_ESP32-S3_e-Paper-3.97/components/epaper_port/epaper_port.c | sed -n '178,196p' ；sed -n '234,246p'
+     grep -n 'void EPD_Init' -A 12 01_E-Paper_Example/components/epaper_port/epaper_port.c
+     grep -n -i 'axp\|power' 01_E-Paper_Example/components/epaper_port/epaper_port.c
+ 22) cd ".../08_ESP32-S3_e-Paper-3.97/components/axpPower"
+     grep -n 'LDO_ONOFF_CTRL0\|LDO_VOL2_CTRL\|ALDO3_VOL_MIN\|ALDO3_VOL_MAX\|ALDO3_VOL_STEP\|XPOWERS_AXP2101_CHIP_ID ' src/REG/AXP2101Constants.h
+     grep -n 'bool enableALDO3' -A 4 src/XPowersAXP2101.tpp
+ 23) cd "C:/Users/david/Documents/all_projects/自招学习/hardware/zizhao-esp32s3/main"
+     grep -n 'atomic_store' epd_driver.c                     （D-4 用：只有 :743 / :1001）
+     grep -n 'epd_pins_release()\|epd_pins_release_if_unverified()' epd_driver.c   （:617 / :993 / :1016）
+     grep -n '' epd_driver.c | sed -n '968,1002p' ；sed -n '1004,1029p' ；sed -n '62,82p' ；sed -n '936,967p'
+     grep -n 'static.*s_ready\|static.*s_bus_ok\|static.*s_probing\|static.*s_cmd_dropped\|static spi_device_handle_t' epd_driver.c
+     grep -n 'xTaskCreate' eink_display.c                    （:406 非 pinned）
+     grep -n 'ENABLE_EINK_PARTIAL' eink_display.c            （:29 = 0；:248 使用点）
+     diff --strip-trailing-cr backups/r32_20260921_043512/main/axp_panel_power.c hardware/zizhao-esp32s3/main/axp_panel_power.c | grep -c '^[<>]'   （=23）
+ 24) grep -n '' /c/esp/vendor_demo/ESP32-S3_e-Paper-3.97/ESP-IDF/08_ESP32-S3_e-Paper-3.97/components/epaper_port/epaper_port.c | sed -n '1,8p'
+     grep -n '' /c/esp/vendor_demo/ESP32-S3_e-Paper-3.97/ESP-IDF/01_E-Paper_Example/components/epaper_port/epaper_port.c | sed -n '1,8p'
+     （08 的 :6 = `#include "axp_prot.h"`，01 的 :6 = 空行 ⇒ 08 相对 01 整体 +1 行，见 P2-6）
+ 25) cd "C:/esp/vendor_demo/ESP32-S3_e-Paper-3.97/ESP-IDF"
+     grep -n '' 08_ESP32-S3_e-Paper-3.97/components/epaper_port/epaper_port.c | sed -n '160,180p'
+     grep -n '' 01_E-Paper_Example/components/epaper_port/epaper_port.c | sed -n '158,176p'
+     for f in 01_E-Paper_Example 08_ESP32-S3_e-Paper-3.97; do grep -n '' $f/components/epaper_port/epaper_port.c | sed -n '21,22p;24p;29p;161,162p;164,165p;168,169p;170,171p'; done
+【我没能核的东西（诚实交代）】
+  真机串口日志：0 条（两板均不在总线上）⇒ 本报告所有"最坏值/耗时"都是我从代码上限重算的，与他的性质相同，不是实测。
+
+条数合计：P0×2、P1×3、P2×7、不确定×4、做对了×5、冲突句×4。
+
+============================================================
+一、P0（运行时错误 / 数据损坏 / 永久死锁 / 判据不可达或不成立）
+============================================================
+
+[P0-1] `BUSY never went high (low for Nms straight …)` 里的"连续低 Nms"从来没有被计量过 —— 那条判据用的是"距第一次低的时刻"，而日志文案、以及你在 §20.4 记为"我重算过"的那句第三方结论，都假定它是连续低。
+  现象：
+    一次刷新发出 `0x22=0xF7`+`0x20` 之后，若 BUSY 在毫秒尺度上翻动（高/低交替，任何周期 ≥2ms 都算），
+    `epd_wait_busy_ms(…, require_high=true)` 会在 `el - seen_low >= 300` 时返回 false，
+    调用方 `epd_driver.c:783-785` 打 `full update timed out`… 不，走的是另一条：打的是
+    `BUSY never went high (low for 300ms straight, first_low=1ms, cap=8000ms)`，然后 `s_ready=false`。
+    这句话有两个可证的假：①"never went high" —— 它其实高过很多次，只是每次都不满两拍；
+    ②"low for 300ms **straight**" —— 这 300ms 里根本不是直低，`seen_low` 是"第一次低"的时间戳，
+    此后任何一次单拍高都不会重置它（也没有任何变量在记"这一段低从何时开始"）。
+    后果链（可证的部分）：一次**可能已经受理**的刷新被作废 → `s_ready=false` → `eink_display.c:318` 的
+    `s_panel_ok = epd_ready()` 变 false → 监视任务 `eink_display.c:380-382` 打
+    "面板应答但没刷上（帧缓冲或刷白这步没过，看上一行）… → 查内存"，把现场指向内存，
+    而真正发生的是 BUSY 判据在翻转线上误判；下一轮 `epd_panel_init()` 第一件事是 `epd_reset()`
+    （`:307`）⇒ 打断一次仍在进行的刷新，而 0x26 基准平面已经写进去了（`:769-770` 已过，`:772` 的
+    s_cmd_dropped 门也过不了它，因为它不是 SPI 失败）。你在 `:773-775` 亲口写过这种后果：
+    "基准平面错乱 ⇒ 之后每一次差分都在错基准上做"。
+  证据：
+    `C:\Users\david\Documents\all_projects\自招学习\hardware\zizhao-esp32s3\main\epd_driver.c:159-199`
+    命令：`grep -n '' epd_driver.c | sed -n '140,205p'`（在 …\main 目录下）
+      160:    int seen_low = -1, seen_high = -1;
+      172:        if (lvl == 0) {
+      173:            hi_run = 0;
+      174:            if (seen_low < 0) seen_low = (int)el;      ← 只在第一次低时写，之后永不更新
+      175:            if (!require_high || seen_high >= 0) return true;
+      176:            if (el - (uint32_t)seen_low >= BUSY_ACCEPT_CONFIRM_MS) {
+      180:                ESP_LOGE(TAG, "BUSY never went high (low for %dms straight, first_low=%dms, cap=%dms):"
+      185:        } else if (seen_high < 0) {
+      195:            if (++hi_run >= 2) seen_high = (int)el;        ← 单拍高既不重置 seen_low，也没有 cur_low_start
+    同文件三处"连续低"的两种写法对照：
+      `:250`（主动判活密采）`if (++low_run >= 20) {` —— 递增计数器，**这一段**连续低，正确
+      `:587`（被动预检）    `if (++low_run >= 10) {`  —— 同上，正确
+      `:176`               `el - seen_low`         —— 距第一次低，**不是**连续低
+    命令：`grep -n '' epd_driver.c | sed -n '239,288p'` / `sed -n '570,663p'`
+    被这条判据驱动的调用点与后果：
+      `epd_driver.c:783-785`（命令：`grep -n '' epd_driver.c | sed -n '770,800p'`）
+      `eink_display.c:318`、`:380-382`（命令：`grep -n 's_panel_ok' eink_display.c`；`grep -n '' eink_display.c | sed -n '340,392p'`）
+    你把它当成"已经核过"的那条第三方结论：
+      `hardware\20260919_墨水屏点屏排查记录.md:877` ③
+      命令：`grep -n '' hardware/20260919_墨水屏点屏排查记录.md | sed -n '875,880p'`
+      原文："`BUSY never went high … low for %dms straight` 那句"没说谎"（`seen_high<0` 分支要求此前每拍都是低）"
+      —— 同一个标题（`:875`）写的是"我重算过的部分（不照单全收）"。这一条你没重算，它不成立。
+  为什么成立：
+    `seen_high<0` 只要求"没出现过**连续两拍**的高"，它不要求"此前每拍都是低"。单拍高走 `:185` 分支、
+    只动 `hi_run`，既不写 `seen_high` 也不动 `seen_low`。我按代码逐步推演了一遍 1ms 交替序列：
+    t=0 高(hi_run=1) → t=1 低(seen_low=1) → t=2 高(hi_run 归 1，因为 :173 先清零) → … → t=301 低
+    → `el-seen_low = 300` ⇒ 打这句"连续 300ms 低"。整段里高低各 150 拍。
+    注意：R32-P0 把"见过高"从 1 拍改成 2 拍（`:195`），**加重**了这条：两拍判据让"高过"更容易不被承认，
+    于是"never went high"这句话在真机上有翻转的线上更容易出现。
+  最小修法（不放松任何已写下的判据）：
+    ① 加 `int cur_low_start = -1;`，在 `:172` 进入低分支时 `if (cur_low_start < 0) cur_low_start = (int)el;`，
+       在 `:185` 的高分支里 `cur_low_start = -1;`（连同现有 `hi_run=0` 的语义对称）。
+    ② `:176` 的条件改成 `el - cur_low_start >= BUSY_ACCEPT_CONFIRM_MS`，日志里的 `low for %dms straight`
+       打 `el - cur_low_start`，`first_low` 仍打 `seen_low`（两位分开：一段长度 + 第一次低的时刻）。
+    ③ `:180` 文案把"never went high"改成 "no **qualified** high (2 拍) seen"，另加一个被丢掉的单拍高计数
+       `hi_single=%d`（`hi_run==1` 时 ++），这样现场能一眼分案"全程低"与"在翻转"。
+    ④ 记进 todo：`BUSY_ACCEPT_CONFIRM_MS=300` 的语义从"距第一次低 300ms"收紧为"连续低 300ms"，
+       方向是**变严**（原来更容易作废，现在更难作废），成本 = 真翻转的线上每轮多等 ≤8s 上限才失败，
+       与 `EPD_BUSY_TIMEOUT_MS` 同量级，20s 锁预算不必重算（`:783` 那一档本来就是 8s 上界）。
+    ⑤ 排查记录 §20.4 ③ 那句要改口（按你自己的规矩 §21.6：不删原文，加一条"此项 R33 推翻"）。
+
+[P0-2] `0x12` 之前少了官方那一步 `EPD_ReadBusy()`，于是"先高后低"这道判活判据可以被 `epd_reset()` 自己的脉冲满足；而你在 `:310-312` 写下的"这条路径到不了"的立论被同一只文件的 `:761` 直接否证。
+  现象：
+    `epd_panel_init()`：`:307 epd_reset()`（末尾只等 50ms，`:297`）→ `:320-324` 用 500µs 步长看三拍（观察位）
+    → `:325 epd_cmd(0x12)` → `:326 epd_busy_activity()` 开始找"先高后低"。
+    若复位引起的 BUSY 高电平在 RST 释放后仍超过 50ms（官方在这一步之后**专门插了一次 `EPD_ReadBusy()`** 就是
+    因为不能假定它已经结束），那么密采段第 1~2 拍就把这个"复位的余高"记成 `seen_high`（`:261` 只需连续
+    2×50µs=100µs），随后它泄成低 → `:250-254` `low_run>=20 且 seen_high` ⇒ `return true` ⇒
+    判活通过、`s_ready=true`（`:725`）、`epd init done`、`panel blanked (800x480)`，
+    而我们发出的 `0x12` 可能整段落在"面板还在忙"的窗口里被忽略 —— 这正是 `:146-149` 你自己写的假成功形状
+    （"面板当时若还在忙，会把 0x24/0x26/0x22/0x20 整段忽略掉，随后它忙完放低 → 我们判'刷新成功'而屏上什么都没有"）。
+  证据：
+    本驱动的形状：命令 `grep -n '' epd_driver.c | sed -n '303,325p'` 与 `grep -n 'static void epd_reset' -A 16 epd_driver.c`
+      290:static void epd_reset(void)
+      297:    vTaskDelay(pdMS_TO_TICKS(50));      ← RST 释放后只等 50ms，没有"等 BUSY 回低"
+      307:    epd_reset();
+      320-324: pre_high 三拍（`if (gpio_get_level(EPD_BUSY_PIN) != 0) pre_high = 1;`）
+      325:    epd_cmd(0x12);
+    官方形状（**这块板那份**例程）：命令 `grep -n '' 08_ESP32-S3_e-Paper-3.97/components/epaper_port/epaper_port.c | sed -n '234,246p'`
+      234:void EPD_Init(void)
+      236:    EPD_Power_ON();
+      237:    vTaskDelay(pdMS_TO_TICKS(10));
+      238:    EPD_Reset();
+      240:    EPD_ReadBusy();      ← 发 0x12 **之前**先等 BUSY 结束
+      241:    EPD_SendCommand(0x12);  //SWRESET
+      242:    EPD_ReadBusy();
+    密采两拍的门槛只有 100µs：命令 `grep -n '' epd_driver.c | sed -n '239,288p'` → `:247`（1000×50µs）、`:261`、`:250-254`。
+    官方那一步到底在等多久（**这一条把"复位脉宽可能远超 50ms"从我的推测变成厂商自己的口径**）：
+      命令 `grep -n '' 08_ESP32-S3_e-Paper-3.97/components/epaper_port/epaper_port.c | sed -n '160,180p'` →
+        165:static void EPD_ReadBusy(void)
+        168:    vTaskDelay(pdMS_TO_TICKS(100));   ← **进函数先无条件睡 100ms，然后才开始看引脚**
+        169:    while(1)
+        171:        if(!ReadBusy){break;}
+        173:        vTaskDelay(pdMS_TO_TICKS(20));
+      （`01` 同一函数在 `:164-173`，形状一字不差，只是行号 −1 ⇒ 厂商认为"命令/复位之后 100ms 内引脚可能还高"
+        是通则；todo 第 62 条你已经核出它是 `while(1)` 无超时死等，这次补的是它**前面**那 100ms。）
+      ⇒ 官方 `EPD_Init` 在 `EPD_Reset()` 之后调的就是这个函数（`08:240`），也就是官方给"复位余高"的预算是
+        **≥100ms 起**；本驱动给的只有 `:297` 的 50ms + `:320-324` 的 1.5ms，然后就把 `0x12` 发出去。
+    `:310-312` 的立论原文（命令同上 `sed -n '303,325p'`）：
+      "这个纯形式在本固件里到不了——**每一条**升级到主动判活的路径都在几毫秒前刚通过
+       `epd_busy_passive_low()` 的"连续 ≥1ms 低"（`probe_attempt()` 里那行调用是无条件的），线那时是低的。"
+    被否证：命令 `grep -n 'epd_panel_init()\|epd_busy_passive_low(' epd_driver.c`
+      694:    if (!epd_busy_passive_low(rail_off)) return false;
+      708:    if (!epd_panel_init()) return false;      ← probe 路径：预检在 reset 之前
+      761:    if (!epd_panel_init()) {                  ← epd_display_full：整条路径**没有**任何预检
+    ⇒ "每一条"不成立；而且即使在 probe 路径上，预检证明的是 **`epd_reset()` 之前** 线是低的
+      （`:694` 在 `:708→:307` 之前），它恰恰不排除"复位自己打出一个高"这个变体 ——
+      这一点你在 `:317-318` 和 `烧录须知.md:95-96` 里已经承认（"`epd_reset()` 之后硬件复位自身的 BUSY 脉冲宽度**无实测**"、
+      "①`epd_panel_init` 在采样**之前**先做了 `epd_reset()`，硬件复位自己的 BUSY 脉冲就落在这个窗口里"）。
+      也就是说：你一边在 `:95-96` 承认这个沿会落进采样窗，一边在 `:310-312` 用它来论证"报告那条形状到不了"。
+  为什么成立：
+    判活整套的证据力就压在"高沿能归因给 `0x12`"这一句上（`:209-216` 是 R27→R31 一路收紧的全部理由）。
+    现在这个高沿有一个**已知来源**（`epd_reset()`）和一个**官方专门等过的步骤**（`08:240`），而本驱动把两者
+    都省了，只补了一位单拍观察位。`pre_high` 不能修这个洞：它只在 RST 释放后 1.5ms 那一点看一眼，
+    它既不会把线拉低，也不会推迟 `0x12`。
+    并且：把 `pre_high` 当折扣读法用（`烧录须知.md:84`、`:98`）会让**真活着**的屏在第一刷就被打折 ——
+    健康屏在 RST 释放后的复位脉宽只要 >50ms，`pre_high` 必为 1（它就在 `:297` 那 50ms 之后 1.5ms 采样），
+    于是每一刷都打 `busy was HIGH before 0x12 … 存疑活屏`（`:342`）。
+    【这一条的"是否 >50ms"我没有数据 ⇒ 见 U-2；但"没有等低就发 0x12"和"立论被 :761 否证"这两点是代码事实，
+     不需要硬件数据。】
+  最小修法（同一处代码把 P0-2 和"单拍/两拍不对称"一次改完）：
+    ① 在 `:320-324` 用一段**有界等低**替掉三拍观察位：以 1ms 步长最多等 500ms，要求"连续两拍低"才离开
+       （与 `:585-591` 的被动形状同口径，只是把 10 拍缩到 2 拍），等到 ⇒ `pre_high=0`；等不到 ⇒ `pre_high=1`
+       并**照旧发 `0x12`**（保持你"只观察不拦"的语义，别造新闸门 —— R31 P0 那类"判据在窗内不可达"不能再犯）。
+       这样 `epd_busy_activity()` 抓到的第一个合格高沿只可能来自 `0x12`，与官方 `08:240` 同形。
+       500ms 这个数也是我拍的（我没有脉宽数据），但它两头都不吃亏：厂商那一步是"先无条件睡 100ms，
+       然后 20ms 一轮询直到低，**无上限**"（`08:168-173`），所以任何有限值都比官方便宜；而 500ms ≥ 5×厂商
+       那 100ms 的起步预算。要改这个数请连同 ③ 的三处算术一起改，别只改常量。
+    ② `:310-312` 那句"每一条…到不了"改成实话：判活路径有两条，`probe_attempt()` 那条有预检、
+       `epd_display_full()→:761` 那条没有；因此"复位余高"这一变体在刷屏路径上不排除，靠 ① 的等低消掉。
+    ③ 预算注释同步重算（**必须写回结论句**）：`:46` 的 `epd_panel_init()` 由 `≈2.25s` 变 `≤2.75s`
+       （+500ms 等低）；`:49` 一轮上限 `≈5.0s` 变 `≈5.5s`；`eink_display.c:503` 的 15.4s 变 15.9s
+       （链里有两个 `epd_panel_init()`）；20s 锁仍够（余 4.1s）；`RELEASE_CLAIM_WAIT_MS=10000` 的
+       "≈两轮"口径变成"≈1.8 轮"，要么把常量提到 12000 并把 `:50-52` 那段"赢在下一轮认领之前"的论证
+       按 5.5s/轮重写，要么显式接受"两轮"其实只差 1s。
+    ④ `烧录须知.md:83` 的"以 500µs 步长看三拍"要跟着改，并明确写"三拍取**或**"（现在的代码 `:321-322`
+       是三拍里任一拍即记 1，而文档读起来像"三拍都算"）；判读表 `:84`/`:98` 那句
+       "`pre_high=1` 时这一轮那个'高'不能算是对 `0x12` 的应答"在 ① 落地后应改成"等低 500ms 没等到"。
+       成本：改完之后 `pre_high=1` 的含义变窄，现场能打折的证据变少（这是收紧，不是放松）。
+
+============================================================
+二、P1（下一个读日志的人会被误导 / 并发与边界未闭 / 资源泄漏）
+============================================================
+
+[P1-1] `epd_wait_busy_ms()` 现在两头不对称：**判"高过"要两拍，判"刷完了"只要一拍低** —— 这就是你本轮 P0 刚堵的那类洞的镜像，代价同样是你自己写过的那句"假成功留到下次重启"。
+  现象：
+    `:195` 之后 `seen_high>=0`，下一拍读到 `lvl==0` 就在 `:175` 直接 `return true`（一拍的 1ms 低就宣布
+    "面板受理并做完了"）。一拍低在 BUSY 这种高阻线上是最不可信的一拍：`epd_busy_activity` 的密采段
+    （`:248-251`）要 20 拍低（1ms），被动预检（`:586-587`）要 10 拍低（1ms），这里要 1 拍（0ms 分辨率）。
+    返回 true ⇒ 上层不清 `s_ready` ⇒ `eink_display.c:319` 打 `panel blanked (800x480), free int DMA heap=…`
+    而屏上可能什么都没有，且 `:350` 的监视任务因为 `s_panel_ok` 已 true 而 `break`、任务退出，
+    之后 `epd_panel_probe()` 因 `s_ready` 恒真早退（`:668`）⇒ **这个假成功会一直留到下次重启**
+    （`:148-149` 你自己写的后果，逐字一致）。
+  证据：命令 `grep -n '' epd_driver.c | sed -n '140,205p'`
+      175:            if (!require_high || seen_high >= 0) return true;
+      195:            if (++hi_run >= 2) seen_high = (int)el;
+      199:        vTaskDelay(pdMS_TO_TICKS(finding_edge ? 1 : 20));
+    同文件另两处"低也要连续几拍"：命令 `grep -n '' epd_driver.c | sed -n '239,288p'` → `:250`；
+      `sed -n '570,663p'` → `:587`。
+    后果侧：命令 `grep -n 's_panel_ok' eink_display.c` → `:318`、`:319`、`:350`；
+      命令 `grep -n 'epd_panel_probe' epd_driver.c eink_display.c` → `epd_driver.c:668`。
+  为什么成立：
+    R32-P0 的全部理由是"同一根线、同一个串扰源，两处判据一松一紧"（`:186-194`）。这句话在这里**一字不改地
+    重新适用**，而且松的那一头现在是"这一刷成没成"的出口那一拍。你把它留在两拍的另一半上了。
+    我不假定真机上存在 1ms 尺度的低毛刺（那是 U-3），我说的是：本轮你收紧了高侧、没有对称地处理低侧，
+    而低侧这一拍直接决定 `s_ready` 与 `panel blanked`。
+  最小修法：`lo_run` 计数器，`:172` 分支 `if (++lo_run >= 2)` 才允许 `:175` 的 `return true`，否则继续等
+    （高侧 `:185` 把 `lo_run` 清零，与 `hi_run` 对称）。成本：每一次成功刷新多等 1 拍（1ms 步长时 1ms、
+    `finding_edge==false` 时是 20ms）；`BUSY_ACCEPT_CONFIRM_MS` 那条早退判据不受影响（它按 tick 差算）。
+    **两个调用点都要跟着改口径**：`epd_wait_busy()`（`:206`，8s）与 `epd_wait_idle(300)`（`:207`，被
+    `epd_panel_init` 尾部 `:378` 用，注释 `:375` 写"正常是立刻通过"）—— 后者改成两拍后"立刻"变成"≥2 拍"，
+    `:374-377` 那段注释要一起改，否则又一处"文案与算法不一致"。
+    另外把 `:168` 那句"最坏持锁时长只多 200ms"改写清：多 200ms 的是"从没高过"那一档，
+    "BUSY stuck" 那一档两版都是 `timeout_ms` 上界（`:197`），别混成一句。
+
+[P1-2] 主动判活的密采段与慢采段之间有一个**未闭的分辨率断层**：50ms 之后出现、宽度 <20ms 的高脉冲在物理上采不到，而判据要求"两拍"。
+  现象：
+    密采段只跑 1000×50µs ≈ 50ms（`:247`、`:263`），之后换 10ms 步长（`:269`），而慢采段"两拍高"
+    （`:281` `if (high && prev_high) seen_high = true;`）意味着**至少要连续 10ms 的高**才能凑出一对
+    （第 1 拍在 t、第 2 拍在 t+10ms ⇒ 脉宽 ≥10ms 才可能同时命中两点；要稳，需 ~20ms）。
+    于是：一个 `0x12` 之后 50ms 才翻高、且高只持续几毫秒~十几毫秒的活面板，**永远**给不出合格的
+    `seen_high` ⇒ `panel silent after SWRESET … (pre_high=? saw_low=1 saw_high=0)` = 你在 `:332`
+    说的"0V 漏电签名"，把一块好屏按漏电定案。
+  证据：命令 `grep -n '' epd_driver.c | sed -n '239,288p'` → `:247`、`:250`、`:261`、`:263`、`:268`、`:269`、`:281`
+    你自己的前提：`:232-233`（R31 P0 的整段论证）"…它自己承诺的是'钉高**好几毫秒**'（上面 ①），比 10ms 窄，
+      连续两拍高在 10ms 采样下**物理上不可能同时命中**"。
+    你把这条论证只用来删"提前 break"（`:256-257`、`:278-279`），没有回答"那 50ms 之后呢"：
+      慢采段仍然只用 10ms 分辨率找那个"几毫秒宽"的沿，只是现在跑满 1800ms。
+    而"高沿什么时候来"没有依据：`:213`"我们从命令落棒起就以 50us 步长密采"、todo 第 59 条"100µs/1ms 两档
+      '连续拍数'也无波形依据"。
+  为什么成立：判据要求（连续两拍高）与可用采样分辨率（慢采段 10ms）在 50ms 之后不匹配，这是纯算术，
+    不需要硬件数据；需要硬件数据的只是"真机上有没有面板落进这个断层"。
+  最小修法（不放松"两拍"）：慢采段的每一次采样换成**一个小密采突发** —— 每 10ms 醒来后用 50µs 步长采
+    40 拍（2ms）再回去睡；两拍判据仍成立，只是"两拍"的时间尺度从 10ms 回到 100µs。
+    成本：慢采段 CPU 忙等占空比从 0 变 ~20%（1800ms 里多 ~36ms 忙等），总墙钟时长与 1.85s 预算不变，
+    `:46`/`:49`/`eink_display.c:503` 三处算术都不用改。
+    次一等的替代：把密采段从 50ms 拉到 300ms（`:247` 的 1000 改成 6000），代价 = 判失败轮从 1.85s 变 2.10s，
+    三处预算注释都要重算（一轮 5.0→5.25s，锁链 15.4→15.9s）—— 我推荐前一个，因为它不动任何算术。
+
+[P1-3] `axp_panel_power.c` 的注释自己规定"别拿扫描那支的 20ms 顶替 50ms"，但下一段（`acked` 分支）就是用 20ms 算的。
+  现象：
+    `epd_driver.c:43-44`：`走的是"id 读 + 6 笔 0x90/0x94 读写 ≈0.14s + 100ms 稳压等待 ≈0.25s"`。
+    0.14s = 7 笔 × 20ms。而这 7 笔全部走 `axp_read_reg()`/`axp_write_reg()`，它们的事务上限是 **50ms**
+    （`axp_panel_power.c:46`、`:53`）。20ms 那支是 `axp_probe_addrs()` 专用的（`:115`）。
+    按代码上限重算：7×50ms = 0.35s + 100ms = **0.45s**，不是 0.25s；这条分支最坏比注释写的大 0.2s。
+  证据：
+    命令 `grep -n 'pdMS_TO_TICKS' axp_panel_power.c` →
+      46:                                        pdMS_TO_TICKS(50);   （axp_read_reg）
+      53:                                      pdMS_TO_TICKS(50);     （axp_write_reg）
+      115:                                                        &val, 1, pdMS_TO_TICKS(20));   （扫描）
+      380:        vTaskDelay(pdMS_TO_TICKS(100));   /* 等轨稳定 */
+    命令 `grep -n 'axp_write_reg\|axp_read_reg' axp_panel_power.c` → acked 分支的事务点：
+      `:321`（id 读）+ `:373`、`:375`、`:377`、`:379`、`:384`、`:385` = "id 读 + 6 笔"，7 笔 ✓（这一半你算对了）
+    命令 `grep -n '' epd_driver.c | sed -n '25,60p'` →
+      35: *                               `axp_read_reg()` 与 `axp_write_reg()` 各一份；**别拿扫描那支的 20ms 顶替**——
+      43: *                                 走的是"id 读 + 6 笔 0x90/0x94 读写 ≈0.14s + 100ms 稳压等待
+      44: *                                 ≈0.25s"，比全扫便宜得多。两种都不能相加。）
+    你在 `:36` 还专门记过同一类错："R32 第一版这里写的就是 20ms，被 R32 复查第 5 条的 5×70ms 对出来"。
+  为什么成立：同一条规则在同一块注释里只对了一半；`烧录须知.md:118-121` 把这块推导原样抄给了现场，
+    现场会照 0.25s 去核"这一轮为什么用了这么久"。
+  最小修法：`:43-44` 改成"id 读 + 6 笔读写 7×50ms=0.35s + 100ms ≈0.45s"。
+    `:49` 的"一轮 ≈5.0s"不受影响（那条分支与全扫分支互斥，`:44` 已写明），但**必须**在 `:49` 后面补一句
+    "acked 轮上限 ≈0.45s+被动+init ≈2.75s"，否则两条分支的读者各拿一个数。结论句要写回数字，
+    不要留"≈0.25s"。
+
+============================================================
+三、P2（措辞与实现不符 / 引用错误 / 算术）
+============================================================
+
+[P2-1] "0.85s 余量"在你自己的 5.0s 面前不成立（6 − 5.0 = 1.0s），而这句话今天还活在 3 个会被现场读到的地方。
+  证据：命令 `grep -n '0\.85s\|5\.0s' epd_driver.c` →
+      49: * ⇒ 一轮 ≈5.0s。…
+      53: * "本轮剩余时间 + 一次 unlucky 的让位"，只留 0.85s 余量的旧值 6s 恰好在最坏那一窗内被用完——
+    命令 `grep -rn "0\.85" --include="*.c" --include="*.h" --include="*.md" .`（仓库根）命中活跃文件三处：
+      `hardware/zizhao-esp32s3/main/epd_driver.c:53`、`hardware/zizhao-esp32s3/main/eink_display.c:514`、
+      `hardware/烧录须知.md:122`；其余命中都在 `backups/`（无需改）。
+    而 `0.85s` 的**正确出处**你自己也写对了：`hardware/20260919_墨水屏点屏排查记录.md:920`
+    与 `todo.md:68` 都把 0.85s 归给"评审按一轮 ≈5.15s 算出的余量"。
+    ⇒ 于是 `烧录须知.md:121-122` 出现同一句里自相矛盾：先给"≈ **5.0s**"，紧接"旧的 6s 只剩 0.85s 余量"。
+  为什么成立：纯算术。5.0s→1.0s；5.15s→0.85s。你选了自己的数（5.0s）却留了别人的余量。
+  最小修法（"结论不变、依据换掉"）：三处改成"只留 **1.0s** 余量（评审按 5.15s 那版给的是 0.85s）"。
+    把 10s 这个选择改成别的值都不必做，成本 = 无（这是把已经算错的数写回结论句）。
+
+[P2-2] `epd_driver.c:38` 引 `axp_panel_power.c:322`，而那一行的原文是 `acked = (id_err == ESP_OK);`；20ms 那句在 `:323`。§21.1 第 3 行记的"已改成 :322"仍然差一行。
+  证据：命令 `grep -n 'attempt < 5\|acked = \|vTaskDelay(pdMS_TO_TICKS(20))' axp_panel_power.c` →
+      320:    for (int attempt = 0; attempt < 5 && !acked; attempt++) {
+      322:        acked = (id_err == ESP_OK);
+      323:        if (!acked) vTaskDelay(pdMS_TO_TICKS(20));
+    命令 `grep -n '' epd_driver.c | sed -n '25,60p'` → `38: … 全地址扫 112×20ms=2.24s（`axp_panel_power.c:322` 那个`
+      `39:  if (!acked) vTaskDelay(20)` 只在 0x34 重试里 …`（引号里的代码原文对得上 `:323`，行号对不上）
+    跨备份追这条行的漂移（命令 `for d in backups/*/main; do printf "%s: " "$d"; grep -n 'if (!acked) vTaskDelay' "$d/axp_panel_power.c" | cut -d: -f1; done`）：
+      r24:253 / r25:285 / r26:305 / r27:305 / **r27b~r32 起始备份:308** / **r32final* 三份:323**
+    ⇒ 本轮（R32）该行真实漂移是 308→323；`排查记录:1022` 你写的"`axp_panel_power.c:308` → `:322`（陈旧行号）"
+      把一次改错写成了改对。
+  为什么成立：`axp_panel_power.c` 本轮**被改过**（`diff --strip-trailing-cr backups/r32_20260921_043512/main/axp_panel_power.c hardware/zizhao-esp32s3/main/axp_panel_power.c | grep -c '^[<>]'` = 23 行），
+    所以 §21.6（`排查记录:975-976`）"第三方文件保留行号"的豁免对它不适用。
+  最小修法：改成 `:323`；并在 §21.6 的例外清单里把"`axp_panel_power.c`"从"保留行号"挪到"本轮也改过"。
+    更省事的版本（与 §21.6 的规矩一致）：把 `（axp_panel_power.c:322 那个 if (!acked) vTaskDelay(20)）`
+    改成只写符号名 `axp_probe 的 !acked 重试延时`，不写行号。成本：读者多跳一次 grep，换掉一个会漂的数。
+
+[P2-3] §21.1 第 1 行（`排查记录:916`）用 `:226/:246` 指"同文件要两拍"的两处，而 R32 终版里它们是 `:261`/`:281`；`:226` 是一行注释，`:246` 是 `*saw_high = false;`。同一节标题（`:912`）自称"行号对 R32 终版 `0x113e40` 成立"。
+  证据：命令 `grep -n ':226\|:246' 20260919_墨水屏点屏排查记录.md` → 命中的就是 `:916` 那一整行（含"对照同文件 `:226/:246` 要两拍"）。
+    命令 `grep -n '' epd_driver.c | sed -n '226p;246p;261p;281p'` →
+      226: * ② P0-3：`*low_no_high` 必须在**出口**算…   （注释，不是判据）
+      246:    *saw_high = false;                      （初始化，不是判据）
+      261:            if (++hi_run >= 2) seen_high = true;
+      281:        if (high && prev_high) seen_high = true;  /* 同样要连续两拍，单拍尖峰不算（P0-1） */
+    标题：命令 `grep -n '行号' 20260919_墨水屏点屏排查记录.md` → `:912: ### 21.1 逐条处置（行号对 R32 终版 `0x113e40` 成立）`
+    你自己的规矩：`:975-976`"指向本文件内部的交叉引用**不再写裸行号**（注释一改，行号就漂…）"
+  为什么成立：`:916` 那行引的正是本轮被注释挤动过的 `epd_driver.c`，而 §21.1 的表头把这份行号声明为终版行号。
+    两个口径只能有一个是对的。
+  最小修法：`:916` 的 `:226/:246` 改成 `:261/:281`；或（更按你自己的规矩）改成符号名
+    "`epd_busy_activity()` 密采段/慢采段各一处"。成本：无。
+
+[P2-4] `eink_display.c:509` 那句"（grep `task_wdt` 无命中）"按字面跑一遍就不成立 —— 全仓库唯一命中的正是这一行自己。
+  证据：命令 `grep -rn --exclude-dir=build --exclude-dir=managed_components 'task_wdt' .`（在 zizhao-esp32s3 目录下）→
+      ./main/eink_display.c:509:     * `esp_task_wdt_add()`（grep `task_wdt` 无命中）。…
+    命令 `grep -n '' eink_display.c | sed -n '495,522p'` → 该行原文如上。
+  为什么成立：这句是"本机狗不监视我们任务"的**唯一**支撑之一（另两条是 `sdkconfig:982/983` 的
+    idle 喂狗与 `vTaskDelay` 让出 CPU，那两条我核过、成立）。可核的口径是"没有任何**调用点**"。
+  最小修法：改成"全仓库 `esp_task_wdt_add()`/`esp_task_wdt_init()` 无调用点（唯一文本命中是本行注释）"。
+    成本：无。
+
+[P2-5] `epd_pins_release()` 上方那段 IDF 引用：`gpio_reset_pin` 留下的不是"输入 + 上拉"而是 `GPIO_MODE_DISABLE` + 上拉（输入缓冲也是关的）；而"gpio_config 固定 return ESP_OK"这个**理由**是错的，真理由是 `gpio_reset_pin` 把 `gpio_config` 的返回值丢了。结论（`failed` 永不响）不变。
+  证据：
+    你的原文：命令 `grep -n '' epd_driver.c | sed -n '856,935p'` → `:914-917`
+      914:     * 别把这里读成"引脚断开了"：`gpio_reset_pin()`（5.1.6 `gpio/gpio.c:434-447`）内部就是
+      915:     * 一份 `gpio_config_t{ .mode = GPIO_MODE_DISABLE, .pull_up_en = true }`（`:441`）再交给
+      916:     * `gpio_config()`，留下的状态是**输入 + 内部上拉到 3V3**（`gpio_config` 只 assert 引脚合法、
+      917:     * 固定 `return ESP_OK` ⇒ 上面那个 `failed` 计数在 5.1.6 永远不会响…）
+    IDF 实文：命令 `grep -n 'esp_err_t gpio_reset_pin' -A 16 components/driver/gpio/gpio.c` →
+      439:        .mode = GPIO_MODE_DISABLE,
+      441:        .pull_up_en = true,
+      445:    gpio_config(&cfg);          ← 返回值丢弃
+      446:    return ESP_OK;            ← 无条件
+    命令 `grep -n '' components/driver/gpio/gpio.c | sed -n '347,362p'` →
+      347-351: mask 非法 ⇒ `return ESP_ERR_INVALID_ARG`
+      353-357: 要输出但不在 OUTPUT 掩码 ⇒ `return ESP_ERR_INVALID_ARG`
+      ⇒ `gpio_config` **不是**"只 assert 引脚合法、固定 return ESP_OK"。
+    为什么结论仍对：命令 `grep -rn 'SOC_GPIO_VALID_GPIO_MASK\|SOC_GPIO_VALID_OUTPUT_GPIO_MASK' components/soc/esp32s3/include/soc/soc_caps.h` →
+      163: #define SOC_GPIO_VALID_GPIO_MASK         (0x1FFFFFFFFFFFFULL & ~(0ULL | BIT22 | BIT23 | BIT24 | BIT25))
+      165: #define SOC_GPIO_VALID_OUTPUT_GPIO_MASK  (SOC_GPIO_VALID_GPIO_MASK)
+      ⇒ S3 上 OUTPUT 掩码 == GPIO 掩码，本工程 6 个脚号（3/46/9/10/11/12，含 GPIO46）都在掩码内，
+        `:353-357` 那道检查永不触发；`:347-351` 也不会（mask 非 0）。
+  为什么成立：你把一个"永远不响的报警器"的**依据**写错了 —— 真依据是 `gpio_reset_pin` 丢返回值（比 gpio_config
+    能不能出错更强，因为它无条件），而且 `烧录须知.md` 全篇教现场把 release 读成"输入 + 内部上拉"：
+    在 `GPIO_MODE_DISABLE` 下 `gpio_get_level()` 那个焊盘读回 0，这不是"输入"。今天不出事，
+    因为旁证读（`:623-629`）自己重新 `gpio_config` 成 `GPIO_MODE_INPUT`。
+    风险面：谁照 `:914-917` 的措辞在 release 之后直接 `gpio_get_level()` 去看"面板有没有在拉低"，
+    会恒读到 0，并把它读成 §十六-2 的"0V 漏电签名"。
+  最小修法：`:916-917` 改成"留下的是 `GPIO_MODE_DISABLE` + 内部上拉（输入缓冲也关，`gpio_get_level()` 不保证可读）；
+    `failed` 永不响是因为 `gpio_reset_pin` 无条件 `return ESP_OK`（`:445-446`）"。
+    并在 `:856-859` 那段（BUSY 例外）补一句"这就是旁证读必须自己 `gpio_config` 成 INPUT 的原因"。成本：无。
+
+  （编号说明：P2-6、P2-7 两条因为与 §六 的"冲突 4"同源，写在 §六 末尾，没有漏在 §三。）
+
+============================================================
+四、不确定（我说它成立/不成立都缺同一份数据；写清要哪条日志给什么）
+============================================================
+
+[U-1] 一次真全刷的 BUSY 高电平到底多久 —— 决定 `EPD_BUSY_TIMEOUT_MS=8000`（`:26`）和 todo 第 62 条那条链。
+  需要的数据：第一次肉眼确认刷上之后，`full update timed out`（`epd_driver.c:784`）是否出现；
+    以及 `BUSY stuck > %dms (panel not responding): first_high=%dms first_low=%dms`（`:201`）里
+    `first_high` 的分布 —— `first_high` 一旦落在 7000ms 附近就说明 8s 是真的不够，而不是面板不应答。
+  日志给得出：`epd_wait_busy_ms` 那三行（`:180`/`:201`）+ `eink_display.c:319` 的 `panel blanked` 时间戳差。
+  我不定案的理由：这些行在 `0x20` 之后才会打，而两板都不在总线上；这不是"需要仪器"，是"需要一次真机运行"。
+
+[U-2] `epd_reset()`（`:290-298`）之后硬件复位自身的 BUSY 脉宽是否 >50ms —— 决定 P0-2 有多常用。
+  需要的数据：判活**成功**那一轮里 `busy was HIGH before 0x12 …（pre_high=1 …）`（`:342`）出现的比率。
+    若每一轮真刷都打 ⇒ 复位脉宽 >50.0015ms，P0-2 从"可能"升为"每刷必发"；若一次都不打 ⇒ 复位脉宽 <50ms，
+    P0-2 的可达性下降，但 `:310-312` 那句假立论与 `:761` 那条无预检路径仍然成立。
+  日志给得出：`烧录须知.md:75` 已把这一行登记为判读项。
+  （不用仪器的另一条替代：把 `:320-324` 的三拍改成"最多 500ms 记 first_low"，同一次运行就能量出脉宽上界 ——
+   这就是 P0-2 修法 ① 顺带交付的观测量。）
+
+[U-3] BUSY 上是否真的存在毫秒尺度的翻转 —— 决定 P0-1 / P1-1 是每刷都炸还是只炸在纸上。
+  需要的数据：`BUSY never went high (low for %dms straight, first_low=%dms …)`（`:180`）里
+    `first_low != 0` 的轮数 —— `first_low>0` 说明第一拍读到的是高，即"进循环时就有人把线拉高过"；
+    再配 P0-1 修法 ③ 的 `hi_single` 计数，一次 90s 录制就能把"翻转"与"直低"分开。
+  日志给得出：需要你先按 P0-1 ③ 加那半个计数位；现有文案分不开这两种。
+  我不定案的理由：这正是你自己反复划的那条线（todo 第 59 条"没有一段硬件数据"）。
+
+[U-4] 全 NACK + `pull compare` 两根读 1/1 这一档仍然分不开"扫错焊盘/接触不良"与"PMIC 真的没上电"；
+  `i2c_hw_fsm_reset` 那三步里 `i2c_ll_master_clr_bus()` 究竟有没有把 9 个 SCL 打出去 —— **需要仪器**（示波器/逻辑分析仪）。
+  软件侧我只补一条你在 §63 没写的东西：编译进去的那条路径（`i2c.c:675/676/677` = disable → clear_bus → enable）
+  是**在时钟被关掉的期间**写清除位的，`i2c_hw_enable`（`:677`）之后没有任何一处再写这几个位；
+  未编译的那条（`:685-686`）才是 enable 之后再写。也就是说"顺序反了"这个疑点从"没核"变成"代码里能看见"，
+  但"到底发没发出时钟"仍然只能靠仪器。⇒ 现场读到 `TMO=` 不许推"硬件也没辙"（这条你已经改口过了，成立）。
+
+============================================================
+五、"做对了"（5 条，每条给我自己独立重算的数，不抄你的注释）
+============================================================
+
+[D-1] `RELEASE_CLAIM_WAIT_MS=10000`（`epd_driver.c:61`）的分段推导整体是对的（只有 P1-3/P2-1 两处数错）。
+  我的独立重算（全部取代码里能读到的上限）：
+    0x34 重试：5×(50ms 事务 + 20ms 间隔) = 5×70 = 350ms = 0.35s ✓（`axp_panel_power.c:46/53` 的 50ms、`:323` 的 20ms）
+    已知邻居：`kPeerAddrs` 5 个 × 20ms = 0.100s ✓（`:115` 的 20ms）
+    全地址：0x08..0x77 = 0x77-0x08+1 = 112 个 × 20ms = 2.240s ✓
+    上拉对读 2×5ms + PWR_OUT 2×5ms = 20ms ✓（`:202`、`:209`、`:283`、`:289` 全是 `pdMS_TO_TICKS(5)`）
+    AXP 段合计 = 0.350+0.100+2.240+0.020 = **2.710s** ✓（你写 ≈2.7s）
+    被动预检 = 400×100µs = 40ms + 5ms 建立 + 读 ≈ **0.045s** ✓（你写 0.05s）
+    `epd_panel_init` = (50+2+50)ms 复位 + 3×500µs + (1000×50µs = 50ms) + 1800ms + 300ms
+                     = 0.102+0.0015+0.05+1.8+0.3 = **2.2535s** ✓（你写 ≈2.25s）
+    一轮（全扫分支）= 2.710+0.045+2.2535 = **5.009s** ⇒ 两轮 = 10.017s ⇒ 取 10000ms 差 17ms，
+    但它是"两轮里第一轮已跑完一段才开始等"的上界，取 10s 我认。
+    ⇒ 唯一错的是把 6−5.0=1.0s 写成 0.85s（P2-1）。
+
+[D-2] `eink_display.c:497-515` 的 20s 显示锁预算：链条我逐项重算成立。
+    2.9（全诊断轮 AXP）+ 2.25（probe 里的 init）+ 2.25（`paint_blank_locked`→`epd_display_full`→`epd_panel_init`，
+    `:502-503` 说清了"里面还有一次"）+ 8（`EPD_BUSY_TIMEOUT_MS`）= **15.4s** ✓，余 4.6s ✓。
+    深睡那条分支 20s + 10s = **30s** ✓（`:514`）。
+    （若按 P0-2 修法加了 500ms 等低，这条链变 15.9s，余 4.1s，仍然不用动 20s。）
+
+[D-3] `s_probes` 与 `s_probe_round` 的锁步，以及 `%60==30` 与 `%12` 刻意错开：我独立验证过，是对的。
+    `axp_enable_panel_rail()` 全工程只有一个调用点：命令 `grep -rn 'axp_enable_panel_rail' .` →
+      `epd_driver.c:677`（外加 `axp_panel_power.h:17` 声明与注释命中）。
+    `s_probes++` 在该函数体第一行（`:299`），`s_probe_round++` 在 `probe_attempt()` 早退 `if (s_ready) return true;`
+    （`:668`）之后（`:674`）⇒ 屏一亮两边同时冻结，永远同相位（`:669-673` 的自述正确，R28 那次"提到早退之前"
+    确实会造成 D≡6 (mod 12) 的碰撞）。
+    取模验算：`full_diag = (s_probes <= 3 || s_probes % 60 == 30)`（`:331`）；判活轮是
+    `s_probe_round % 12 == 0`（`:687`，`PANEL_PROBES_PER_LIVENESS 12` 在 `:513`）。
+    30 mod 12 = 6 ≠ 0 ⇒ 全量 2.24s 扫描那一轮**永不是**判活轮 ✓；
+    而 `s_probes<=3` 的头三轮落在 1/2/3，也不是 12 的倍数 ✓（`s_probe_round` 从 1 起）。
+
+[D-4] 令牌协议不会自锁、也没有可达的 use-after-free：我把它没写的那半个论证补完了，并另外核了另一头。
+    写 `s_probing=false` 的只有两处：命令 `grep -n 'atomic_store(&s_probing' epd_driver.c` → `:743`、`:1001`，
+    两处都在"无论成功失败"的出口上；`probe_attempt()` 内没有 `ESP_ERROR_CHECK`/`assert`/会 longjmp 的调用
+    （`SPI_CHECK`/`ESP_RETURN_ON_FALSE_ISR` 都是 return）⇒ 不存在拿了不还的路径 ✓。
+    另半边（本轮新看）：所有能进 `epd_pins_release()` 的路径都持显示锁
+    （命令 `grep -n 'xSemaphoreTake\|xSemaphoreGive' eink_display.c` → `:354/:424/:452/:467/:480/:516`；
+     `grep -rn 'epd_panel_probe\|epd_init(' .` → `eink_display.c:358`、`:429` 两个调用点都在锁内），
+    唯一无锁的那一条是 `epd_pins_release_if_unverified()`，它靠 `s_bus_ok && !s_ready` + 令牌把
+    "正在刷屏"挡在门外 —— 挡住它的是**条件**而不是令牌（todo 第 61 条你自己已经说出来，成立）。
+    今天仍无可达 UAF ⇒ 疑似但不成立，因为 `s_ready==true` 期间 `epd_pins_release_if_unverified()` 走
+    `:997-999` 那第三条出口，不碰句柄；我找不到绕过它的调用形状。
+
+[D-5] ALDO3 的寄存器映射与电压编码：芯片侧我这次能给你**比 todo 第 51 条更硬**的证据（不需要仪器，只要读随板例程）。
+    `0x90` = bit2 = ALDO3 使能、`0x94` = ALDO3 电压：
+      命令 `grep -n 'LDO_ONOFF_CTRL0\|LDO_VOL2_CTRL\|ALDO3_VOL_MIN\|ALDO3_VOL_MAX\|ALDO3_VOL_STEP\|XPOWERS_AXP2101_CHIP_ID ' src/REG/AXP2101Constants.h` →
+        5:#define XPOWERS_AXP2101_CHIP_ID (0x4A) ；117: LDO_ONOFF_CTRL0 (0x90) ；121: LDO_VOL2_CTRL (0x94)
+        205: ALDO3_VOL_MIN (500) ；206: MAX (3500) ；207: STEP (100)
+      命令 `grep -n 'bool enableALDO3' -A 4 src/XPowersAXP2101.tpp` →
+        1842:        return setRegisterBit(XPOWERS_AXP2101_LDO_ONOFF_CTRL0, 2);   ⇒ 0x90 bit2 ✓
+      电压编码我重算：目标 3300mV ⇒ (3300-500)/100 = 28 = **0x1C** ✓，与 `axp_panel_power.c` 里
+        `(uint8_t)((v & 0xE0) | 0x1C)`（`:375`，保留高 3 位）一致，也与 `XPowersAXP2101.tpp` 的
+        `setALDO3Voltage` 语义一致（(mV-500)/100、高位保留）。3300 ≤ 3500 在量程内 ✓。
+      板侧：命令 `grep -rn 'EPD_Power_ON' --include=epaper_port.c .` →
+        `08_ESP32-S3_e-Paper-3.97/components/epaper_port/epaper_port.c:182/236/289/346`
+        且 `:184` = `enapwrstate(ALDO3);`，而 `:236` 就在 `EPD_Init()` 的第一条语句 ⇒
+        **威发自己给这块 3.97 板写的点屏函数就是"先开 ALDO3"**。
+      ⇒ 结论：`0x90 bit2 ↔ 屏电` 这一路在"芯片侧"和"官方板级例程"两侧都已被**盘里的文件**证实。
+        todo 第 51 条可以半关（剩"Q2/SI2301 那级负载开关真的出得来电压"这一半，那才需要仪器）。
+        代价：把"从未证实"降级成"映射已由官方本板例程证实，轨的物理输出仍未证实"。
+        注意这与 P2-6/冲突句-4 是同一件事的两面：证据在 `08`，引用写的是 `01`。
+
+============================================================
+六、你文档里与本轮结论互相冲突的四句话（原文照抄 + 冲突句所在处）
+============================================================
+
+冲突 1
+  原句（`hardware\zizhao-esp32s3\main\epd_driver.c:310-311`）：
+    "这个纯形式在本固件里到不了——每一条升级到主动判活的路径都在几毫秒前刚通过 `epd_busy_passive_low()` 的
+     "连续 ≥1ms 低"（`probe_attempt()` 里那行调用是无条件的），线那时是低的。"
+  与它冲突的句子（同一件事的另一处原文，`hardware\zizhao-esp32s3\main\eink_display.c:502-503`）：
+    "`paint_blank_locked()` 走 `epd_display_full()`，里面**还有一次** `epd_panel_init()`（≈2.25s）+ 等 BUSY 超时 8s ⇒ 约 **15.4s**"
+    —— 这一句本身就承认存在第二条进 `epd_panel_init()` 的路径；那条路径上没有 `epd_busy_passive_low()`
+    （证据：命令 `grep -n 'epd_panel_init()\|epd_busy_passive_low(' epd_driver.c` 的 `:761`）。⇒ "每一条"是假的。
+
+冲突 2
+  原句（`hardware\20260919_墨水屏点屏排查记录.md:877` 第 ③ 项）：
+    "`BUSY never went high … low for %dms straight` 那句"没说谎"（`seen_high<0` 分支要求此前每拍都是低）"
+    —— 且它挂在 `:875` 标题"它 7 条"做对了"里我重算过的部分（不照单全收）"下面。
+  与它冲突的句子（代码原文，`epd_driver.c:174`）：
+    "if (seen_low < 0) seen_low = (int)el;"  配 `epd_driver.c:176` "if (el - (uint32_t)seen_low >= BUSY_ACCEPT_CONFIRM_MS)"
+    —— 分支条件只要求"没凑出两拍的高"，`seen_low` 只在第一次低时写；单拍高走 `:185` 不重置任何东西。
+    ⇒ "此前每拍都是低"这句话与代码冲突，我按 P0-1 给了可证伪的 1ms 交替序列。
+
+冲突 3
+  原句（`hardware\烧录须知.md:122`，同义句在 `epd_driver.c:53`、`eink_display.c:514`）：
+    "旧的 6s 只剩 0.85s 余量"
+  与它冲突的句子（同一段里上一句，`hardware\烧录须知.md:121`，同 `epd_driver.c:49`）：
+    "`epd_bus_setup()` 毫秒级 ⇒ 一轮 ≈5.0s"
+    —— 同一块推导：6 − 5.0 = 1.0s。0.85s 只在"一轮 5.15s"那版口径下成立，而那版口径
+    `hardware\20260919_墨水屏点屏排查记录.md:920` 与 `todo.md:68` 都已经明确标成评审给的。
+
+冲突 4
+  原句（`hardware\zizhao-esp32s3\main\epd_driver.c:502`）：
+    "屏电只能由 PMIC 的 ALDO3 出（官方 epaper_port.c:182 EPD_Power_ON 就是 enableALDO3）"
+  与它冲突的句子（同工程两只文件的原文）：
+    `hardware\zizhao-esp32s3\main\epd_driver.h:3`："移植自官方例程 `ESP-IDF/01_E-Paper_Example/components/epaper_port/epaper_port.c`"
+    `hardware\zizhao-esp32s3\main\epd_driver.c:597`（以及 `hardware\烧录须知.md:175`）：
+      "第二档仍然不能读成"面板有电"：bit2↔ALDO3 的映射在本板上**从未证实**。"
+    —— 命令 `grep -rn 'EPD_Power_ON' --include=epaper_port.c .` 显示 `EPD_Power_ON` 只存在于
+    `08_ESP32-S3_e-Paper-3.97/...epaper_port.c:182`；`01`（也就是 `epd_driver.h:3` 点名的那份）里零命中，
+    且 `01:222-225` 的 `EPD_Init()` 第一步是 `vTaskDelay` 不是供电（命令 `grep -n 'void EPD_Init' -A 12 01_E-Paper_Example/components/epaper_port/epaper_port.c`）。
+    ⇒ 同一只文件里 `:502` 拿官方例程当"只能由 ALDO3 出"的证据、`:597` 又说这个映射"从未证实"，
+      而它们引的是**不同文件夹**的同名文件。按 D-5：`08` 已经证实，`:597` 与 `烧录须知.md:175` 是过时的保守；
+      `:502` 是对的但引用可核性不成立（读者打开 `epd_driver.h:3` 指的那份会核不到 ⇒ P2-6 见下）。
+
+[P2-6]（挂在冲突 4 上，仍按格式补一条）三处引用不带文件夹名，跨两份同名 `epaper_port.c` 时会指错文件。
+  现象：`烧录须知.md:10`、`epd_driver.c:502`、`eink_display.c:324` 都写"官方 `epaper_port.c:182`/`EPD_Power_ON`"，
+    而 `epd_driver.c:137`/`:139`/todo 第 62 条引的 `epaper_port.c:161/164/168/24-29` 是 **`01`** 的行号；
+    同一份文件在 `08` 里整体 **+1 行**（`08:6` 多了一行 `#include "axp_prot.h"`）。
+  证据：命令 `grep -rn 'EPD_Power_ON\|epaper_port.c' hardware/烧录须知.md hardware/zizhao-esp32s3/main/epd_driver.c hardware/zizhao-esp32s3/main/epd_driver.h hardware/zizhao-esp32s3/main/eink_display.c` →
+      烧录须知.md:10 / epd_driver.c:137 / :139 / :502 / epd_driver.h:3 / eink_display.c:324
+    命令 `ls -d */`（在 `C:\esp\vendor_demo\ESP32-S3_e-Paper-3.97\ESP-IDF`）显示 `01_…`~`08_…` 六份里
+      有 6 个 `components/epaper_port/epaper_port.c` 副本（命令 `find /c/esp/vendor_demo -name epaper_port.c`）。
+  为什么成立：你的规矩（`排查记录:976`）是"指向 IDF/第三方源码的引用保留行号"，而前提是那份文件唯一；
+    这里"epaper_port.c:168"在两个目录下不是同一行，且 `EPD_Power_ON` 只在其中一个里存在。
+  最小修法：所有引用一律写全相对路径（`ESP-IDF/01_E-Paper_Example/components/epaper_port/epaper_port.c:168`、
+    `ESP-IDF/08_ESP32-S3_e-Paper-3.97/components/epaper_port/epaper_port.c:182`）。成本：注释变长几十字符。
+
+[P2-7] `s_ready` / `s_bus_ok` 是普通 `static bool`，却被 `epd_pins_release_if_unverified()` **在锁外**读；同文件对同类标志（`s_cmd_dropped`）却写了 `volatile`，`s_probing` 写了 `atomic_bool`。口径不一致。
+  现象：`eink_sleep()` 拿不到显示锁（`eink_display.c:516` 超时）才走 `epd_pins_release_if_unverified()`，
+    此时另一个任务（`eink_display.c:354` 的监视任务，`xTaskCreate` 未绑核，见 `:406`）可能正持锁改
+    `s_ready`/`s_bus_ok`/`s_spi`（`:763`、`:777`、`:785`、`:913`、`:925`）。而本函数在 `:992` 无条件读它们。
+    写侧的唯一同步是互斥锁，读侧没有锁、也没有原子 ⇒ 这是一个形式上未同步的跨核读。
+  证据：命令 `grep -n 'static.*s_ready\|static.*s_bus_ok\|static.*s_probing\|static.*s_cmd_dropped\|static spi_device_handle_t' epd_driver.c` →
+      64:static bool s_bus_ok = false;
+      69:static bool s_ready = false;
+      76:static atomic_bool s_probing;
+      80:static volatile bool s_cmd_dropped = false;
+    命令 `grep -n '' epd_driver.c | sed -n '968,1002p'` → `:973`/`:977` 只原子地碰 `s_probing`，`:992` 读的是两个普通 bool
+    命令 `grep -n 'xTaskCreate' eink_display.c` → `406: BaseType_t ok = xTaskCreate(panel_watch_task, "epd_watch", 6144, NULL, 1, NULL);`（未绑核）
+    命令 `grep -n 'xSemaphoreTake\|xSemaphoreGive' eink_display.c` → `:354`（监视任务持锁）、`:516`（深睡侧 20s 超时）
+  为什么**不**成立为缺陷（我给得出这个结论，因为我把坏交错逐个试了一遍）：
+    要出事必须是"读侧看到 `s_ready==false` 而写侧仍在发 SPI"。写侧把 `s_ready` 清成 false 的三个点
+    （`:763`/`:777`/`:785`）都在**该轮最后一次 SPI 写之后**（`:761` 返回即不再写；`:772` 之后只剩 `:781/:782` 两笔，
+    `:785` 在 `:783` 的等待之后），所以"false 已可见 + 还在写"这个组合不存在；
+    而 `s_ready==true` 期间读侧走 `:997-999` 第三条出口、根本不碰句柄（这正是 todo 第 61 条说的"挡住它的是条件不是令牌"）。
+    剩下的是编译器把 `:992` 的读提到 `:977` 那次原子 exchange 之前 —— 我在 5.1.6/GCC13 的默认优化下构造不出
+    可达的坏结果（`:975-983` 的循环体调用了外部函数 `vTaskDelay`，编译器不能跨越它缓存这两个全局）。
+  最小修法（不改任何判据、纯口径统一）：`s_ready`/`s_bus_ok` 改成 `static volatile bool`（与 `:80` 同风格），
+    并把上面那段"为什么坏交错不存在"的两行论证写进 `:959-966` 那块（现在那里只论证了"令牌够用"，
+    没论证"锁外读普通 bool 够用"）。成本：无运行时开销（这两个标志每轮读几次）。
+
+============================================================
+七、我不报的东西（免得你以为我漏了）
+============================================================
+  · `ENABLE_EINK_PARTIAL` 仍为 0（`eink_display.c:29`）⇒ 局刷路径不可达：按你的要求**不作为缺陷**报。
+    我只留一句事实：`epd_display_partial()` 的 `:796` `if (x1 <= x0 || y1 <= y0) return true;` 在局刷一旦启用后
+    会把"空区域"记成成功 —— 现在不可达，不占条目。
+  · `ESP_LOGD`：命令 `grep -rn 'ESP_LOGD' .` 全工程零命中（只有 `axp_panel_power.c:41` 一句注释在讲它的历史）
+    ⇒ `CONFIG_LOG_DEFAULT_LEVEL=3 / LOG_MAXIMUM_LEVEL=3`（构建树 `C:\esp\zproj\sdkconfig`）不会吃掉任何判据。这条我核过了，没问题。
+  · 我不建议你现在去找万用表/示波器以外的东西：两块板不在 USB 总线上，本轮唯一能推进的是"把日志文案与
+    算法对齐"（P0-1、P1-1、P2-1…5）和"把官方那一步等低补回来"（P0-2）。

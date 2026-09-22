@@ -1,0 +1,108 @@
+# R43 第四次复查报告原文 · B 组（空上下文 · 只读 · 不改任何文件）
+# 子 agent 任务名：Backup/snapshot integrity review chunk B
+# 委托范围：只读复查 r43 双根备份与 docs/ 快照口径
+# 正文来源：会话 transcript `2c637e58-0a6e-4412-983d-959b7d542219.jsonl` 第 32475 行的 <result>…</result> 段，19:17 用 python json 解析 → 取该行最长字符串 → 正则抽 <result> 与 </result> 之间全文，逐字复原、未编辑、未补全
+# 凭据自检：正文不含 SoftAP 口令明文（19:17:51 程序化包含性比对：从 `provision_ap.c` 读值后只打印布尔，值未输出）
+# 处置与逐条复跑读数：见 `hardware/20260919_墨水屏点屏排查记录.md` §29.13
+---
+
+本轮快照读数（2026-09-22 17:59:28–18:00:23 终校）：待烧指纹三处仍 `4842a3a0…`/`0x1164a0`/1,139,872 B；`du -sk` 根 A=22726 KB、`docs/`=808 KB、根 B=1830 KB；`docs/` 现 **10 只**；两根 `main/` 互差无输出（各 30 只）；快照 vs 工作树差 **3 只**且全为注释行；`.map`/`.elf` 各 1；bin 全量 31 只 / 精确名 glob 28 只（去重 23）。
+（自述：全程只读，未跑 `idf.py build`、未打开 `provision_ap.c`；仅在仓库外 `/tmp` 落了 3 个 git blob 对照临时件，仓库内零写入。）
+
+## P0
+
+**P0-1｜"待烧那只对应源码 = `3c37af3` 那一版"是全树级假话，且当前工作树已比冻结那版超前 3 只**
+- 症状：`hardware/烧录须知.md:516-517`「R43 **含源码的提交只有 `3c37af3`**…**待烧镜像 `4842a3a0…` 对应的源码就是 `3c37af3` 那一版**」。同一只文件 509-515 行自己就写着"从 git 检出重建不成立"，两句互斥；`backups/README.md:21-24` 也持后者。
+- 复跑命令：`for f in $(ls -1 backups/r43_20260922_131029/main); do git cat-file -e 3c37af3:hardware/zizhao-esp32s3/main/$f 2&gt;/dev/null || echo "NOT_IN_GIT: $f"; [ "$(git cat-file blob 3c37af3:hardware/zizhao-esp32s3/main/$f | tr -d '\r' | md5sum | cut -d' ' -f1)" = "$(tr -d '\r' &lt; backups/r43_20260922_131029/main/$f | md5sum | cut -d' ' -f1)" ] || echo "DIFF: $f"; done`
+- 读数（17:56:55）：30 只里 **17 只与 `3c37af3` 的 blob 不同**（`CMakeLists.txt`、`buttons.c`、`clock_sync.c/.h`、`download_mgr.c`、`eink_display.h`、`main.c`、`net_http.c/.h`、`nvs_creds.c`、`offline_store.c/.h`、`ota_bg.c`、`power_policy.c`、`provision_ap.c/.h`、`volume_guard.h`），**2 只从未进 git**（`ui_font.c`、`ui_font.h`；`git ls-tree 3c37af3:...main | wc -l` = **28**）。同口径对 `HEAD` 也是 17 只不同。
+- 追加实测（17:16–17:17 的注释订正）：`git diff HEAD --numstat -- hardware/zizhao-esp32s3/main` 现跑 = **20 只 / +990 / −207**，其中含那 3 只 `.c`（`axp_panel_power.c` 6 行、`eink_display.c` 6 行、`epd_driver.c` 44 行，**非注释行 0**）。也就是说：即便只看已跟踪的那 3 只，工作树也已不等于 `3c37af3`。
+- 为什么是 P0：本轮已实证"只改注释也换 md5"（`README.md:50-52`、`烧录须知.md:532`）。所以"重跑 `md5sum` 三处一致"这句话**不能**再被读成"这只镜像 = 当前源码的产物"；下一轮若据此判定"源码没动过、指纹仍现行"就会拿一个已由 3 只注释超前的工作树去对一只 13:30:55 的镜像。
+- 建议处置（只建议）：把 516-517 那句限定到"那 3 只 `.c` 的**已提交版本**"，并补一句"待烧那只的**完整**构建输入 = `3c37af3` 的 3 只 `.c` + 17 只未提交文件 + `ui_font.c/.h` 两只未跟踪件，唯一载体是 `r43_*/main/` 快照"。
+
+**P0-2｜`diff -rq` 同一命令 9 分钟内给出两种读数（2 只 / 3 只），而它是 §5 写明的"现跑复核"判据**
+- 症状：`backups/README.md:86`「【R43 14:06:44 现跑复核本行】`diff -rq …` ⇒ 无输出」把这条命令当根间一致性的凭据；根间确实现在仍无输出，但**快照 vs 工作树**这条我 17:40:22 首跑只报 2 只（漏 `epd_driver.c`）。
+- 复跑命令：`diff -rq backups/r43_20260922_131029/main hardware/zizhao-esp32s3/main`（连跑 3 次）+ 逐只 `cmp -s` 循环。
+- 读数：17:40:22 = 2 只（axp、eink）；17:49:32 = **3 只**；17:51:00 连跑三次 = 3/3/3；逐只 `cmp` 30 轮 = **3 只**（`axp_panel_power.c`、`eink_display.c`、`epd_driver.c`，A-B 全 SAME）。期间 `epd_driver.c` 的 mtime/ctime 恒为 17:17:09、快照侧恒为 13:31:56 ⇒ 不是有人在中间改文件，是**首跑漏报**。被漏的正是本轮唯一"改注释换 md5"的那只。
+- 建议处置：备份侧一致性核查一律改成"逐只 `cmp -s` 全 30 只 + 计数"，`diff -rq` 只作辅助；文档里凡引用 `diff -rq` 结论的地方补一句"须与逐只 `cmp` 双跑"。
+
+## P1
+
+**P1-1｜"以 17 只为准"这条落定口径已回摆成 20 只**
+- 症状：`烧录须知.md:514-515`「落定口径：以 **17** 这个数为准」；`排查记录:2136`「`main/` 那 **17 只**文件仍未提交」；同口径另见 `排查记录:1953/1967/1971/1983`、`done.md:818/827`、`dev_log/20260922.md:387`、`FreqErr.md:807`。
+- 复跑命令：`git -c core.quotePath=false diff HEAD --numstat -- hardware/zizhao-esp32s3/main | awk '{f++;a+=$1;d+=$2}END{print f, "+"a, "-"d}'`
+- 读数（17:59:06）：**20 / +990 / −207**（17→20 的差额就是那 3 只注释订正重新变脏）。
+- 建议处置：交掉最后一次提交（todo #108）后按同一条命令现跑并改写这几处，或把"以 17 为准"降级成带时刻读数。
+
+**P1-2｜`docs/` 快照集合已从 9 只变 10 只，"清单/布局同名/三条不变"三处口径当场假**
+- 症状：`backups/README.md:94`「按 r42 那根的 **9 只布局**复制进去」、`:98`「**9 只全 SAME**」；`排查记录:2205`「下一轮要复跑的三条不变：`ls backups/r43_*/docs/`（**9**）」；`todo.md:21`、`done.md:841`、`dev_log:381` 同。
+- 复跑命令：`ls -1 backups/r43_20260922_131029/docs | wc -l`；`ls -la backups/r43_20260922_131029/docs`
+- 读数（17:44:56 / 17:59:28）：**10 只**。第 10 只 = `20260922_R43复查报告原文_code.txt`，mtime **17:36**，md5 `446637d3e6b7ba7ede0d495ef8cea6fa`，与原件 `hardware/20260922_R43复查报告原文_code.txt` **同值**。
+- 建议处置：清单改成 10 只并把"上一轮报告原文"正式列为固定成员（r42 那根的 docs 里确实含两只 R41 报告，见 `README.md:89`，R43 只是照做却没写进清单）。
+
+**P1-3｜"快照滞后"口径只点名了 4 处，实际漂移 7 只 + 1 只新增成员**
+- 症状：`README.md:99-100` / `排查记录:2201-2203`「快照之后本轮还要动这几处：`f9cf62b` 及其后的纯文档订正提交、`FreqErr.md` 第 ⑪ 条、本节末尾那条计数说明、`done.md` 的【R43 五订】」。
+- 复跑命令：`for p in "20260919_墨水屏点屏排查记录.md|hardware/…" …; do md5sum 快照 原件; done` + `stat -c '%y %n' 原件`
+- 读数（17:44:56 / 17:48:38）：与原件 **md5 已不同 7 只**：`20260919_墨水屏点屏排查记录.md`(b975fecb→866f6386，原件 17:28:35)、`FreqErr.md`(6dd4526b→7e62d554，17:26:08)、`done.md`(a3129562→e97ea951，17:24:38)、`todo.md`(b9900e05→139a27e1，17:24:07)、`20260922.md`(7065842f→7bcc8dff，17:24:16)、`烧录须知.md`(311757b2→e5d83aae，17:28:49)、`20260922_墨水屏收尾R43.md`(9a77a16f→0473b556，17:24:58)；**相同 3 只**：两只 R42 报告 + 新加的第 10 只 R43 报告。口径句未点名的有 `todo.md`、`dev_log/20260922.md`、`烧录须知.md`、`updates/…R43.md` 四处，且"新增成员"这一类根本没被涵盖。
+- 建议处置：把边界句从"点名式"改成"规则式"（除报告原文类不可变物外，`docs/` 全成员一律视为可漂移，终态由 R44 收口带齐）。
+
+**P1-4｜`§29.12 P1-4` 自造"带 warning 的失败重跑"，与三只 log 实测和 §3/§5 口径三向矛盾**
+- 症状：`排查记录:2242`「三只 r43 构建日志里 `binary size 0x1164a0 bytes` 分别在第 **57 / 57 / 59** 行——**第一只带 warning 的失败重跑**多两行」；对照 `README.md:47`「调用三次、三次都成功（0 warning / 0 error）」、`README.md:84`、`dev_log:351`。
+- 复跑命令：`grep -c -i 'warning' backups/r43_20260922_131029/*.log`；`grep -n 'binary size 0x1164a0' …`；`diff &lt;(tr -d '\r' &lt; ①) &lt;(tr -d '\r' &lt; ②)`
+- 读数（17:47:14 / 17:47:14）：三只 log `warning` **全 0**、`error` 全 0，末尾都到 `Project build complete`；size 行实际在 **`build_r43_20260922_130955.log` 第 59 行、`build_r43_final.log` 57、`build_r43c_determinism.log` 57**（文档写 57/57/59 且把它归给"第一只"，顺序与指认都不对）。多两行的真因是 ① 编译了 3 只对象（`eink_display.c`、`axp_panel_power.c`、`epd_driver.c`，ninja `[x/11]`），②③ 只编 `epd_driver.c`（`[x/9]`）。
+- 建议处置：该句改成"① 比 ②③ 多两只 `.c` 的编译步骤 ⇒ 行号 +2"，删掉"带 warning 的失败重跑"（失败重跑属 R42，`README.md:83`）。
+
+**P1-5｜`§29.12 P1-5` 的"14 只里 8 只在备份根"实测 7/7**
+- 症状：`排查记录:2244-2245`「`find hardware -name "*.log"` = **14**，其中 **8** 只在备份根里、是构建日志不是真机日志」。
+- 复跑命令：`find hardware -name "*.log" | wc -l`；`find hardware -name "*.log" -path '*/backups/*' | wc -l`
+- 读数（17:52:18）：总 **14** ✓；备份根内 **7**（根 B 的 r40×1 + r42×3 + r43×3）；根外 **7** = 顶层 `hardware/2026*_*.log` **6** 只 + 散文件 `hardware/zizhao-esp32s3/C:espbuild_r22.log`。**下游结论未坏**（`ls -1 hardware/2026*_*.log` = 6、去掉两只"官方例程" ⇒ 分母仍是 4）。
+- 建议处置：8 改 7，并把那只散文件点名成"第 7 只不属于真机日志"的原因（见 P2-4）。
+
+**P1-6｜`main/` 快照内混着两个时刻的拷贝，文档零记录**
+- 症状：`README.md:25/91`、`排查记录:1979` 都写成"整份 `main/` 复制进两根"（单一次动作、目录名 `131029`）。
+- 复跑命令：`find backups/r43_20260922_131029/main -maxdepth 1 -type f -printf '%c %p\n' | sort`
+- 读数（17:50:06）：29 只 mtime/ctime = **13:18:42**，`epd_driver.c` 单独 = **13:31:56**（与两根 bin 副本同秒；其余 29 只无一例外）。这与日志里"② 只重编 `epd_driver.c`"吻合，说明是**为对齐构建输入的二次回拷**，但没有任何一处文档写过这件事、也没写"快照不等于单一时刻"。
+- 建议处置：在 §5 或 §29.11 补一行"`r43_*/main/` 内 29 只 = 13:18:42、`epd_driver.c` = 13:31:56（构建 ② 的实际输入），快照**不是**单一时刻"。
+
+## P2
+
+**P2-1｜"两根下全部 28 只 bin（去重 23 个 md5）"的"全部/最早"两个词与全量口径互斥**
+- 症状：`排查记录:2160`「同一只脚本扫两根备份目录下**全部** bin：**28 只文件 / 去重 23 个 md5 / 最早 `backups/r26_20260921_001714/`**」；`dev_log:363`、`updates/…R43.md:41` 同。
+- 复跑命令：`python -c "import glob,hashlib;l=glob.glob('backups/*/zizhao_esp32s3.bin')+glob.glob('hardware/*/backups/*/zizhao_esp32s3.bin');m=[hashlib.md5(open(p,'rb').read()).hexdigest() for p in l];print(len(l),len(set(m)),min(l))"` 与 `find backups hardware -name "*.bin" | wc -l`
+- 读数（17:55:31 / 17:42:46）：文档那条 glob = **28 只 / 23 个 md5 / 最早 `backups\r26_…`**（逐字兑现 ✓）；全量 `find` = **31 只 / 26 个 md5**，最早是 `backups/r24_20260920_225948/zizhao_esp32s3_r24_0x111d40.bin`（09-20 22:59）。差在 3 只异名 bin：`r24_…_r24_0x111d40.bin`、`r25_…_r25_0x111fd0.bin`、`r26_…/zizhao_esp32s3_stale_onebuild_behind.bin`。
+- 建议处置：句中的"全部"改成"全部**同名**（`zizhao_esp32s3.bin`）"，另加一行"另有 3 只异名 bin，全量口径 = 31 只/26 md5、最早 `r24_20260920_225948`"。
+
+**P2-2｜体积三句：两句过期、一句现行**
+- 复跑命令（不自相矛盾量法，逐只单量）：`du -sk backups/r43_20260922_131029`、`du -sk backups/r43_20260922_131029/docs`、`du -sk hardware/zizhao-esp32s3/backups/r43_20260922_131029`
+- 读数（17:43:38 / 17:59:28）：根 A = **22726 KB**（`du -h` = 23M）→ 文档"22706 KB"**过期**（+20 KB 全来自 docs/）；`docs/` = **808 KB** → 文档"788 KB"**过期**；根 B = **1830 KB**（`du -h` = 1.8M）→ **现行**（注：文档正文写的是"1.8 MB"，我全库 `grep 1830` **无命中**，"1830 KB"这个 KB 级写法只存在于本次任务书，不是文档原话）。
+- 建议处置：把 §29.11 的"22706/788"降级为"15:26:44 读数"，现行值改 22726/808；`du -h` 23M 一句不动。
+
+**P2-3｜`README §1` 的 +977/−203 与 `main.c` 最后提交号**
+- 复跑命令：`git -c core.quotePath=false diff HEAD --numstat -- hardware/zizhao-esp32s3/main`；`git log -1 --format='%h %ad' --date=format:'%Y-%m-%d %H:%M' -- hardware/zizhao-esp32s3/main/main.c`
+- 读数（17:47:45）：现值 **+990 / −207**（文档写 20 只 +977/−203，13:01 读数，带时刻 ⇒ 合规但已旧）；`main.c` 末次提交确为 **`5077157` 2026-09-14 21:22** ✓。
+- 建议处置：更新为该轮提交后的现跑值并换时刻。
+
+**P2-4｜散文件 `hardware/zizhao-esp32s3/C:espbuild_r22.log`（同类事故第二次，未登记）**
+- 复跑命令：`stat -c '%n size=%s mtime=%y' "hardware/zizhao-esp32s3/C:espbuild_r22.log"`；`git -c core.quotePath=false ls-files --error-unmatch "hardware/zizhao-esp32s3/C:espbuild_r22.log"`
+- 读数（17:52:18 / 17:53:46）：198 B、mtime 2026-09-20 20:48:47、**未被 git 跟踪**（pathspec 报 did not match）。`排查记录:1171` 记过同族事故（`C:espr33_build.log` 被移走），这只 R22 的没进任何清单，且它正在污染 P1-5 那条 `.log` 计数。
+- 建议处置：只建议——按 `1171` 那只的先例移到 `C:\esp\` 并在 §29 登记（**属删除/移动类动作，须你本轮明确要求**，我没动）。
+
+**P2-5｜口径缺口（不含内容，仅指位置）**：`README.md:108` 只规定 `nvs.csv` 不进备份根也不进 git；而 `dev_log/20260922.md:391` 那句话表明"同一条配网口令在已归档的 bin 里也命中"。也就是说**含凭据的 bin 有 28/31 只躺在两根 `backups/` 下**，这条边界目前无人登记。建议处置：在 §6 增一行"bin 亦属凭据载体"（我未打开源文件、未做任何口令相关 grep，见"无法核实"）。
+
+## 无法核实
+
+- 口令暴露面核查：按指令跳过。
+- "当前工作树重新构建得到的 md5" 是否仍为 `4842a3a0…`：**无法核实**（`idf.py build` 禁用）。只能给可复跑旁证：① 冻结 bin mtime 13:30:55 &lt; 两根副本 13:31:56（17:39:09 `stat`），② 17:16–17:17 三只 `.c` 各多 6/6/44 行、**非注释 0 行**，③ 本轮实证注释改动会换 md5 ⇒ 预期不再相同，但**未实测**。
+- 第 1 次构建那只 `1357fa2512bc5140d99a01d5f0a00764` 的 `cmp -l` 证据：**盘上确无此物**（`find backups hardware /c/esp/zproj/build -name '*.bin' | xargs md5sum | grep -c 1357fa25…` = **0**，17:53:46）⇒ 该结论只剩日志，不可复跑（与 `README.md:50-52` 自述一致）。
+- 板上当前运行的镜像 md5（R37 `e6ac5d1b…`）：仍**不可证**（`README.md:73-74` 已自标推测）。
+- "R42 那代构建时是否曾有过 `.map`"：备份根内实测无（见下），但 `C:\esp\zproj\build` 已被 R43 三轮覆盖 ⇒ 历史那一刻无法回验。
+
+## 核过没问题
+
+- 待烧指纹：三处 + r42 两处共五只读数 = `4842a3a0…`（构建目录 + r43 两根）/ `2174cd05…`（r42 两根），`wc -c` = 1,139,872 = `0x1164a0`，三处一致（17:39:07、17:47:14、17:59:28 三次复跑同值）。
+- 三只构建 log：`7b20446dc84a78653758f06f1c6ea1dd` / `c1b285760beaf7f2b9bc47e9ffee71ac` / `5ac7d80d5ccc964da88c1b846455cb89` 全对；"一只文件两个名字"（`/c/esp/build_r43b_132644.log` ≡ 两根 `build_r43_final.log`，同 `c1b28576…`）成立；**两根各三只、集合相同**；r42 两根的三只 log 也逐只同值（`b0fff93d`/`a7658928`/`7770e61e`）。
+- `main/` 快照：`diff -rq backups/r43_20260922_131029/main hardware/zizhao-esp32s3/backups/r43_20260922_131029/main` **无输出**，各 **30** 只、文件名集合与工作树完全相同；差的 3 只**全是注释**（6+6+44 行、非注释 0 行；`/*`与`*/` 计数两侧同为 114，`eink_display.c` 先 `tr -d '\r'` 再比）。
+- `.map`/`.elf`：各 **1** 只、都只在根 A（`find backups hardware -name '*.map'|wc -l` = 1，`.elf` = 1，17:40:55）；`r42_*/` 两根清单里既无 `.map` 也无 `.elf` ⇒ §29.12 P0-1④ 现行。
+- 根 A/根 B 布局：根 A = `main/`+bin+3 log+`.map`+`.elf`+`docs/`；根 B = 同前但**无 `docs/`**、无 map/elf ⇒ 与 `README.md:91-92` 相符。
+- `docs/` 9 只快照本身：逐只 md5 与 §29.11"15:26:25 第二遍回执"**完全相同**（`b975fecb`/`7065842f`/`9a77a16f`/`6dd4526b`/`a3129562`/`b9900e05` + 未变 `c750e2c2`/`0dd14bc1`/`311757b2`）⇒ 回执是真；r42 那根 `docs/` 也确是 9 只且含两只 R41 报告。
+- `.gitignore:19` 的 `backups/` 仍在（18 行注释、19 行规则）；`git ls-files backups/` = 0、`*.bin` = 0、`*.log` = 0；`ui_font.c/.h` 确为未跟踪（`?? `）；`git ls-files hardware/ | grep -c 报告原文` = **5**（§29.11 的"5"现行）；`origin/main..HEAD` = **6**（文档明写只配带时刻 ✓）；`3c37af3` 改 **13** 只、含那 3 只 `.c`；`f9cf62b`、`5905fcd` **零源码**（纯文档 ✓）。
+- `nvs*csv` 在仓库、两根、`/c/esp`（深度 4）均**不存在**；`Err.log` = **0 字节**；`/c/esp/r34_flash.ps1` 确为 `Set-Location C:\esp\zproj\build` + `0x20000 zizhao_esp32s3.bin` ⇒ "真烧的那只就是这只"成立。
