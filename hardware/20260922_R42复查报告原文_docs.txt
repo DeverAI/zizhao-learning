@@ -1,0 +1,337 @@
+# R42 落地复查报告（文档与归档侧 · 空上下文 · 故障检测专员 · 刁难式审查）
+
+## 0. 本报告的采集时刻与命令清单
+
+`date` 实读（本报告第一次读数）：
+
+    $ date
+    Tue Sep 22 12:23:03     2026
+
+后续关键读数（按发生顺序）：
+
+    12:25:24   cmp -l 那一对镜像
+    12:27:08   第一对 BUSY stuck 口径（我自己的命令形状）
+    12:27:48   quotePath / 跟踪报告计数
+    12:28:29   口径 A/B 的"文档钦定命令形状"复跑
+    12:31      main/ 与构建目录逐只 cmp
+
+审计对象：`C:\Users\david\Documents\all_projects\自招学习` @ main，HEAD `489baad`（`489baad980ac138c19cdd1c31c2ca3686188c9fd`，12:20:21）。
+父提交 `7f3ed56`（R41 归档）。范围 = 本批落进仓库的**文档与归档面**，加它们引用的上下文（构建目录、两根备份、`C:\esp` 的工作副本与脚本）。
+**全程只读**：我没有 `git add/commit/checkout/reset/stash`，没有构建，没有烧录，没有 `git push`，没有播提示音。
+我写过的文件只有一个：本文件（`hardware/20260922_R42复查报告原文_docs.txt`，新建，写前已 `ls` 确认该路径不存在）。
+
+跑过的命令（原样，去掉提示符噪音；中文路径一律带 `-c core.quotePath=false`，理由见 §28.1④，我第一轮就踩了）：
+
+    date
+    git -c core.quotePath=false show HEAD --stat
+    git -c core.quotePath=false status --short
+    git config --get core.quotePath                       # 退出码 1 ⇒ 未设置 ⇒ 默认 true
+    git -c core.quotePath=false show HEAD --name-only | grep -c "烧录须知"
+    git -c core.quotePath=true     show HEAD --name-only | grep -c "烧录须知"
+    cat .gitignore
+    git -c core.quotePath=false ls-files backups
+    git check-ignore -v backups/README.md
+    ls -la backups/ ; ls -la backups/r42_20260922_114342/ ; ls -la backups/r42_20260922_114342/docs/
+    ls -la hardware/zizhao-esp32s3/backups/ ; ls -la hardware/zizhao-esp32s3/backups/r42_20260922_114342/
+    md5sum backups/r4*/zizhao_esp32s3.bin backups/r3*/zizhao_esp32s3.bin
+    md5sum hardware/zizhao-esp32s3/backups/r4*/zizhao_esp32s3.bin hardware/zizhao-esp32s3/backups/r3*/zizhao_esp32s3.bin
+    md5sum /c/esp/zproj/build/zizhao_esp32s3.bin
+    stat -c '%s' /c/esp/zproj/build/zizhao_esp32s3.bin
+    cat /c/esp/zproj/build/.bin_timestamp
+    cmp -l backups/r40_20260922_052906/zizhao_esp32s3.bin backups/r42_20260922_114342/zizhao_esp32s3.bin | wc -l
+    cmp -l <同上> 2>/dev/null > /tmp/cmpout.txt ; head -2 /tmp/cmpout.txt ; tail -2 /tmp/cmpout.txt
+    date '+%F %T' ; grep -rn --exclude-dir=backups "BUSY stuck" . | wc -l ; grep -rn "BUSY stuck" . | wc -l
+    grep -rn --exclude-dir=backups "BUSY stuck" . | awk -F: '{print $1}' | sort | uniq -c | sort -rn
+    grep -rn "BUSY stuck" . | grep -c "Binary file"
+    grep -rn "BUSY stuck" backups/r41_20260922_091459/ | wc -l
+    grep -rn "BUSY stuck" hardware/zizhao-esp32s3/backups/r41_20260922_091459/ | wc -l
+    grep -c "BUSY stuck" hardware/20260922_R41复查报告原文_code.txt hardware/20260922_R41复查报告原文_docs.txt
+    comm -23 <(grep -rn --exclude-dir=backups "BUSY stuck" . | sort) <(grep -rn "BUSY stuck" . | grep -v "/backups/" | sort)
+    git ls-files | grep -c "墨水屏" ; git -c core.quotePath=false ls-files | grep -c "墨水屏"
+    git -c core.quotePath=false ls-files | grep -c "复查报告"
+    git -c core.quotePath=false ls-files | grep "复查报告"
+    md5sum backups/r42_20260922_114342/build_r42*.log hardware/zizhao-esp32s3/backups/r42_20260922_114342/build_r42*.log
+    grep -n "within comment\|error:\|binary size" backups/r42_20260922_114342/build_r42_failed.log
+    grep -ci warning / grep -ci error  ×  build_r42.log / build_r42_try1.log
+    grep -n "binary size" build_r42.log build_r42_try1.log
+    ls -l --time-style=+%H:%M:%S /c/esp/ports_20260922_R4*.txt /c/esp/r42_ports.ps1 /c/esp/build_r42*.log
+    cat /c/esp/ports_20260922_R41.txt ; grep -n "ts=\|蓝牙链接上的标准串行\|COM14\|70:04:1D\|VID_0000&PID_0002\|6&32CE6A2E\|6&1C68E73C\|FTDI\|VID_0483" /c/esp/ports_20260922_R42.txt
+    md5sum /c/esp/r41_rep_code.txt /c/esp/r41_rep_docs.txt hardware/20260922_R41复查报告原文_code.txt hardware/20260922_R41复查报告原文_docs.txt
+    grep -a -c "<新判决字串>" ×{r40 镜像, r42 镜像×2, 构建目录镜像}
+    grep -a -c "不参与那六条判决尾巴" ×同上
+    diff -rq /c/esp/zproj/main hardware/zizhao-esp32s3/main
+    for f in axp_panel_power.c axp_panel_power.h eink_display.c epd_driver.c epd_driver.h; do cmp -s main/$f 根A/$f; cmp -s main/$f 根B/$f; done
+    cmp -s backups/r42_*/docs/<每只文档> <工作树对应路径>
+    git -c core.quotePath=false diff HEAD --numstat -- hardware/zizhao-esp32s3/main
+    git log -1 --format=... -- hardware/zizhao-esp32s3/main/main.c
+    git log --oneline -1 origin/main ; git rev-list --count origin/main..HEAD
+    grep -n "RNN\|r38_" /c/esp/r34_flash.ps1 ; grep -n "0x20000\|Set-Location" /c/esp/r34_flash.ps1
+    sed -n '478,492p;500,545p;568,584p;645,662p' hardware/zizhao-esp32s3/main/axp_panel_power.c
+    sed -n '375,420p;162,166p' hardware/zizhao-esp32s3/main/epd_driver.c
+    grep -c "R42" axp_panel_power.c epd_driver.c eink_display.c
+    grep -rn "ESP_LOG.*BUSY stuck" hardware/zizhao-esp32s3/main/ | wc -l
+    grep -rn --exclude-dir=backups --exclude-dir=.git -E "恒 56|始终 56|差值恒|差值始终" .
+    grep -rn --exclude-dir=backups --exclude-dir=.git -E "R42.*已烧|已写入板子|烧录成功" .
+    grep -rn "11:52:0x" --exclude-dir=backups --exclude-dir=.git .
+    ls -l /c/esp/zproj/build/zizhao_esp32s3.elf /c/esp/zproj/build/zizhao_esp32s3.map
+    find <两根 r42 目录> -name '*.elf' -o -name '*.map' | wc -l
+
+## 1. 判级汇总
+
+**P0 0 条 ｜ P1 4 条 ｜ P2 10 条 ｜ 无法核实 3 项 ｜ 其余 11 组核过无问题。**
+
+一句话结论：**本轮没有 P0**——"待烧镜像到底是哪一只"这条主线（指纹、三处一致、含 R42 代码）我第一次想抓它抓不住，
+它是真的，而且比我预期的更硬（镜像里能直接搜到本轮换掉的判决字串，上一只搜不到）。
+**但本轮把"计数口径族"收口的那三条断言，被本轮自己的归档动作当场又打穿了一次**，只是这次穿在文档这一侧：
+钦定口径的现值已经从写进文档的 **26** 变成 **68**，而 68 里有 **37** 是本轮亲手塞进 `hardware/` 的两只"报告原文"副本贡献的。
+⇒ 也就是说：**R42 立的那条"归档只喂备份根一侧"的因果，方向对、但不全；归档同样在喂被钦定为"可核"的那一侧。**
+
+## 2. P1（会误导下一轮 / 结论按原样复跑会得反向答案）
+
+### [P1] 1 · `axp_panel_power.c:577` 这个行号是错的，真实位置是 `:581`；它被用在"归因"和"三处一起改"两处承重句上
+
+三处都写了 `:577`：
+
+- 排查记录 §28.2(b)：「代码字串（`:577`）与本文件 §24.x、`烧录须知.md` 那两处阅读规则**三处一起订**。」
+- 排查记录 §28.4：「只有**两处进镜像的字串**会变长（`axp_panel_power.c:577` 判决尾巴第①档那句、`:652` `s_pp_done` 那档跳过原因那句）」
+- `updates/20260922_墨水屏收尾R42.md` 代码侧第 3 条：「⇒ 代码字串（`:577`）+ 排查记录 §24.x + `烧录须知.md` 阅读规则**三处一起改**」
+
+我核（`sed -n '568,584p'` 逐行对齐 + `grep -n "排在链首"`）：
+
+    577:             cap_res_e == ESP_OK ? "OK" : esp_err_to_name(cap_res_e),
+    581:             cap_set_e != ESP_OK ? "驱动能力没设成最弱档（见上）… 这一支是六档判决的第①档、且排在链首…"
+
+`:577` 是同一行日志里 **`复原=%s` 那个字段**，不是判决链的第①档尾巴。而且 `:577` 这行**本轮根本没改**（它是 R39 P1-9 加的复原字段），
+所以这条引用不只是偏四行，它指向的是一行"没被本轮动过"的代码。
+⇒ 要紧在于：这句承重在一个**归因**上——"两次成功之间 +80 B = 这两处字串变长"。读者照 `:577` 去看，会看到一句跟尺寸变化无关的话，
+于是那条归因变成了"引用不支持结论"。`grep -n "驱动能力没设成最弱档" axp_panel_power.c` 现在给 **581**。
+（对照：同段引用的 `:542`、`:652`、`:312`、`:505`、`:511`、`:866` 和 `epd_driver.c:393`、`:73`、`epd_driver.c:164`、`eink_display.c:540`
+我逐条 `sed -n '<n>p'` 看过，**全部命中**，见 §6 组 G1。）
+
+### [P2→P1] 2 · `updates/…R42.md` 写给下一轮的"计量口径"命令，在本轮提交之后**恒返回空**，会教下一轮得出"本轮只改注释"的反向结论
+
+逐字（`updates/20260922_墨水屏收尾R42.md` "为什么本批**必须**重烧"段）：
+
+    计量口径（写给下一轮，别凭印象）：`git diff HEAD -- hardware/zizhao-esp32s3/main/axp_panel_power.c` 的非注释行**不为空** ——
+    `static bool s_pp_done;` 声明搬家、`s_pp_done = true;` 置位点搬家（这两条是可执行）…
+    对照：`epd_driver.c`、`eink_display.c` 本轮 `git diff` 的**非注释行为 0**
+
+问题：`git diff HEAD` 比的是"工作树 vs 最新提交"。这句在 11:55 写的时候成立（当时 R42 还没提交），
+但 **12:20:21 提交之后它永久失效**——那三只文件已经进了 HEAD。我复跑：
+
+    $ git -c core.quotePath=false diff HEAD --numstat -- hardware/zizhao-esp32s3/main
+    （列表里**没有** axp_panel_power.c / epd_driver.c / eink_display.c —— 它们相对 HEAD 干净）
+
+⇒ 下一轮照这句话跑，**三条文件全部"非注释行为 0"**，按 §26.5 的收口规则就会判"这轮只改注释 ⇒ 不重建"。
+这正好是本轮花整节力气推翻的那个判断。而"报告写的落点"里没有任何一处给出**跨提交稳定**的写法。
+可复跑的替代（我实测有效）：`git show HEAD -- …/axp_panel_power.c`（本批）或 `git diff HEAD~1 HEAD -- …`（比"上一轮 → 本轮"）。
+定位补充：同一句话在排查记录 §28 正文里没有复现（那里用的是"10 行 `R42` 标记"的 `grep -c`，这个是稳的），所以只有 `updates` 那只文件带这个坑。
+
+### [P1] 3 · 计数口径族的**归因**被本轮自己的归档动作第二次打穿：钦定口径 26 → 68，其中 37 来自本轮新入库的两只报告副本
+
+本轮立的规矩（§28.1、`backups/README.md` §7、`epd_driver.c` 注释 ③）是这样的因果句：
+
+- `epd_driver.c` ③：「**差值不是常量，是时刻的函数**：每归档一次就给**备份根一侧**添一批命中（R41 那批添了 20 行）」
+- `backups/README.md` §7：「每归档一轮，就把一份带旧字串的源码/文档复制进 `backups/` ⇒ **含 `backups/` 那只 grep 口径的命中数随轮次单调上涨**（R41 那批一次就添了 20 行）」
+- 排查记录 §28.1②：「本轮 11:51:06 再复跑：`--exclude-dir=backups` = **26**，全含 = **106**，差 **80** —— 比 11:10 又涨 4，**涨的还是备份里新添的东西**」
+
+我按**钦定的那条命令形状**原样复跑（`epd_driver.c` 注释末尾钦定：`date` + `grep -rn --exclude-dir=backups "BUSY stuck" . | wc -l`）：
+
+    $ date '+%F %T'
+    2026-09-22 12:28:29
+    $ grep -rn --exclude-dir=backups "BUSY stuck" . | wc -l
+    68
+    $ grep -rn "BUSY stuck" . | wc -l
+    204
+    ⇒ 差 136
+
+三段式本身没破（12:28 这一跑我有命令+时刻+数，文档那一跑也带了 11:51:06），**破的是那句因果**：
+"涨的还是备份里新添的东西" / "每归档一次给**备份根一侧**添一批"——本轮提交往 `hardware/` 里加了**两只报告原文**（不在 `backups/`，被口径 A 全额计入）：
+
+    $ grep -c "BUSY stuck" hardware/20260922_R41复查报告原文_code.txt
+    28
+    $ grep -c "BUSY stuck" hardware/20260922_R41复查报告原文_docs.txt
+    9
+
+⇒ 口径 A 的 +42（26→68）里 **37 行来自这两只文件**，其余 ~5 行是 §28 本轮正文自己写的；口径 B 从 106 涨到 204（**+98**），
+是这两只副本 ×（根里一份 + `backups/r42_*/docs/` 里一份）叠加的结果。
+更难看的是**口径 A 现在有一半以上不是"引用旧名的地方"**：
+
+    $ grep -rn --exclude-dir=backups "BUSY stuck" . | awk -F: '{print $1}' | sort | uniq -c | sort -rn | head -3
+         28 ./hardware/20260922_R41复查报告原文_code.txt
+          9 ./hardware/20260922_R41复查报告原文_docs.txt
+          7 ./hardware/20260919_墨水屏点屏排查记录.md
+
+那 28+9 行**绝大多数是报告里印着的 grep 命令行本身**（`$ grep -rn "BUSY stuck" … | wc -l`）。
+⇒ 也就是说：本轮钦定为"唯一可核口径"的那条命令，测出来的数**已经不再度量它想度量的东西**（"还有多少地方在用旧名"），
+它度量的主要是"存档报告里回显了多少次这条命令"。
+文档里真正的不变量其实是另一条，而且它现在仍然成立、且不受归档影响（我实测）：
+
+    $ grep -rn "ESP_LOG.*BUSY stuck" hardware/zizhao-esp32s3/main/ | wc -l
+    0
+
+建议：① 把 §28.1② 那句"涨的还是备份里新添的东西"改成"**两侧都会涨**：备份根每归档一批涨一批，正文每**存档一只报告**涨 20~40 行"；
+② 给 `--exclude-dir` 再加 `--exclude=*_复查报告原文.txt`，或干脆把"要复跑的那个口径"固定成 `ESP_LOG` 那一形（单位与语义都稳定）；
+③ `README.md` §7 与 `epd_driver.c` ③ 同一口径同改（否则下一轮又会在三处里读到两个版本的因果）。
+
+### [P1] 4 · "仓库 = 能重建这只镜像"不成立：`main/` 相对 HEAD 有 17 只文件、+948/−193 未提交，`main.c` 最后一次提交是 09-14
+
+本轮把"待烧"钉成三处一致（构建目录 + 两根），这条我复核为真（见 §6 G3）。
+但 `backups/README.md` §3 与 `烧录须知.md`【R42 口径钉死】给读者的**整体印象**是"这只镜像的一切都在盘上可核"。
+实态是**镜像的一半源码没有进过仓库**：
+
+    $ diff -rq /c/esp/zproj/main hardware/zizhao-esp32s3/main
+    Only in /c/esp/zproj/main: _fontcheck.txt        # 工作树 main == 构建树 main（好）
+    $ git -c core.quotePath=false diff HEAD --numstat -- hardware/zizhao-esp32s3/main
+      （17 只文件，节选）
+      +257  -43  hardware/zizhao-esp32s3/main/main.c
+      +210  -14  hardware/zizhao-esp32s3/main/provision_ap.c
+      +169  -59  hardware/zizhao-esp32s3/main/ota_bg.c
+      +119  -4   hardware/zizhao-esp32s3/main/clock_sync.c
+      +20   -7   hardware/zizhao-esp32s3/main/power_policy.c   …
+    $ git log -1 --format='%h %ad' --date=format:'%m-%d %H:%M' -- …/main/main.c
+    5077157 09-14 21:22
+
+⇒ `git clone` + `idf.py build` **复现不出 `2174cd05…`**；能复现它的只有 `C:\esp\zproj\` 这一份工作树，而它在 R42 的文档里被明文排除在备份之外
+（README §6：「构建目录本体 `C:\esp\zproj\` … 都在仓库外」）。
+这不是 R42 引入的（是历史欠账），但**本轮新立的"三处一致 / 可复跑"口径正好踩在它上面**，所以必须点名：
+"三处一致"证的是"备份没抄错"，**不**证"仓库里能重建"。建议在 `backups/README.md` §1 的分工表下面加一行边界：
+"仓库跟踪的固件源码 = 只到本轮改动的那几只；其余 `main/*` 相对 HEAD 未提交（实测 17 只 / +948 −193），故**从 git 检出重建不出待烧镜像**。"
+相关：`.elf` / `.map`（同一次 11:47 构建、各 11.3MB / 9.3MB）在构建目录里，但**两根备份里都是 0 只**（`find` 实测）。
+本轮一边宣布"`cmp -l` 跨尺寸不能定位"，一边把**唯一能定位的产物**留在会被下一轮覆盖的目录里，这是同族缺口。
+
+## 3. P2（措辞 / 清单 / 一致性，不影响判读但会咬人）
+
+- **P2-1 · "`:483` 那块"落空**：§28.2(a)「声明随之挪到 `bb_pp_scan_all()` **之前**（`:483` 那块）」。实测 `483` 是**空行**，
+  注释块是 484–487、`static bool s_pp_done;` 在 **488**。写 484 或 488 才对得上。
+- **P2-2 · `§24.x` 占位符没落地，三处**：`hardware/20260919_墨水屏点屏排查记录.md:1763`、`done.md:768`、
+  `updates/20260922_墨水屏收尾R42.md:48` 与 `:69` 都写"§24.x"。我核真实落点是 **§24.2**（`### 24.2` 在 1261 行、`### 24.3` 在 1299 行，
+  【R42 订正①②】插在 1281–1290）。"x" 这种写法在本文件里是**指不到节的**，正好违反本轮自己在 §28.5 强调的"落点要对号"。
+- **P2-3 · 时刻不可解析**：排查记录 `:1747` 逐字「**11:52:0x 实测**：`git ls-files | grep -c "墨水屏"` = **0**…」。
+  `11:52:0x` 不是一个时刻。这条恰恰是"三段式"里"命令+时刻+数"的**范例句**，坏在第二段。
+- **P2-4 · `backups/README.md` §5 根 A 的日志只列了两只**：逐字「根 A `r42_*/` 另有 `build_r42.log`、`build_r42_try1.log`、`docs/` 九份」——
+  实到 **3** 只（漏 `build_r42_failed.log`，而同一段表格行和 §28.4 都点名它"随本轮进两根"）。根 B 那句"三只 log"是对的，两句话对不齐。
+- **P2-5 · README §2 的"§编号一一对应"不成立**：「`rNN_YYYYMMDD_HHMMSS/` —— 一轮一份，`NN` 是轮次（与 `done.md`、排查记录的 **§编号一一对应**）」
+  实测根 A 有 `r34_…`/`r35_…`/`r36_…` 三只目录，而排查记录最大到 **§二十八**（`grep -c "^## 三十"` ⇒ 0），
+  反向 §二十四 = R38、§二十六 = R40、§二十七 = R41。应改成"与文中的 `RNN` 标号对应；§编号**不**对应"。
+- **P2-6 · README §2 把 `r2X_epd_*` 归错线**：「`audit_rNN_*`、`r1X_backend_*`、`r2X_epd_*` 是**墨水屏线之前**（后端/点屏早期）的旧命名」
+  ——同句括号自己就和"之前"打架：`r20_epd`/`r21_epd`/`r22_epd` 就是墨水屏线本体（对应 `updates/20260920_墨水屏真驱动与供电根因R19-R21.md`）。
+  这三只"内容口径"和 R19 之后一致，不该被划进"不要拿现在的表去对它们"那一堆。
+- **P2-7 · 本轮结束时刻三个文件两个值**：排查记录 §28 写「09:30 ~ **11:51**」，`done.md:730` 与 `updates/…R42.md:3` 都写「09:30 ~ **11:55**」。
+  按钟点警告"时间戳只当运行标签"，这不算假事实，但**同一轮的标签在归档三件套里不一致**，下一轮无法判断哪个是收口时刻。
+- **P2-8 · `cmp -l` 那个 284,444：能复跑，但不配当凭证**（这是任务点名要我判断的一条）。
+  我复跑（12:25:24）逐字：
+
+        $ cmp -l backups/r40_20260922_052906/zizhao_esp32s3.bin backups/r42_20260922_114342/zizhao_esp32s3.bin | wc -l
+        284444
+        first: 29 270 340        last: 1139504 117  23
+        stderr: cmp: EOF on ‘…r40…bin’ after byte 1139504
+
+    三个数（284,444 / 首差 29 / 末差 1,139,504）**与 §28.4 与 `烧录须知` 完全一致**，"279,337 不可复跑"也真不可复跑（它操作数是盘上已不存在的 `528dcc62…`）。
+    但：1,139,504 字节里有 284,444 处不同 = **25% 的字节都对不上**，这不是"代码变了 28 万处"，是**整体后移的相位噪声**——
+    一个字节前插就会让后半段全错。把它写进"待烧指纹"段落当凭证，读者会高估证据强度。
+    同一条断言（"确有代码进 rodata"）有**硬得多的可复跑证据**，本轮没想到：
+
+        $ grep -a -c "排在链首"                 r40=0   r42=1   根B r42=1   构建目录=1
+        $ grep -a -c "SCL 真的被配成推挽并起过时钟"  r40=0   r42=1   根B r42=1   构建目录=1
+
+    ⇒ 建议把 284,444 降级为附注，主凭证换成"新旧字串在镜像里的**存在性**"（单位=1 行，跨尺寸不变，两根都能跑）。
+- **P2-9 · `墨水屏` 清单计数一族会每轮 +1，文档没预告**：§28.1④ 写「`git -c core.quotePath=false ls-files | grep -c "墨水屏"` = **5**」（11:52 快照）。
+    我 12:27:48 复跑 = **6**，涨的正是本轮新入库的 `updates/20260922_墨水屏收尾R42.md`。带时刻 ⇒ 不算假事实，
+    但同一句用它去支撑"仓库跟踪的复核报告 0 只→3 只"这类**清单断言**，读者会以为 5 是稳态。这一族每轮至少 +1（每轮必新增一只 `…墨水屏收尾RNN.md`）。
+- **P2-10 · `backups/README.md` 自己不在 git 里，但被三处文档当"已归档资产"引用**：
+  它确实被 `.gitignore:19` 吃掉（`git check-ignore -v backups/README.md` ⇒ `.gitignore:19:backups/  backups/README.md`；`git ls-files backups` ⇒ 0 命中），
+  README §1 也**诚实写了这一点**（值得肯定）。问题是 `done.md:770`、`dev_log/20260922.md:304`、`updates/…R42.md:79` 都把它列进"本轮归档落点"，
+  而 R42 的提交（`489baad`）里没有它 —— 从 git 检出的机器上按这三处清单去找 `backups/README.md` 会找不到。建议清单里给它标一句"（磁盘 only）"。
+
+## 4. 无法核实
+
+- **U-1 · 成功第 1 次那只 `528dcc62a3b014eb397c1c2bcb321f2b` / `0x116400`**：盘上不存在（构建目录现为 `2174cd05…`）。
+  尺寸有间接旁证（`build_r42_try1.log` 第 57 行逐字 `zizhao_esp32s3.bin binary size 0x116400 bytes`，与文档一致），
+  **md5 永久不可核**。文档自己已标"盘上已不存在"，处置正确 ⇒ 我不追加判级，只登记。
+- **U-2 · 钟点警告的两个读数**（11:32:25 → 11:52:59）：无落盘产物可核（`C:\esp` 里那三只构建日志的 mtime 是
+  11:40:20 / 11:41:30 / 11:47:16，落在区间内但不构成对读数的证明）。文档已自称"读数差不是时长"，方向是安全的。
+- **U-3 · `s_pp_done` 置位点搬家"进了镜像"这句**：搬家不是 rodata，字符串法**证不到**。
+  我只能给间接链：① 五只源文件 `main/ ↔ 两根 ↔ 构建目录` 逐只 `cmp` 全同；② `build/.bin_timestamp` 逐字
+  `2174cd05149241ca39335f2fb257abda  C:/esp/zproj/build/zizhao_esp32s3.bin`；③ 源文件 mtime 全部早于镜像 mtime
+  （`axp_panel_power.c` 11:46:51、`epd_driver.c` 11:40:55、`eink_display.c` 11:08:32 < bin 11:47:36）；④ 同一只镜像里能搜到本轮另两处字串改动。
+  ⇒ 结论：**间接证据充分、无直接痕迹**；若要把 U-3 升为"已证"，需要 `zizhao-esp32s3.map`（存在，但未进任何备份根，见 P1-4）。
+
+## 5. 我试图证伪但没成功的条目（逐条附实读，供你判断我有没有偷懒）
+
+- **G1 · 行号引用族（除 `:577`/`:483` 外全中）**：`:312`=`【R42 P2-⑥】"跑过一次"的口径…`✓｜`:505`=声明搬家注释首行✓｜`:511`=`【R42 措辞自查】`✓｜
+  `:542`=`s_pp_done = true;   /* R42 P2-⑥：从这行起 SCL 已是推挽…*/`✓｜`:652`=`s_pp_done ? "本上电周期已跑过一次（= bb_setup 成功…R42 P2-⑥ 之后…）"`✓｜
+  `:866`=`【R42：别写成"别去白等判活"】这个置位点的效果只在非放行轮成立`✓｜`epd_driver.c:393`=`【R42 收口…】`✓｜
+  `epd_driver.c:73`=`【R40 口径】这个 0.45s 只能标"典型"…`✓（"未漂"为真）｜`epd_driver.c:164` + `eink_display.c:540` = 0.26 订正双落点✓。
+- **G2 · 指纹族全中**：`0x116450` = **1,139,792 B**（`stat -c '%s'` 三处一致，且 0x116450 换算 = 1139792 ✓）；
+  md5 `2174cd05149241ca39335f2fb257abda` = 构建目录 / 根 A / 根 B **三处同一只**（我在 12:24 独立重跑，与文档 11:47:25、12:17:45 两次读数同结论）；
+  上一只 `0b8818b7…` = `0x116330` = **1,139,504 B**、两根都还在、md5 未变 ⇒ "降级为历史产物"这句是真的，且 288 B 差、80 B 差都对得上。
+- **G3 · "含本轮代码修复"**：镜像里 `排在链首` 与 `SCL 真的被配成推挽并起过时钟` 两处各命中 1 次，r40 镜像两处各 0 次；
+  旧句 `不参与那六条判决尾巴` 在**四只镜像里都是 0**（⇒ 文档说"这句一度写在代码里"是指 R41 版工作副本，没有镜像级主张，不构成矛盾）。
+- **G4 · quotePath 教训**：`git config --get core.quotePath` 退出码 **1**（未设置 ⇒ 默认 true）；
+  同一条 `show HEAD --name-only | grep -c "烧录须知"`：带 `-c core.quotePath=false` = **1**，不带 = **0** ⇒ **假阴性机制成立**。
+- **G5 · 跟踪报告"自本轮起 3 只"**：`git -c core.quotePath=false ls-files | grep -c "复查报告"` = **3**，逐字列出的正是
+  R40 / R41_code / R41_docs；默认口径 = **0**（同一条假阴性）。`hardware/20260921_R33复查报告原文.txt` 确实**未跟踪**（`git status` = `??`），
+  与 §20 那条"盘上存档 1 份 + 备份副本 1 份"的订正不冲突。
+- **G6 · 报告原文"cmp 与 md5 双核一致"**：`C:\esp\r41_rep_code.txt`(40,130 B/10:23) md5 `1b8fef9d…` == 仓库副本；
+  `C:\esp\r41_rep_docs.txt`(33,749 B/10:49) md5 `18bc035c…` == 仓库副本；两只判级汇总逐字与 §28 表格一致（P0 0/P1 3/P2 6/无法核实 5/9 组；P0 0/P1 4/P2 4/无法核实 2/23 组）。
+- **G7 · 备份清单（除 P2-4/5/6 外）**：根 A 目录数与命名（含 `r27b/r29b/r31b/r32final{,2,3}/r38{,b,c}` 重试后缀）✓；
+  根 B 四条 **2/5/7/5** ✓（`r37`=2、`r39`=5 平铺无 bin、`r40`=7、`r41`=5 无 bin）；**R41 那批两根都没 bin** ✓ 仍真；
+  `docs/` **九份** ✓；根 A r39 bin = **1,139,440 B** ✓；根 A `r41_20260922_091459` 与根 B 同名目录**内容不同**（A 含 `docs/`、B 不含）✓；
+  `backups/todo_prev_R19-R32_20260922_011600.md` 在根上 ✓；根 B r42 **无 `eink_display.h`** ✓（todo 里那句"也没有 eink_display.h"是对的）。
+- **G8 · 构建三段日志与失败原因**：`build_r42_failed.log` md5 `a7658928eca9810a6eaacf65130eb773`（两根同值）✓，
+  第 49 行逐字 `C:/esp/zproj/main/epd_driver.c:80:84: error: "/*" within comment [-Werror=comment]` ✓，
+  该日志里最后一行 binary size 是 `Bootloader binary size 0x57d0`（第 43 行）、**app 那行确实从未打印** ✓；
+  `build_r42_try1.log` `7770e61e…` + `0x116400` ✓；`build_r42.log` `b0fff93d…` + `0x116450` ✓；两只成功日志 `grep -ci warning`=0、`grep -ci error`=0 ✓。
+- **G9 · 端口快照**：`C:\esp\ports_20260922_R42.txt` 5,498 B、`ts=2026-09-22 11:27:06` ✓；COM3~6 Description 逐字 `蓝牙链接上的标准串行` + 实例前缀 `BTHENUM\{00001101-…}` ✓；
+  K3 里 COM7/COM8 `FTDIBUS\VID_0403` ✓、COM10~12 `VID_0483` ✓、COM13/COM14 `Unknown` ✓；COM14 实例 `6&1C68E73C` ✓、MAC `70:04:1D:D8:75:8C` ✓、
+  COM13 `6&32CE6A2E` / `70:04:1D:D7:B8:48` ✓；第 65 行 `未知 USB 设备(设备描述符请求失败) [USB\VID_0000&PID_0002\5&322F3E23&0&1]` ✓。
+  上一只 `ports_20260922_R41.txt` 只有 103 B、`ts=2026-09-22 08:25:21`、**确实没有 Description 字段** ⇒ "R41 那句蓝牙是推测"为真。
+- **G10 · 脚本**：`r34_flash.ps1` 第 31 行 `$R = if ($env:RNN) { $env:RNN } else { "rNN" }` ✓ 且注释写明"从 R38 起硬写 r38_"；
+  第 17 行 `Set-Location "C:\esp\zproj\build"` + 第 24 行 `0x20000 zizhao_esp32s3.bin` ⇒【口径钉死】"脚本烧的是**构建目录**那只"**为真**。
+- **G11 · 六档/六道结构**：判决 `?:` 链实测 **6 支**，`cap_set_e != ESP_OK` 确为**链首**，后五支 = 2×`ACK=0` + 3×`同址复现` ⇒ §28.2(b) 的"命中链首读不到后五档"**成立**；
+  `pp_skip` 实测 **6 档**（`!swapped_ran`/`!od_exhausted`/`s_pp_done`/`!bus_quiet`/`!pull_readable`/`scl_ext_high`）+ `bb_pp_scan_all()` 体内 `cap_get_e`、`bb_setup` 两道提前 return
+  **都在 `:542` 置位之前** ⇒ 名额搬家这句话在代码里是真的做到了。
+- **G12 · 14.07/0.26 加法族**：`0.47+0.05+2.75+2.75+0.05+8 = 14.07` ✓、`14.07+0.26=14.33` ✓、`0.73+0.05+2.75+2.75+0.05+8 = 14.33` ✓、
+  `0.73−0.46=0.27`（现行母数）✓ ⇒ "R41 说 14.07 漏了一个 0.05s"确实是假账，本轮的订正**算对了**。
+- **G13 · "恒 56" 的 9 个活口**：我按 `grep -E "恒 56|始终 56|差值恒|差值始终"` 全仓库扫（排除 `backups/`），
+  命中处**每一处都紧跟【R42 订正】/【R42 证伪】**：`dev_log:164→165`✓、`FreqErr:539→540`✓、`done:639→641`、`done:686→687`✓、
+  `排查记录:1530→1532`、`:1617→1618`✓、`updates/R40:37→38`✓、`updates/R41:32→33`✓、`epd_driver.c:394`（以"写死过"的过去式引用）✓。
+  ⇒ 这条我想抓没抓住，**扫干净了**。
+- **G14 · main/ 注释重写有没有又自指导入一次计数**：没有。新注释里只留"R40/R41 两版在这里**写死过** 7/9/63/65/16/72"（过去式点名）+ 一条要读者自己重跑的命令，
+  没有出现"本注释有 N 处"。`grep -c "BUSY stuck"` 于 `epd_driver.c` = 2，是旧名字面量本身，不构成自指计数断言。
+- **G15 · 归档交叉引用**：§28 内出现的全部 `§` 目标（§9、§11、§13、§16、§18.2、§19.1、§23.3、§24、§26.4、§26.5、§27.3）与
+  新锚点（§28.1/28.2/28.3/28.4/28.5、§27.6、§24.2）**都存在**；`done.md §二十一`、`dev_log 第十七批`、`updates/…R42.md`、
+  `FreqErr` 新 **7** 条（`git show HEAD -- FreqErr.md | grep -c "^+\[错误类型\]"` = 7，与"新增七条"标题一致）✓；
+  指向盘外的指针 `C:\esp\r41_rep_code.txt`/`_docs.txt`/`ports_20260922_R42.txt`/`r42_ports.ps1`/三只 build 日志 **全部在盘上**。
+
+## 6. 这一轮还没做的事（我复核后确认"仍未做"，且文档没有把它写成已做）
+
+任务给的 7 条我逐条扫了全仓库（排除 `backups/`），**没有任何一处**把它们说成"已完成/已排除/已实测"：
+
+1. **R38~R42 一只字节都没烧进板子** ✓ 仍未烧。三处一致表述：`todo.md:28`、`done.md:771①`、`dev_log:308①`、`§28.5①`。
+   端口证据链也仍未变（COM14 只在 `Unknown` 名单里）。
+2. **六档判决一档都没读过** ✓ `烧录须知` 那三行判决表的"实测读数"格至今写 **`未跑过`**／`未出现`。
+3. **屏亮没亮零次肉眼确认** ✓ `updates/…R42.md:85` 第 6 条仍在；`ENABLE_EINK_PARTIAL` 仍为 0（局刷至今未经验证）。
+4. **第三块活板没碰、COM13 也没碰** ✓ `todo.md` 第 64 条仍写"COM13 与第三块活板**都不许动**"。
+5. **PMIC ship/关机模式仍不可验证 ≠ 已排除** ✓ `done.md:774⑤`、`§28.5⑤`、`updates:84`；`烧录须知.md:35` 仍把它列为**待查假设**；
+   R41 报告 U-4 那句"不允许别处把它写成已排除"没有被违反（全仓库 `grep` 未见"已排除 ship"）。
+6. **没有 `git push`** ✓ 本地 `origin/main` = `0720537`，`git rev-list --count origin/main..HEAD` = **3**（R40/R41/R42 三个提交都未推）。
+7. **没播完成提示音** ✓ `§28.5①`、`done:773②`、`dev_log:308②` 都明写不播。
+
+**本轮自己新增的"还没做"**（不是复述，是我这轮之后多出来的）：
+
+8. `:577`→`:581`、`:483`→`:484/488`、`§24.x`→`§24.2`、`11:52:0x` 这四个引用还没修（P1-1 / P2-1 / P2-2 / P2-3）。
+9. 钦定口径的**现值**还没重跑进文档：文档停在 11:51:06 的 26/106，盘中实为 12:28:29 的 **68/204**（P1-3）。
+10. `updates/…R42.md` 那句"写给下一轮的计量口径"还没改成跨提交稳定的命令（P1-2）——**这条最要紧，它会在下一轮直接诱发"该重建却没重建"**。
+11. `main/` 17 只文件的未提交欠账、以及 `.elf`/`.map` 不进任何备份根的欠账，都还没处理（P1-4）。
+12. 报告只落了**一只**（本文件）。任务 #99 要的是"代码侧 + 文档侧两组"，本轮我只被派了文档侧 ⇒ 代码侧对 `489baad` 的复核仍是空白。
+
+## 7. 如果只改三处，改哪三处（按性价比排序）
+
+1. `updates/20260922_墨水屏收尾R42.md` 的"计量口径"段：`git diff HEAD` ⇒ `git show HEAD --`，并补一句"本命令在提交后才成立，提交后跑 `git diff HEAD` 恒为空"。（挡下一次漏重建）
+2. `axp_panel_power.c:577` ⇒ `:581`（三处），顺手 `:483`⇒`:484/488`、`§24.x`⇒`§24.2`、`11:52:0x`⇒补全秒位。（挡归因失联）
+3. `§28.1②` + `epd_driver.c`③ + `backups/README.md`§7 同改一句：**归档两侧都涨**，并把"要复跑的那个数"从
+   `grep -rn --exclude-dir=backups "BUSY stuck" .`（本轮实测 **68**）换成 `grep -rn "ESP_LOG.*BUSY stuck" main/`（本轮实测 **0**，不随归档漂）。
+
+—— 报告结束。审查者：空上下文故障检测专员（文档侧）。除本文件外未写、未改、未删任何文件。
