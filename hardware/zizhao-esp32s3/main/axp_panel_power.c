@@ -309,7 +309,9 @@ static void axp_bus_pull_compare(int *up_sda, int *up_scl, int *dn_sda, int *dn_
  *       （IDF 5.1.6 components/driver/gpio/gpio.c:434-447），legacy i2c 驱动也不碰驱动能力，
  *       不显式复原就是把这个设置永久留给后面每一轮。
  *   (e) 一个上电周期只跑一次（s_pp_done），且它外面还套着 full_diag 轮（头 3 轮 + 每 60 轮
- *       错开 30）与 pads_free 两道门。
+ *       错开 30）与 pads_free 两道门。【R42 P2-⑥】"跑过一次"的口径 = **真的把 SCL 配成推挽并起过
+ *       时钟**；那两道"还没把 SCL 推起来就 return"的出口不再消耗名额（见 `bb_pp_scan_all()` 上方那条注，
+ *       那里同时说明为什么**不能**把这两道叫成"什么线都没碰"）。
  * 能换到什么：④拿到 ACK ⇒ "SCL 那一路上拉缺失/那一轨 0V"从推断变成实测，且点不亮屏的原因
  * 第一次落到一个软件能绕开的点上（但绕行不合规，只当诊断手段，不当修复）。④仍 0 ACK ⇒
  * 主机侧连边沿质量这一维也实测排除，0 应答只能落在器件侧（没通电 / 没出复位 / 不在这张地址表），
@@ -479,6 +481,12 @@ static int bb_scan_all_slow(const bb_pins_t *p, const char *role)
     return acks;
 }
 
+/* 推挽档一个上电周期只付一次对顶风险：它跑在 full_diag 轮里（头 3 轮 + 每 60 轮），
+ * 不加这个标志的话头 3 轮就是三次，而每次都是 112 帧主动顶时钟。
+ * 声明必须落在 `bb_pp_scan_all()` 之前（本文件里它的定义在 `bb_probe()` 之前，
+ * 置位点要写进函数体，放在后面就看不见这个符号了）。 */
+static bool s_pp_done;
+
 /* ④推挽 SCL 全地址扫（R38）：把 SCL 由高电平时改成主动顶到轨，边沿不再受上拉电阻限制。
  * 这是主机侧最后一维，也是唯一有对顶风险的一档，所以进不进来由 bb_probe 里那组门条件决定，
  * 而对顶代价本身由这里三层兜住：SDA 恒开漏（bb_setup 里写死）、驱动能力设最弱一档并回读、
@@ -493,7 +501,16 @@ static int bb_scan_all_slow(const bb_pins_t *p, const char *role)
  * 那条 `pp_skip` 的六道链里，所以别叫它"第 6 道门"——那个编号已经被 P1-5 的 `swapped_ran` 占了，
  * 同一文件里两个"第 6 道门"是数不出来的那种写法）：读不到原值就没法复原，不猜一个值写回去，
  * 这一档直接不跑（把焊盘留在 CAP_0 上会让之后每一轮硬件 I2C 都跑在一个我们没设过的档位上，
- * 那是在给后续取证掺变量）。 */
+ * 那是在给后续取证掺变量）。
+ * 【R42 P2-⑥：`s_pp_done` 的置位点从 `bb_probe()` 的"进入前置位"挪到这里、放在下面那两道
+ *  "还没把 SCL 配成推挽就 return"的出口之后】。挪之前只要走到 `if (pp_skip == NULL)` 槽就烧掉，
+ *  而这两道出口根本没顶起过一次时钟 ⇒ 日志下一轮印"本上电周期已跑过一次"，把整条链上唯一
+ *  还没实测的维度（主机侧「上升沿质量」）用一次"没测成的跳过"永久跳过，且看不出来。
+ *  现在只有 `bb_setup` 成功、真的要以推挽驱动 SCL 了才算"跑过一次"（对顶风险从这里开始付）；
+ *  两道出口各自那行"跳过"仍在，下一轮 full_diag 还会再来。
+ *  【R42 措辞自查】别说成"什么线都没碰"：`bb_setup` 失败那一道的上游已经写过一次
+ *  `gpio_set_drive_capability(CAP_0)`（改的是档位寄存器，不是驱动状态）。准确说法是
+ *  "从没以推挽把 SCL 推高过"，遗留的只有档位——所以下面那行日志要报出复原结果。 */
 static void bb_pp_scan_all(const bb_pins_t *p, const char *role)
 {
     int pp_acks = 0, pp_nacks = 0, od_acks = 0, od_nacks = 0;
@@ -522,6 +539,7 @@ static void bb_pp_scan_all(const bb_pins_t *p, const char *role)
                  role, esp_err_to_name(e), esp_err_to_name(early_e));
         return;
     }
+    s_pp_done = true;   /* R42 P2-⑥：从这行起 SCL 已是推挽 ⇒ 槽位在这里、不在调用前扣 */
     (void)bb_release_clocks(p, BB_SLOW_HALF_US, &high_beats);
     for (uint8_t a = 0x08; a <= 0x77; a++) {
         if (!bb_addr_ack(p, BB_SLOW_HALF_US, a)) {
@@ -560,7 +578,7 @@ static void bb_pp_scan_all(const bb_pins_t *p, const char *role)
              (unsigned)BB_SLOW_HALF_US, high_beats, pp_acks, pp_nacks, first_str,
              od_same < 0 ? "没测" : (od_same == 1 ? "ACK" : "NACK"),
              od_acks, od_nacks,
-             cap_set_e != ESP_OK ? "驱动能力没设成最弱档（见上），这一段的限流假设不成立，判决照读但代价核算要重算"
+             cap_set_e != ESP_OK ? "驱动能力没设成最弱档（见上），这一段的限流假设不成立 ⇒ 计数与高低拍两个字段照读，代价要重算（这一支是六档判决的第①档、且排在链首：命中它就不再看 ACK / 9 拍 / 同址复现那五档）"
              : (pp_acks == 0
                  ? (high_beats < 9
                      ? "推挽档自己都没把 SCL 抬满 9 拍（见前面 9clk_high）⇒ 线上有比最弱驱动档更强的下拉（对顶或钳地）。这一档测不出'上升沿质量'的结论，0 应答也不能记到器件头上"
@@ -571,11 +589,6 @@ static void bb_pp_scan_all(const bb_pins_t *p, const char *role)
                          ? "只有把时钟主动推高才有应答、同一个地址换回开漏就 NACK ⇒ 根因落在 SCL 那一路的上升沿（外部 4.7K 那一档没生效，只剩内部 45K）。引脚表与驱动层无罪。注意：I2C 规范不允许主机推挽 SCL，这是诊断绕行手段、不当修复"
                          : "推挽段拿到 ACK，但换回开漏的 GPIO 配置失败 ⇒ 同址复现没测成，这一档只交付'推挽下有人应答'半条结论，'能不能长期用'仍未测"))));
 }
-
-/* 推挽档一个上电周期只付一次对顶风险：它跑在 full_diag 轮里（头 3 轮 + 每 60 轮），
- * 不加这个标志的话头 3 轮就是三次，而每次都是 112 帧主动顶时钟。
- * 标志在进入前就置位，探针内部 GPIO 配置失败也算"跑过一次"：宁可不重试，也不在一轮里多顶一次线。 */
-static bool s_pp_done;
 
 /* 一整段位碰诊断。调用前提：端口0 已交还（pads_free），且 41/42 此刻归我们支配。
  * scl_ext_high/pull_readable 由调用方从 pull compare 带进来：前者是"这一路有没有强于 45K 的
@@ -636,12 +649,11 @@ static void bb_probe(bool scl_ext_high, bool pull_readable)
     const char *pp_skip =
         !swapped_ran ? "对调档那一路 gpio_config 就没成 ⇒ 开漏五档里少了一档的证据，「穷尽」这句话此刻缺最后一维（R39 P1-5：以前这一档失败只是日志少一行，门却照开，而同一个「没证据」在 pull compare 那一路是按『不跑』处理的——两套口径不能并存）" :
         !od_exhausted ? "开漏那几路已经有 ACK，推挽只会多冒一次对顶风险，换不到新信息" :
-        s_pp_done ? "本上电周期已跑过一次" :
+        s_pp_done ? "本上电周期已跑过一次（= `bb_setup` 成功、SCL 真的被配成推挽并起过时钟；R42 P2-⑥ 之后，那两道'还没把 SCL 推起来就 return'的出口不再算数）" :
         !bus_quiet ? "SDA 不干净（after9=0 ⇒ 9 拍后器件仍把数据线上扣着；或 sda_low=1 ⇒ 我们主动拉低却读回高，线上有比内部 45K 更强的驱动源）⇒ 事务不在静止态，此刻顶时钟最危险" :
         !pull_readable ? "pull compare 那两次 gpio_config 至少一次失败 ⇒ 不知道时钟路上有没有强驱动源，推挽就成了盲顶" :
         scl_ext_high ? "SCL 那一路已被外部驱动为高 ⇒ 推挽=与强驱动源对顶（该由它自己抬，不该我们顶）" : NULL;
     if (pp_skip == NULL) {
-        s_pp_done = true;
         bb_pp_scan_all(&kBBNormal, "sda41/scl42");
     } else {
         ESP_LOGW(TAG, "bitbang sda41/scl42 PP-SCL 跳过（原因=%s）→ 主机侧「上升沿质量」这一维本轮仍未实测", pp_skip);
@@ -850,7 +862,12 @@ bool axp_enable_panel_rail(void)
                      esp_err_to_name(en_rd_e), esp_err_to_name(en_wr_e),
                      e_on == ESP_OK ? "ok" : esp_err_to_name(e_on), on,
                      e_vol == ESP_OK ? "ok" : esp_err_to_name(e_vol), vol);
-            s_axp_off = true;   /* 轨没开成 = 面板必然无电，按"没电"处理，别去白等判活 */
+            s_axp_off = true;   /* 轨没开成 = 面板必然无电，按"没电"处理。
+                                 * 【R42：别写成"别去白等判活"】这个置位点的效果只在**非放行轮**成立：
+                                 * `epd_driver.c` 的分支表 B2 那条门是
+                                 * `rail_off && (s_probe_round % PANEL_PROBES_PER_LIVENESS) != 0`，
+                                 * 每 12 轮仍放行一次判活+init ⇒ 这一支不会把面板永久挡在判活之外，
+                                 * 但它也不等于"轨一定没电"（回读 0x90 失败/位为 0 都走到这里）。 */
         } else {
             ESP_LOGI(TAG, "panel rail (ALDO3) enabled: 0x90=0x%02X (bit2=1) 0x94=0x%02X → %dmV, wr 0x94=%s 0x90=%s",
                      on, vol, ((vol & 0x1F) * 100) + 500,

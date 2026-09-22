@@ -1,0 +1,379 @@
+# R41 代码侧 · 空上下文故障检测报告
+
+审计对象：`C:\Users\david\Documents\all_projects\自招学习` @ main，HEAD `7f3ed56`（父 `73cbbfc`）
+只审固件代码侧：`hardware/zizhao-esp32s3/main/` 五只源文件（`epd_driver.c` / `eink_display.c` / `axp_panel_power.c` / `epd_driver.h` / `axp_panel_power.h`）+ 这五只里所有"可复跑断言"+ 它们钉住的常数与镜像指纹。
+审计时刻：2026-09-22 09:56:44 ~ 10:17:50（+08:00）。
+仓库状态：全程只读。我跑过的写操作只有一个：本文件（`C:\esp\r41_rep_code.txt`）。未 `git add/commit/checkout/reset/stash`，未烧录，未开串口，未碰 COM13，未碰第三块活板，未跳过 `C:\esp\r34_flash.ps1` 的 MAC 门（该脚本本轮根本未被调用）。
+工作树旁证（不是我改的，但会影响"相对 HEAD"这类句子的读法）：`git diff HEAD --numstat` 对那五只文件 = 空，而全仓库 `git diff HEAD --stat` = 51 files changed（backend 等，与本批无关）⇒ 我下面凡是说"代码 = HEAD"都成立。
+
+判级汇总：**P0 0 条 ｜ P1 3 条 ｜ P2 6 条 ｜ 无法核实 5 条 ｜ 核过无问题 9 组**
+
+一句话结论：**本轮没有 P0**——"未确认供电的面板不许被驱动 CS/DC"这一族防护在代码里是真的成立（证据见 G2/G6），三条 P1 全部落在 `epd_driver.c` 里 R41 自己新写/改写的那段"计数会漂"注释内部：**它一边纠正上一轮的裸计数，一边在同一块注释里又埋了三颗会被自己复跑打穿的数**。P2 里最值钱的一条是 G4 的"推挽名额被拒跑吃掉"（两条日志互斥），其余是措辞与引用对象。
+
+---
+
+## P1（结论性错误：算错 / 不可达当可达 / 引用错对象 / 口径自相矛盾）
+
+### [P1] ① · 注释宣布"`grep -n "BUSY stuck" main/*.c` ⇒ 只有本注释的两行"——同一刻它是**三行**，而且第三条就是这句话自己
+
+被审原文位置：`hardware/zizhao-esp32s3/main/epd_driver.c`，符号锚：`epd_wait_busy_ms()` 函数体内、`ESP_LOGE("BUSY no accepted end within …")` 上方那段【R41：…】漂移注里的这句
+> `**当前代码里没有任何 `ESP_LOG*` 打印旧名**（可核命令`
+> ``grep -n "BUSY stuck" hardware/zizhao-esp32s3/main/*.c` ⇒ 只有本注释的两行），`
+
+我核到的事实：
+```
+$ cd ...自招学习 && date -Is
+2026-09-22T09:56:44+08:00
+$ grep -rn "BUSY stuck" hardware/zizhao-esp32s3/main/*.c | wc -l
+3
+$ grep -rn "BUSY stuck" hardware/zizhao-esp32s3/main/*.c
+.../main/epd_driver.c:385:     * 旧名 `BUSY stuck > %dms (panel not responding)`
+.../main/epd_driver.c:388:     * `grep -rn --exclude-dir=backups "BUSY stuck" .`（含 backups 就去掉这个选项）。
+.../main/epd_driver.c:401:     *  `grep -n "BUSY stuck" hardware/zizhao-esp32s3/main/*.c` ⇒ 只有本注释的两行），
+```
+三处全在同一块注释（385–407）里 ⇒ 括号外面那句大前提"当前代码里没有任何 `ESP_LOG*` 打印旧名"**是对的**（我另跑了一遍更宽的形状，见下），但"两行"这个数是错的，而且错法很讲究：**说出这句话的这一行本身就是一次命中**。它是 R41 新增的行，不是继承来的：
+```
+$ git show 7f3ed56 -- hardware/zizhao-esp32s3/main/epd_driver.c | grep -n "只有本注释的两行"
+126:+     *  `grep -n "BUSY stuck" hardware/zizhao-esp32s3/main/*.c` ⇒ 只有本注释的两行），
+$ git show 7f3ed56 --unified=0 -- hardware/zizhao-esp32s3/main/epd_driver.c | grep -E "^@@"
+@@ -360 +388,2 @@ static bool epd_wait_busy_ms(int timeout_ms, bool require_high)
+@@ -366,2 +395,10 @@ static bool epd_wait_busy_ms(int timeout_ms, bool require_high)
+```
+（同一个 hunk 里加进来的还有 P1-② 那句"差值仍是 56"。）
+大前提本身可核且成立：
+```
+$ grep -rn "stuck" hardware/zizhao-esp32s3/main/ | cut -c1-100
+epd_driver.c:385:     * 旧名 `BUSY stuck > %dms (panel not responding
+epd_driver.c:388:     * `grep -rn --exclude-dir=backups "BUSY stuck" .`
+epd_driver.c:401:     *  `grep -n "BUSY stuck" hardware/zizhao-esp32s3/
+```
+整个 `main/` 里连 `stuck` 这个子串都只出现在注释行，没有一处 `ESP_LOG*`。
+
+建议处置：把"两行"删成不带数的说法（"只有本注释里的指针，没有可执行行"），或者换成不把这句话自己算进去的形状：`grep -rn "ESP_LOG.*BUSY stuck" hardware/zizhao-esp32s3/main/` ⇒ 我实测 0 命中。**别用"本注释的 N 行"这种形式**：注释每多引用一次旧名，N 就 +1，而写这句话的那一行永远在给它 +1——这正是 §27.1 P1-4 立的规矩（"裸计数要么写命令+时刻+当场的数"），它在**固件注释**里被复现了一遍。
+
+---
+
+### [P1] ② · 同一块注释把"两只口径的差值仍是 56"当不变量写死，实测已是 78；而且这 22 的增量正是 R41 自己建的两份备份
+
+被审原文位置：同上文件、同上【R41：…】块的末尾那句
+> `两只口径的差值仍是 56（72−16 与 65−9 相同）⇒ 口径没变、只是又漂了一轮。】`
+
+我核到的事实（用注释自己指定的那对命令，逐字跑）：
+```
+$ date -Is ; grep -rn "BUSY stuck" . | grep -v "/backups/" | wc -l ; grep -rn "BUSY stuck" . | wc -l
+2026-09-22T09:57:47+08:00
+25
+103            ⇒ 差值 = 78
+$ grep -rn "BUSY stuck" . | grep -c "/backups/"
+78             ⇒ 差值就是"backups/ 里的命中数"，它不是不变量
+```
+漂的来源可指到具体目录：
+```
+$ grep -rn "BUSY stuck" . | grep "/backups/" | awk -F: '{print $1}' | sed -e 's#\(/backups/[^/]*\)/.*#\1#' | sort | uniq -c | sort -rn | head -3
+     17 ./backups/r41_20260922_091459
+      3 ./hardware/zizhao-esp32s3/backups/r41_20260922_091459
+```
+R41 在两个根各存了一份源码备份，`epd_pins_release` / `epd_wait_busy_ms` 那几行的注释里就有这个词 ⇒ 每份 +3/+17，56 就是这么变成 78 的。另有一层单位不一致：
+```
+$ grep -rn "BUSY stuck" . | grep -c "Binary file"
+25
+```
+含 backups 那一只口径里有 25 行是 `Binary file ./backups/…elf matches`——**每只镜像只算 1 行**，而文本文件每命中算 1 行。所以"差值"两边的计数单位不同，"56 相同 ⇒ 口径没变"这条推理不成立（它能同时被"多存一份 bin"与"注释变长"推动，两者都不是口径变了）。
+上一轮公布的 17/73（08:41）我没有复现义务——但 16/72→25/103 之间的差不是"+1 一次记录"能概括的：**建一次备份就给它 +20**。
+
+建议处置：①删掉"差值仍是 56"（连"差值恒定"这类二次断言一起删），只保留"命令 + 时刻 + 当场的两个数"；②如果要保留对差值的解释，写成一句结构性说明："差值 ≡ `backups/` 里的命中数，随备份只数 × 注释长度增长，且含二进制时每只镜像只算 1 行"；③`烧录须知` / `updates/…R41.md` 里那句"**两口径差值恒 56**"跟着一起改（同一族，落点在文档，我按代码侧优先登记）。
+
+---
+
+### [P1] ③ · 注释宣称 `--exclude-dir=backups` 与去掉该选项"是同一对口径"，实测两条命令差 2 行；而公开数 16 来自被指着说"可核"的那条的**不等价变体**
+
+被审原文位置：同上文件、同块的这一行（R41 的 hunk `@@ -360 +388,2 @@` **正好改的就是这一行**）：
+```
+-     * `grep -rn --exclude-dir=backups "BUSY stuck"`。落笔那一刻是 **7 命中** = 上述三处文档共 5 行
++     * `grep -rn --exclude-dir=backups "BUSY stuck" .`（含 backups 就去掉这个选项）。
++     * 落笔那一刻是 **7 命中** = 上述三处文档共 5 行
+```
+（上面这段 diff 是我用 `git show 7f3ed56 -U2 …| grep -A4 -B2 "可核口径"` 打的。）
+
+我核到的事实：
+```
+$ date -Is ; grep -rn --exclude-dir=backups "BUSY stuck" . | wc -l ; grep -rn "BUSY stuck" . | grep -v "/backups/" | wc -l
+2026-09-22T09:57:47+08:00
+27
+25
+$ grep -rn --exclude-dir=backups "BUSY stuck" . | sed 's/:.*//' | sort > /tmp/a.txt
+$ grep -rn "BUSY stuck" . | grep -v "/backups/" | sed 's/:.*//' | sort > /tmp/b.txt
+$ comm -23 /tmp/a.txt /tmp/b.txt        # 只有 --exclude-dir 口径有的两行
+./hardware/20260922_R40复查报告原文.txt
+./hardware/20260922_R40复查报告原文.txt
+$ grep -n "BUSY stuck" ./hardware/20260922_R40复查报告原文.txt | grep -c "/backups/"
+2
+```
+原因：`grep -v "/backups/"` 是对**整行内容**做匹配，不是对路径做匹配。那份存档报告的第 92、94 行本身就是命令原文（`grep -rn "BUSY stuck" . | grep -v "/backups/" | wc -l   → 16`），行内含 `/backups/` ⇒ 被自己过滤掉。于是"含 backups 就去掉这个选项"这句等价性断言在**当前仓库里不成立**，而且它错的这一版正是 R41 落地的这一行。
+连带后果（这条才是我判 P1 的理由）：注释钦定的"可核口径"（`--exclude-dir=backups`）今天给 **27**，而注释里引用的两个数 **16 / 72** 是按那条不等价的变体算的 ⇒ 下一轮任何人照注释的命令复跑，都对不上注释里的数——这恰好是 §27.1 P1-1 本轮刚立的规矩（"引用即复跑"）。
+
+建议处置：①在这块注释里**只留一条命令**，写全（含 `| wc -l`），并明确"另一条口径会按内容误杀含 `/backups/` 字样的命令行文本，不要用"；②把 `16 / 72` 改标成"`grep -v` 变体、08:20 快照"，与 `27`（今天，`--exclude-dir`）分开写；③若想把"排除备份"做对，用 `--exclude-dir=backups` 或 `--exclude='*.elf' --exclude='*.bin'` 之一并写死，别用 `grep -v` 打路径。
+
+---
+
+## P2（措辞 / 标签 / 一致性）
+
+### [P2] ④ · 提交说明写"gpio_reset_pin **五处**旧口径统一"，代码里带 `R41 统一口径` 标的是**六格**
+
+被审原文位置：`git show -s --format=%B 7f3ed56` 里那句"`gpio_reset_pin` 五处旧口径统一为 `GPIO_MODE_DISABLE`+约45K 上拉"。
+
+我核到的事实：
+```
+$ grep -rn "R41 统一口径" hardware/zizhao-esp32s3/main/ | cut -c1-60
+main/axp_panel_power.c:308: *       （输入缓冲是**关**的，不是"输入"；R41 统一…
+main/axp_panel_power.c:490: * 不是"输入"；R41 统一口径），不恢复 FUN_DRV
+main/axp_panel_power.c:864:     * + 内部上拉"（输入缓冲关，不是"输入"；R41 统…
+main/axp_panel_power.h:11:  * **不是高阻**、更不是"输入"；R41 统一口径，与 `axp_…
+main/epd_driver.h:36:       * 也不是高阻**；R41 统一口径，交还动作见 epd_driver.c…
+main/epd_driver.h:68:       * R41 统一口径，此前这里写作"输入 + 约 45K 内部上拉"。
+```
+= 6 格（`.c` 3 + `axp_panel_power.h` 1 + `epd_driver.h` 2）。文档侧口径是**对的**：`hardware/20260919_墨水屏点屏排查记录.md` §27.2 ⑧ 写"残留 5 处 …落地时还多扫出一处报告没列的：`epd_driver.h` 的 `epd_sleep()` 那格 ⇒ 按符号扫全文"，`done.md:686` 同。**只有提交说明这一句停在"五处"。**
+建议处置：提交说明不能改（已入库），那就按项目纪律在 `done.md`/§27.2 ⑧ 旁边补一句"提交说明里的'五处'是报告清单的数，落地是六处（第 6 处 = `epd_driver.h` 的 `epd_sleep` 那格）"，让"六"在本批所有载体里一致；下一轮提交说明按符号数。
+
+### [P2] ⑤ · 仓库级清扫漏了一处活的"用高阻交还"——在 `FreqErr.md` 的**正确做法**里（落点在文档，但它是被本轮钦定的那条全仓库 grep 抓出来的）
+
+被审原文位置：`FreqErr.md`，符号锚：R25 那条"[错误类型] 修一处闸门时只验'要救的那条路径'…" 的 `→ 正确做法：…` 末句
+> `同时记住**"归到已知空闲态"≠"驱动到某个电平"**，未供电的负载要用高阻交还而不是钉高。`
+
+我核到的事实（本轮任务书第 6 组指定要跑的那条 grep，去掉 backups）：
+```
+$ grep -rn --exclude-dir=backups -e "Hi-Z" -e "hi-Z" . | cut -c1-150
+（14 行，全部是"旧日志串的历史引用"：done.md 214/241/462、updates/R28 23/24、updates/R29 34、
+  排查记录 647/649/1164、烧录须知 266、dev_log 211/152/181/16、updates/R30 44、updates/R33-R38 38）
+$ grep -rn --exclude-dir=backups "输入高阻" .
+（无输出）
+$ grep -rn -e "Hi-Z" -e "高阻" hardware/zizhao-esp32s3/main/
+（9 行，逐行都是"不是高阻"的否定式或历史引用；固件侧干净）
+```
+`FreqErr.md:200` 那一行不在上面两条的输出里（它写的是"高阻"不是"Hi-Z"，且不含"输入高阻"），是我按 `高阻` 复查 `main/` 之外的文件时看到的。区别很重要：其余 14 处都是**引用旧日志串**（合法、该留），只有这一处是**往未来教的口径**。R41 的统一口径说得很清楚：`gpio_reset_pin` 给的是 `GPIO_MODE_DISABLE` + 约 45K 上拉、输入缓冲关，**不是高阻**。"别钉高、要交还"这个实质没错，但教学句用了被本轮判定为假的术语。
+建议处置：把该句改成"未供电的负载要交还到不驱动态（本机实际是 `GPIO_MODE_DISABLE`+45K 上拉，不是高阻），而不是钉高"。并在 §27.2 ⑧ 那条"按符号扫全文"后面加一句：**清扫范围要含 `FreqErr.md` 的"正确做法"行**——那正是下一轮会被照抄的地方。
+
+### [P2] ⑥ · 推挽档"每上电周期只跑一次"的名额会被**第七道门的拒跑**吃掉：同一轮里"本档不跑"与后一轮"本上电周期已跑过一次"互相打脸
+
+被审原文位置：`hardware/zizhao-esp32s3/main/axp_panel_power.c`，符号锚 A：`bb_pp_scan_all()` 开头 `const esp_err_t cap_get_e = gpio_get_drive_capability(p->scl, &cap_before);` 之后的早退（打印 `… PP-SCL 跳过：读不到 SCL 原始驱动能力 (…) ⇒ 设完没法复原，本档不跑 …`）；符号锚 B：`bb_probe()` 里 `const char *pp_skip = …` 链的第三档 `s_pp_done ? "本上电周期已跑过一次" : …`；符号锚 C：紧接 `if (pp_skip == NULL) { s_pp_done = true; bb_pp_scan_all(...); }`，以及 `static bool s_pp_done;` 上方那段"标志在进入前就置位"。
+
+我核到的事实：
+```
+$ sed -n '508,513p' …/axp_panel_power.c      # 第七道门：只读能力就失败 ⇒ return，一根线都没顶
+    const esp_err_t cap_get_e = gpio_get_drive_capability(p->scl, &cap_before);
+    if (cap_get_e != ESP_OK) {
+        ESP_LOGE(TAG, "bitbang %s PP-SCL 跳过：读不到 SCL 原始驱动能力 (%s) ⇒ 设完没法复原，本档不跑 → …");
+        return;
+    }
+$ sed -n '643,645p' …/axp_panel_power.c      # 名额在进入前就烧掉
+    if (pp_skip == NULL) {
+        s_pp_done = true;
+        bb_pp_scan_all(&kBBNormal, "sda41/scl42");
+```
+`cap_get_e` 失败 ⇒ 早退 ⇒ **没有付过任何对顶风险**，但 `s_pp_done` 已经是 true ⇒ 之后每个 full_diag 轮（30+60k，一个上电周期里就是第 30、90、150… 次探测）都会印"本上电周期已跑过一次"，而它没跑过。`s_pp_done` 上方那条理由只覆盖了"探针内部 GPIO 配置失败"（`bb_setup` 那一档，确实在顶过线之后），没覆盖这道"读能力就失败"的门。
+两条口径在同一件事上相反：一条说"本档不跑"，另一条说"已跑过一次"；而 `烧录须知` 那张表把第七道门描述成"**那一档根本没进**"（对的），把第三道门描述成"每上电周期只一次"（此时是假的）。
+代价：`主机侧「上升沿质量」这一维`在本该实测它的那一轮里被永久跳过，且日志读起来像"测过了"。可达性：需要 `gpio_get_drive_capability` 在 GPIO42 上返回非 OK——我静态无法判它会不会发生（见 U-1）。
+建议处置（二选一，都不涉及判据松紧）：①把 `s_pp_done = true;` 移到"确实进过推挽配置"之后（例如只在 `cap_get_e == ESP_OK` 且函数返回前不早退的路径上置位），保持"宁可不重试"的初衷；或②把 `s_pp_done` 那条文案改成"本上电周期已占过一次推挽名额（可能是被第七道门拒跑占的，认 `PP-SCL 跳过：读不到…` 那一行）"。别用"跑过一次"当名额名。
+
+### [P2] ⑦ · 推挽判决"六条尾巴"里第①条自称"判决照读"，而这一支恰恰是把判决字段整条换掉的那一支
+
+被审原文位置：`axp_panel_power.c`，符号锚：`bb_pp_scan_all()` 末尾那只 `ESP_LOGW("bitbang %s PP-SCL(…): 推挽段 ACK=… | 同址开漏复现=… | OD 段(该地址之后) … → %s", …)` 最外层三元的第一支：
+```
+cap_set_e != ESP_OK ? "驱动能力没设成最弱档（见上），这一段的限流假设不成立，判决照读但代价核算要重算"
+: (pp_acks == 0 ? (high_beats < 9 ? "…" : "…") : (od_same == 1 ? "…" : (od_same == 0 ? "…" : "…")))
+```
+我核到的事实：`%s → 判决`是**同一个字段**，`cap_set_e != ESP_OK` 排在最外层 ⇒ 走这一支时，尾②~⑥那五句话**一句都不会出现**，出现的是这句"判决照读"。真正照读的只是同一行里前面的数（`9clk_high=%d/9`、`推挽段 ACK=… NACK=… 首ACK=…`、`同址开漏复现=…`、`OD 段 ACK/NACK`）——数确实还在，但"判决"这个词按 `烧录须知` 那张表的用法指的是尾句六选一。
+建议处置：把这句改成"字段照读、代价要重算"（或"数照读，尾句按上面六条自己套"），避免有人在一行里找一个并不存在的尾句。
+
+### [P2] ⑧ · B2 置位点的行内理由是"别去白等判活"，代码每 12 轮还是会去等——与 `epd_driver.c` 的 B2 分支（正是靠这段判活+init 才凑出 3.53s）互相当面打脸
+
+被审原文位置：`axp_panel_power.c`，符号锚：`axp_enable_panel_rail()` 里 `acked` 侧回读验证失败那一支 `s_axp_off = true;` 的行尾注释
+> `/* 轨没开成 = 面板必然无电，按"没电"处理，别去白等判活 */`
+
+我核到的事实（调用侧唯一的闸门，逐字）：
+```
+$ sed -n '971,987p' …/epd_driver.c
+    const bool rail_off = axp_panel_off();
+    …
+    if (rail_off && (s_probe_round % PANEL_PROBES_PER_LIVENESS) != 0) { … return false; }
+    if (!epd_busy_passive_low(rail_off)) return false;
+```
+`rail_off == true` 只挡掉"非放行轮"，`s_probe_round % 12 == 0` 那一轮照样进 1.85s 判活、照样 `epd_bus_setup()` + `epd_panel_init()`。`epd_driver.c` 常数块里 B2 那一格（符号锚：`RELEASE_CLAIM_WAIT_MS` 上方分支表的 `·B2 `acked` 但回读没确认`）把这一支写成 **0.73 + 0.05 + 2.75 = 3.53s**，也就是说它假设判活**会**被执行——两边描述相反。实质安全性没问题（放行判活本来就是 R27 之后刻意留的逃生口），所以我按 P2 不按 P1；但如果谁按"别去白等判活"去读，就会把 B2 的 2.80s 记没了，那正是 §27.1 P1-2 这一轮刚补的错。
+建议处置：那句注释改成"按'没电'处理 ⇒ 非放行轮不再白等判活（每 12 轮那一次仍会放行，见 `epd_driver.c` 分支表 B2）"。
+
+### [P2] ⑨ · 提交说明把"三只 `.c` 相对 HEAD"和"121 行差异"两对比较对象焊成一句（两个数来自两对不同的文件/两个不同的基线）
+
+被审原文位置：`git show -s --format=%B 7f3ed56` 里那句
+> `代码侧只改注释——三只 .c 相对 HEAD 的非注释改动行 = 0（121 行差异全为注释），`
+
+我核到的事实（同一批我跑了三对比较，见 G1 的完整输出）：
+- 三只 `.c` vs 父提交 `73cbbfc`：raw **107** 行（`axp_panel_power.c 9` + `eink_display.c 30` + `epd_driver.c 68`），非注释 **0**；
+- 五只文件 vs r40 快照：raw **121** 行（再加 `epd_driver.h 10` + `axp_panel_power.h 4`），非注释 **0**；
+- 五只文件 vs **现在的** HEAD：`git diff HEAD --numstat` 对它们是**空**（工作树 = HEAD）⇒ 今天读这句话时"相对 HEAD"是自指的。
+所以"121"这个分母属于另一对比较（多算了那两只 `.h`）。这条**不是数错**——两对的非注释改动都是 0，结论"零新镜像"完全成立；错的是把 `烧录须知:452`（那里明明白白写"五只源文件的差异 121 行"，口径正确）与提交说明这一句混读时会得出"三只 .c 有 121 行"。
+建议处置：提交说明已入库不改；在 `done.md` R41-3 那条旁边把两个数分开写一次（"三只 `.c` vs 父 = 107 行；五只 vs r40 快照 = 121 行；非注释都是 0"），下一轮写这类句子时先写"对谁比、比哪几只"。
+
+---
+
+## 无法核实（代码侧，5 条）
+
+- **U-1 推挽档相关错误路径的真实可达性**：`gpio_get_drive_capability(GPIO_NUM_42)` / `gpio_set_drive_capability(..., CAP_0)` 在本机是否会返回非 OK——决定 P2-⑥、判决尾①到底能不能被现场触发。静态只能看出"写法允许"，不能定案。取证手段：冷插 COM14 → 烧 `backups/r40_20260922_052906/zizhao_esp32s3.bin` → 读 `bitbang sda41/scl42 PP-SCL(原=cap…→设成=… 回读=… 复原=…)` 那一行。
+- **U-2 判活密采段"超出 50ms 的那部分"**：`epd_busy_activity()` 的 1000 拍 × 50µs 被注释自己标成**下限**，`epd_driver.c` 常数块 `epd_panel_init()` 那一格的【R40 P2 口径】也承认"超出量没测过 ⇒ 14.3s / 20s / 14s 都还留着这一格未量"。我没有真机计时可给它定值。⇒ 三条上限目前都是"带一个未量格的推定值"。
+- **U-3 `acked`（电轨已确认）那一支是否真存在**：本轮我复跑
+  ```
+  $ date -Is ; grep -c "AXP2101 detected" hardware/*.log
+  2026-09-22T10:14:48+08:00
+  …R33真机首烧COM14_150s.log:0 …R34位碰首烧COM14.log:0 …R37…40s.log:0 …R37…清洗版.log:0
+  …官方例程对照COM14_90s.log:0 …官方例程对照COM14_复位起抓20s.log:0   （6 只，全 0）
+  ```
+  与注释的说法一致（六只全 0、其中两只是官方例程 ⇒ 分母 4 只我方日志）⇒ 0.45s/0.73s 只能是 **[推]**。这条不是抓错，是登记为未证。
+- **U-4 PMIC ship / 关机模式**：用户口径"不方便，只靠固件自测"（不上电池、不按电源键）⇒ 我**没有任何手段**证实或排除它。本报告不写"已排除"，也不允许别处把它写成已排除。代码侧对应：`axp_panel_power.c` 里 `PWR_OUT` 三条判读只区分"被外部拉低 / 被驱动为高 / 悬空"，`axp_system_off()` 只在 `pwr_pu == 0` 时为真——这个形状本身是诚实的（悬空不定案）。
+- **U-5 待烧镜像的运行期行为**：我只核到"镜像里的字符串 = 注释所说的字符串"（见 G8），没核运行期。R38/R39/R40/R41 都没烧过，所以"注释描述的判据会在板子上成立"整条仍是推的。
+
+---
+
+## 核过无问题（9 组，含我用的命令）
+
+**G1 "只改注释"成立，且 121 只属于那一对比较。**
+用一只自带 C 注释剥离器的脚本（字符串/字符字面量里的 `//`、`/*` 不算注释；反斜杠转义处理过）跑两套比较：
+```
+$ date -Is   # 2026-09-22T10:14:48+08:00
+$ python <比对 r40 快照(main/) vs 工作树(main/)>
+axp_panel_power.c    raw=  9 noncomment=0
+axp_panel_power.h    raw=  4 noncomment=0
+eink_display.c       raw= 30 noncomment=0
+epd_driver.c         raw= 68 noncomment=0
+epd_driver.h         raw= 10 noncomment=0
+TOTAL raw=121 noncomment=0
+$ date -Is   # 2026-09-22T10:17:20+08:00
+$ python <git show 73cbbfc vs git show 7f3ed56>
+axp_panel_power.c    raw=  9 noncomment=0
+eink_display.c       raw= 30 noncomment=0
+epd_driver.c         raw= 68 noncomment=0
+axp_panel_power.h    raw= 37 noncomment=11      ← 见下
+epd_driver.h         raw= 80 noncomment=23      ← 见下
+```
+两只 `.h` 对父提交是"整只文件新增"，所以那两个"noncomment>0"不是注释改动，而是**首次入库**：
+```
+$ git ls-tree --name-only 73cbbfc …/main/ | grep -e axp_panel_power.h -e epd_driver.h   →（空）
+$ git log --diff-filter=A --format="%h" -- …/epd_driver.h …/axp_panel_power.h           → 7f3ed56
+```
+⇒ 结论：三只 `.c` 无论对 r40 快照还是对父提交都是 0 行非注释改动；"121"这个数只对**五只文件 vs r40 快照**成立（对父提交是 107 行）。
+**⑨ 一条 P2 措辞**（提交说明把两对比较对象焊成一句）：提交说明写成"`三只 .c` 相对 HEAD 的非注释改动行 = 0（121 行差异全为注释）"——写它的时候 HEAD 是 `73cbbfc`，但三只 `.c` 对 `73cbbfc` 是 107 行；121 是五只对 r40 备份的数。实质没错（两边非注释都是 0），但按"引用即复跑"应当各写各的分母。单列为 [P2] ⑨，见上。
+
+**G2 `s_axp_off` 三真一假 + 分支表 vs 真实控制流：没有 P0。**
+```
+$ grep -n "s_axp_off" …/axp_panel_power.c
+21:static bool s_axp_off = true;     （声明）
+747: s_axp_off = true;   ← B0：!s_bus_ours && !axp_bus_install()
+798: s_axp_off = true;   ← B1：!acked
+823: s_axp_off = false;   ← acked 侧唯一复位点
+853: s_axp_off = true;   ← B2：acked 但 ALDO3 回读没确认
+946: return !s_axp_off;
+949: bool axp_panel_off(void) { return s_axp_off; }
+```
+三个置位点 + 一个复位点全在 `axp_enable_panel_rail()`（732–947）体内 ✓ 与 §27.1 P1-2、`epd_driver.c` 分支表"三个置位点"一致。
+两条关键追问：
+- **B2 真的还能走到判活+init 吗？** 能。`:853` 置 true 之后控制流继续往下走清理段，函数尾部 `return !s_axp_off;` ⇒ 调用方拿到 `rail_off=true`；而闸门是 `rail_off && (s_probe_round % 12) != 0` ⇒ 放行轮不拦。所以 B2 = 0.73 + 0.05 + 2.75 = **3.53s** 成立（复算见 G7）。
+- **轨已确认（rail_off=false）那一轮真的不可能被闸门拦下吗？** 对，`rail_off==false` 让合取式恒假。
+**P0 检查（未确认的面板不许被驱动）**：`probe_attempt()` 在 `epd_bus_setup()`（才配 CS/DC/SCLK/MOSI）之前有两道实证：闸门 + `epd_busy_passive_low(rail_off)`，后者要求 BUSY 侧证据；旁证读段（`epd_busy_passive_low` 内 `gpio_config_t w{ .mode = GPIO_MODE_INPUT, .pull_up_en = GPIO_PULLUP_ENABLE }` + `wit_spi` 按脚号排除仍归控制器的两根）**只配上拉、一根都不驱动**。深睡侧 `epd_sleep()` 见 G6。⇒ 本轮不存在 P0。
+
+**G3 `full_diag`：消费者四个、两个计数器确实同进同退、mod-12 互斥论证成立。**
+```
+791:const bool full_diag = (s_probes <= 3 || s_probes % 60 == 30);
+797: if (full_diag) axp_scan_all(…)     ← 在 793 `if (!acked)` 体内（文档说的"嵌套"成立）
+888 / 895 / 898：另三个消费者
+```
+恰好四个 ✓。`s_probes++` 全仓库只有 `:737` 一处、`s_probe_round++` 只有 `epd_driver.c:967` 一处、`axp_enable_panel_rail()` 的调用点只有 `epd_driver.c:970` 一处（`grep -rn --exclude-dir=backups "axp_enable_panel_rail" hardware/zizhao-esp32s3/` 只给声明/定义/注释加这一句调用）⇒ 两号从第 1 次尝试起同为 1、每轮同进同退，`epd_driver.c:962` 与 `eink_display.c:508` 那段"同进同退"的论证是真的。互斥：full_diag ∈ {1,2,3} ∪ {30+60k}；60 是 12 的倍数 ⇒ 恒 ≡6 (mod 12)，`%12==0` 永不与之同轮 ⇒ "AXP 全诊断轮进不了 init"成立，"两支不许相加"成立。耗时不叠加的说法 ✓。
+
+**G4 位碰探针：门、尾巴、同址复现、三条不变量。**
+- `9clk_high` 这条规则**确实挡结论，不只是打印**，但两只口径不同（我先确认过文档各说各的、没有混）：开漏侧 `bb_run_at()` 用 `r->scl_high == 0` 换掉判决句（"这一档速度边沿不合格，NACK 不能算器件的账"，对应 `烧录须知:424` 的 `9clk_high=0/9` 那条读法）；推挽侧用 `high_beats < 9` 当尾②（对应 `烧录须知:442`）。⇒ 任务书里泛化的"未达 9 就不许记账"**只对推挽档成立**，对开漏档是"==0"；这不是代码错，是引用侧要小心别把两条并成一条。
+- PP 跳过门：`bb_probe()` 里 `pp_skip` 链**正好六道**（`!swapped_ran` / `!od_exhausted` / `s_pp_done` / `!bus_quiet` / `!pull_readable` / `scl_ext_high`），第七道在 `bb_pp_scan_all()` 体内（`cap_get_e != ESP_OK` 直接 return），与 `烧录须知:439-441` 那段"六道和第七道是两处门、别混成一个编号"一致 ✓。`od_exhausted = (fast.acks+slow.acks+swapped.acks+all_norm+all_swap) == 0`（五项 = 文档说的"开漏五档"）✓；`bus_quiet = (slow.sda_after9 == 1 && slow.sda_low == 0)`，我读 `bb_line_activity()`/`bb_release_clocks()` 确认了 `sda_low` 是"我们主动拉低时读回的值"、`sda_after9` 是"9 拍后 SDA 的电平" ⇒ 门里那句"`sda_low=1` ⇒ 主动拉低却读回高"指对了对象 ✓。
+- 六条尾巴**全部可达**（逐条对三元结构 + 变量定义）：①`cap_set_e != ESP_OK`；②`pp_acks==0 && high_beats<9`；③`pp_acks==0 && high_beats>=9`；④`pp_acks>0 && od_same==1`；⑤`pp_acks>0 && od_same==0`；⑥`pp_acks>0 && od_same<0` —— ⑥只由 `bb_setup(p,false)` 在 :534 失败那一条 break 路径产生，而 `od_same` 的初值 `-1`（"没测"）正是给它准备的 ✓ 不是不可达分支。
+- "**同地址开漏复现**"是**真·同址 re-probe**：`switched=true` 之后 `od_same = bb_addr_ack(p, BB_SLOW_HALF_US, a) ? 1 : 0;` 用的还是触发 ACK 的那个 `a`，且此刻已换回开漏 ✓（R39 P0-2 的落地形状对得上）。
+- 三条 PP 不变量在：①每上电周期一次 = `s_pp_done`（进入前置位，P2-⑥ 说的就是它）；②读不到原始驱动能力就不跑 = 第七道门 return（不顶线、不改档）；③`cap_after = -1` 哨兵 + 打印时 `cap_after >= 0 ? "cap%d" : "未测"` ✓（`R39 P1-8` 那条"给从没测过的数贴上'回读'标签"已修）。
+
+**G5 `epd_wait_busy_ms()` 的计时基准与那条唯一可执行改动。**
+"连续 N ms"的基准确实是"读到反相就复位"：
+```
+323: if (lvl == 0) { … 328: if (cur_low_start < 0) cur_low_start = (int)el;
+                       330: if (el - (uint32_t)cur_low_start >= BUSY_ACCEPT_CONFIRM_MS) { … } }
+340: else { 353: lo_run = 0; 354: cur_low_start = -1;   ← 在**整个 else** 主体里（R39 P0-1）
+```
+即：只要读到一个高，这段低的起点作废；下一次低重新起算。`BUSY_ACCEPT_CONFIRM_MS = 300`、`EPD_BUSY_TIMEOUT_MS = 8000`（`:26`/`:31`）。
+新失败行存在且是**镜像里唯一的可执行改动**（我把两只指纹一起读，见 G8）：
+```
+$ grep -a -c "BUSY no accepted end within" backups/r40_20260922_052906/zizhao_esp32s3.bin → 1
+$ grep -a -c "BUSY stuck"                  backups/r40_20260922_052906/zizhao_esp32s3.bin → 0
+```
+代码侧原文在 `epd_driver.c:408`（`ESP_LOGE(TAG, "BUSY no accepted end within %dms …"`）。
+
+**G6 引脚交还 + 并发护栏（本轮第 6 组的全部条目）。**
+- `epd_pins_release()`（符号锚：`spi_bus_remove_device` / `spi_bus_free(SPI3_HOST)` / `for (int pin : kPanelPins)` 那个循环）末尾 **`s_bus_ok = false;`** ⇒ 交还一定清"总线就绪"标志 ✓；`failed` 那条日志为什么永不触发（`gpio_reset_pin` 丢掉 `gpio_config` 返回值）的解释与 IDF 形状一致 ✓。
+- 抢不到令牌的输家**有界重试**：`while (!claimed) { vTaskDelay(pdMS_TO_TICKS(100)); claimed = !atomic_exchange(&s_probing, true); polls++; if ((uint32_t)(xTaskGetTickCount()-t0)*portTICK_PERIOD_MS >= RELEASE_CLAIM_WAIT_MS) break; }`——按 **tick 差**（抗 32 位回绕），不是 `waited_ms += 100` 的假计时 ✓；三条出口各有回执：`release skipped`（没抢到）/ `release: 等了 Nms（M 次轮询）才拿到` / `release: 拿到令牌但条件不成立` ✓。`atomic_exchange` 在循环里重跑 ✓（不是只 exchange 一次）。
+- 最终护栏 `if (s_bus_ok && !s_ready) epd_pins_release();` ⇒ **未确认的面板不会被交还成驱动态，也不会去拆可能仍在用的句柄**；`s_ready==true` 时不进分支 ⇒ 挡住 use-after-free（`spi_bus_remove_device`→`free(handle)`）的是这个条件，注释也是这么写的，并诚实说明"令牌只挡 probe、不挡刷新"。
+- `epd_sleep()`（文件末尾）用 `if (!s_bus_ok) return; if (!s_ready) { epd_pins_release(); … return; }`，之后才 `0x10` + 10ms + RST 低 + `s_ready=false` ⇒ 用的是"最近一次证据"，**不是**粘滞"曾经活过"；`s_ever_alive` 只剩历史引用：
+  ```
+  $ grep -rn "s_ever_alive\|ever_alive" hardware/zizhao-esp32s3/main/
+  epd_driver.c:201-202  （两行注释：R25 曾立过它、被复查指为粘滞假凭证）
+  ```
+- 我另外复跑了两条它自己引用的东西：`s_ready = false` 的赋值点 = **七处**（`awk` 按函数归类：`epd_display_full` 3、`epd_display_partial` 3、`epd_sleep` 1，`:203` 是初始化）与 `epd_pins_release_if_unverified()` 注释里"七处"一致 ✓；它逐字引用的 `eink_sleep()` 那句在 `eink_display.c:583` 存在且一字不差 ✓。
+
+**G7 常数与算术：全部复算对得上；"由算术定尺寸的上限只有两条"这句话成立。**
+测自代码（不是文档）：
+```
+EPD_BUSY_TIMEOUT_MS 8000 (:26)   BUSY_ACCEPT_CONFIRM_MS 300 (:31)   EPD_PRE_RESETTLE_WAIT_MS 500 (:41)
+EPD_LIVENESS_SLOW_WINDOW_MS 1800 (:47)   PANEL_PROBES_PER_LIVENESS 12 (epd_driver.c:803)
+RELEASE_CLAIM_WAIT_MS 14000 (:191)       xSemaphoreTake(s_lock, pdMS_TO_TICKS(20000)) (eink_display.c:579)
+判活窗 = 1000 拍 × 50µs（密采，标着"下限"）+ 1800ms（慢采，真上限）≈ 1.85s
+```
+复算（`python`，全部命中公布值）：
+```
+B1 AXP = 0.35+0.1+0.01 = 0.46      B1 整轮 = 0.46+0.05+2.75 = 3.26
+B2 id 重试 = 5*0.05+4*0.02 = 0.33   B2 AXP = 0.33+0.2+0.1+0.1 = 0.73   B2 整轮 = 0.73+0.05+2.75 = 3.53
+B2−B1 = 0.73−0.46 = 0.27            一次持锁 = 0.73+0.05+2.75+2.75+0.05+8 = 14.33
+20 − 14.33 = 5.67（写"≈5.7"）        14/3.53 = 3.966 ⇒ 3 个完整最坏轮 = 10.59、剩 3.41
+2*3.53 = 7.06、14−7.06 = 6.94        4*3.53 = 14.12 > 14.00 ⇒ "约 4.0 个"确实不成立
+A 支 = 0.35+0.1+2.24+0.01+0.01 = 2.71(+0.4) = 3.1    (5.9−3.53)/3.53 = 67.1% ⇒ "虚高约 67%"
+PP 顶总线时长 = 112×(0.35+0.19)+0.225 = 60.71ms ⇒ "≤65ms"；34 段里高相 14 段 × 25µs = 350µs/帧
+```
+"只有两条上限由这轮算术定尺寸（14s、20s），1.85s 与 8s 是输入不是产物"——**判为正确**：1.85s 读自 `EPD_LIVENESS_SLOW_WINDOW_MS`+密采拍数、8s 读自 `EPD_BUSY_TIMEOUT_MS`，两者都不由本轮重算推导；20s 是 `14.33 + ≈5.7`；14s 由"两轮 ≈7.06s + 那一场只需赢一次的赛跑"定尺寸。**要补的限定语**：14s 不是算术**推出来的**那个数（算术只给 ≈7.1s），是"按更老的 5.9s 提上去、重算后**故意不降回去**"（`RELEASE_CLAIM_WAIT_MS` 注释 `:177-184` 自己写了理由）——所以说它"被这轮算术定尺寸"要靠"本可以跟着下调"那层意思才成立；这句在 §27.3 第 1 条里正是这么用的，故不判错。
+另记一条完备性提醒（不判级、不改任何数）：分支表点的四支（A / B0 / B1 / B2）没点"轨已确认（rail_off=false）"那一支的形状；它的上限与 B2 同为 `0.73+0.05+2.75 = 3.53s`（acked 侧同一套重试上限 + 同一段写/稳压/回读），所以现行"一轮 probe 最坏 3.53s"不受影响。
+
+**G8 镜像与备份事实（R41 说"零新镜像"，成立）。**
+```
+$ date -Is   # 2026-09-22T10:12:01+08:00
+$ md5sum backups/r40_20260922_052906/zizhao_esp32s3.bin
+0b8818b78e7a87edb625f31551b561c0 *…bin
+$ stat -c%s … ; printf "0x%x" …     → 1139504 / 0x116330
+$ for f in 五只源; do cmp backups/r41_20260922_091459/$f main/$f; done → 五只全 identical
+$ grep -a -c <指纹> …bin：
+  BUSY no accepted end within → 1     BUSY stuck → 0
+  PP-SCL 跳过：读不到 SCL 原始驱动能力 → 1     同址开漏复现 → 1
+  release skipped → 1                   panel pins released to DISABLE+pull-up → 1
+```
+`烧录须知`【R41】"R41 没有产生新镜像…待烧的仍是上面这只，指纹一字未动" ✓（连位碰档那两条 R38/R39 的新日志行都在待烧镜像里，所以烧完之后能读 PP 那一整行）。
+
+**G9 日志分母。** `grep -c "AXP2101 detected" hardware/*.log`（时刻 10:14:48）⇒ 六只文件、**全 0**；文件名里两只是"官方例程对照" ⇒ 注释与 §27.1 P1-3 说的"分母钉成 4 只我方日志（3 次上电）"复现一致 ✓（R41 把 0.45s 从"[实测] 典型"降级为 [推] 这一步，落地是对的）。
+
+---
+
+## 本轮新事实（我实测的、与已公布值不同的每一个数，含命令与时刻）
+
+| # | 公布值（在哪） | 我实测（命令） | 时刻 |
+|---|---|---|---|
+| 1 | "`grep -n "BUSY stuck" …/main/*.c` ⇒ 只有本注释的**两行**"（`epd_driver.c` R41 注释块） | **3 行**（385 / 388 / 401） | 09:56:44 |
+| 2 | 两只 `BUSY stuck` 口径的**差值恒 56**（`epd_driver.c` 同块；`updates/…R41.md:32`；§27.1 P1-4） | **78**（25 / 103，`grep -v "/backups/"` 那对）；另一只排除法给 27 ⇒ 差 76 | 09:57:47 |
+| 3 | 注释钦定的"可核口径"`grep -rn --exclude-dir=backups "BUSY stuck" .` | **27 行**，而公开数 16/17 来自不等价的 `… | grep -v "/backups/"`（**25 行**）；两者差 2 行，全在 `hardware/20260922_R40复查报告原文.txt` 的 92/94 行（行内含 `/backups/` ⇒ 被按内容过滤掉） | 09:57:47 / 09:58:38 |
+| 4 | 含 backups 的全仓库口径（72 / 73 两个快照） | **103 行**，其中 **25 行是 `Binary file … matches`**（每只 .bin/.elf 只算 1 行，与文本命中不同单位） | 09:58:38 |
+| 5 | "`s_pp_done` = 本上电周期已**跑**过一次"（`axp_panel_power.c` PP 第三道门文案） | 第七道门 `cap_get_e != ESP_OK` 早退时**一次都没跑**、名额已被烧掉 ⇒ 该串在本上电周期剩余 full_diag 轮里会说假话 | 10:12:01（代码形状，非现场触发） |
+| 6 | 提交说明"gpio_reset_pin **五处**旧口径统一"（`7f3ed56`） | 代码里带 `R41 统一口径` 的是 **6 格**（.c 3 + axp_panel_power.h 1 + epd_driver.h 2）；文档 §27.2⑧/done:686 写的"5 + 1"才是对的 | 09:59 前后 |
+| 7 | §27.2⑧"全仓库旧口径已清" | `FreqErr.md` 的**正确做法**行仍教"未供电的负载要用**高阻**交还"（活口径残留 1 处，不在固件里，但它是本轮那条清扫 grep 该抓的形状） | 10:01 前后 |
+| 8 | "121 行差异"（提交说明里挂在"三只 `.c` 相对 HEAD"后面） | 121 只对**五只 vs r40 快照**成立；三只 `.c` 相对父提交 `73cbbfc` 是 **107 行**（9/30/68），两只 `.h` 对父提交是**新增 37/80 行**（首次入库）⇒ 一句话里混了两对比较对象 | 10:14:48 / 10:17:20 |
+| 9 | 其余全部对上：非注释改动 **0** 行（两套比较都是）；`0b8818b78e7a87edb625f31551b561c0` / **1,139,504 B = 0x116330**；r41 两份备份与 `main/` **逐字节相同**；`s_ready = false` **七处**；B1 0.46 / B2 0.73 / 宽头 0.27 / 一轮 3.53 / 持锁 14.33 / 余量 5.67 / 3 个完整最坏轮 10.59 / 两轮余量 6.94 / 虚高 67.1% / PP 顶总线 60.71ms；`AXP2101 detected` 六只 log 全 **0** | 见 G1 / G7 / G8 / G9 的命令 | 09:56 ~ 10:17 |
+
+## 我对下一轮（R42）的最低行动要求（只列我这组能负责的）
+
+1. 三条 P1 全在**同一块注释**里（`epd_driver.c` `epd_wait_busy_ms()` 上方【R41】块）。改法是同一种：**把"带数的自指断言"降级成"命令 + 时刻 + 当场的数"或干脆不带数**。这块注释的本意就是教这条规矩，它自己第三次踩进去（P1-4 的 9/65→16/72→17/73→**25/103**）。
+2. P2-⑥ 是本轮唯一一条"代码文案会让下一轮误以为测过了"的项：改 `s_pp_done` 的置位点或改那句话的措辞，**别把它当成纯措辞放过**——`主机侧「上升沿质量」这一维`正是现在整条链上唯一还没测的维度。
+3. 冷插 COM14 → 烧 `backups/r40_20260922_052906/zizhao_esp32s3.bin`（MAC 门照跑）→ 读 `bitbang sda41/scl42 PP-SCL(…) → <尾句>` 那一行。在那之前：U-1 ~ U-5 一律**不许**写成"已排除"，屏不亮的解释仍然只能是"没有已证实的解释"。COM13 与第三块活板本轮都没碰，也没有理由碰。
