@@ -1,0 +1,21 @@
+生成时刻 2026-09-24 03:20:30；口径：git diff --name-only(7) + git ls-files --others --exclude-standard(11)
+排除并点名（每条附理由，现跑明文扫描 HITS=0 才进清单）：5 只
+  DROP  hardware/zizhao-esp32s3/main/provision_ap.c  <- 带 PROV_PASS 明文（门会 rc=1） [not-scanned]
+  DROP  .workbuddy/memory/2026-09-16.md  <- 第三方工具状态目录 [not-scanned]
+  DROP  .workbuddy/r31_record_update.py  <- 第三方工具状态目录 [not-scanned]
+  DROP  Agent_readme.txt  <- 外部项目发来的回信，非本仓库产出，等裁决 [not-scanned]
+  DROP  dev_log/20260919.md  <- 带 PROV_PASS 明文，实测 HITS=1 [not-scanned]
+进清单 13 只：
+  ADD   FreqErr.md
+  ADD   dev_log/20260924.md
+  ADD   done.md
+  ADD   hardware/20260919_墨水屏点屏排查记录.md
+  ADD   todo.md
+  ADD   updates/20260924_墨水屏R50第8代同步与gen12冻结.md
+  ADD   hardware/ht305_sync/evidence/head_tree_c752d0e_025721.txt
+  ADD   hardware/ht305_sync/evidence/head_tree_try1_025653_bad_ls_tree_option.txt
+  ADD   hardware/ht305_sync/evidence/pos_control_try1_025354_str_decode_bug.txt
+  ADD   hardware/ht305_sync/evidence/staged_cred_gate_025158.txt
+  ADD   hardware/ht305_sync/evidence/staged_cred_gate_025158_pos.txt
+  ADD   hardware/ht305_sync/evidence/staged_cred_gate_025158_ps.txt
+  ADD   hardware/ht305_sync/evidence/staged_list_025113.txt

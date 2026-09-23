@@ -1,0 +1,9 @@
+POS_CONTROL_AT 2026-09-24 02:53:54
+SECRET_LEN_BYTES 10 (只报长度，不报内容)
+SHOULD_FIRE hardware/zizhao-esp32s3/main/provision_ap.c hits=1
+SHOULD_FIRE dev_log/20260919.md hits=1
+Traceback (most recent call last):
+  File "C:\Users\david\AppData\Local\Temp\pw_pos_control_r50c.py", line 50, in <module>
+    per.append((p.decode('utf-8'), n))
+                ^^^^^^^^
+AttributeError: 'str' object has no attribute 'decode'. Did you mean: 'encode'?
