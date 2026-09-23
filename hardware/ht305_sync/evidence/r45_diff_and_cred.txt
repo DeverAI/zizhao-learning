@@ -1,0 +1,22 @@
+T0 = 2026-09-23 10:04:46
+local files = 165 | remote files = 165
+only_local  = []
+only_remote = []
+sets_equal  = True
+remote REMOTE_ZIP_SIZE = REMOTE_ZIP_SIZE=1161539
+remote REMOTE_ZIP_MD5 = REMOTE_ZIP_MD5=a1323e0c4642a0cfa42bf662c6d12f3e
+remote REMOTE_FILES = REMOTE_FILES=165
+remote REMOTE_BYTES = REMOTE_BYTES=2999409
+remote REMOTE_FORBIDDEN = REMOTE_FORBIDDEN=0
+remote REMOTE_AGGREGATE = REMOTE_AGGREGATE=28cf50b43283155eeb3af65d96ac2096d0af4f91099bfc2d882e528d9f02dd1f
+remote REMOTE_AT = REMOTE_AT=2026-09-23 10:04:11
+remote REMOTE_DONE_AT = REMOTE_DONE_AT=2026-09-23 10:04:14
+local  plaintext in staging= 1 ['hardware/zizhao-esp32s3/main/provision_ap.c']
+local  zip entries         = 166 | utf8-flagged = 51
+local  zip size/md5        = 1161539 a1323e0c4642a0cfa42bf662c6d12f3e
+local  content files/bytes = 165 / 2999409
+local  LOCAL_AGGREGATE     = 28cf50b43283155eeb3af65d96ac2096d0af4f91099bfc2d882e528d9f02dd1f
+local  CUTOFF_COPY_BEGIN   = 2026-09-23 10:03:58
+local  CUTOFF_ZIP_MADE     = 2026-09-23 10:04:00
+provision_ap.c in payload = True
+T1 = 2026-09-23 10:04:46

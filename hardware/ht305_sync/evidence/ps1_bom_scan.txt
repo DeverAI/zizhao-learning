@@ -1,0 +1,41 @@
+ht305_sync 归档内脚本编码体检（现跑于 09-23 11:36:40；脚本 = scripts/ps1_bom_scan.py）
+判据：非 ASCII 字节数 + 是否有 UTF-8 BOM（ef bb bf）。风险定义：`.ps1` 且 非ASCII>0 且 无 BOM
+（这种组合会被 Windows PowerShell 5 按 GBK 解码，中文注释会吞掉紧随其后的整行 ⇒ FreqErr 已登记的那次自伤）。
+
+gate\ht305_sync_gate_ssh.ps1	nonascii=0	utf8_bom=False	gbk_risk=False
+gate\run_cred_gate_recheck.ps1	nonascii=0	utf8_bom=False	gbk_risk=False
+scripts\chk_r45.ps1	nonascii=0	utf8_bom=False	gbk_risk=False
+scripts\ht305_agg.ps1	nonascii=0	utf8_bom=False	gbk_risk=False
+scripts\ht305_extract.ps1	nonascii=0	utf8_bom=False	gbk_risk=False
+scripts\ht305_extract_zip.ps1	nonascii=0	utf8_bom=False	gbk_risk=False
+scripts\ht305_probe.ps1	nonascii=0	utf8_bom=False	gbk_risk=False
+scripts\ht305_probe2.ps1	nonascii=0	utf8_bom=False	gbk_risk=False
+scripts\ht305_rename.ps1	nonascii=0	utf8_bom=False	gbk_risk=False
+scripts\ht305_upload.ps1	nonascii=0	utf8_bom=False	gbk_risk=False
+scripts\ht305_upload_zip.ps1	nonascii=0	utf8_bom=False	gbk_risk=False
+scripts\ht305_verify.ps1	nonascii=0	utf8_bom=False	gbk_risk=False
+scripts\r44_upload.ps1	nonascii=0	utf8_bom=False	gbk_risk=False
+scripts\r44_verify2.ps1	nonascii=0	utf8_bom=False	gbk_risk=False
+scripts\r45_upload.ps1	nonascii=249	utf8_bom=True	gbk_risk=False
+gate\cred_gate_recheck.py	nonascii=542	utf8_bom=False	gbk_risk=False
+gate\ht305_sync_gate.py	nonascii=150	utf8_bom=False	gbk_risk=False
+scripts\build_sync.py	nonascii=12	utf8_bom=False	gbk_risk=False
+scripts\build_zip.py	nonascii=0	utf8_bom=False	gbk_risk=False
+scripts\collect_ht305_sync.py	nonascii=429	utf8_bom=False	gbk_risk=False
+scripts\expected.py	nonascii=0	utf8_bom=False	gbk_risk=False
+scripts\expected2.py	nonascii=0	utf8_bom=False	gbk_risk=False
+scripts\gen_manifest.py	nonascii=963	utf8_bom=False	gbk_risk=False
+scripts\land_r44b_report.py	nonascii=688	utf8_bom=False	gbk_risk=False
+scripts\probe_zip_vs_head.py	nonascii=12	utf8_bom=False	gbk_risk=False
+scripts\probe_zip_vs_head2.py	nonascii=12	utf8_bom=False	gbk_risk=False
+scripts\ps1_bom_scan.py	nonascii=468	utf8_bom=False	gbk_risk=False
+scripts\pw_census.py	nonascii=240	utf8_bom=False	gbk_risk=False
+scripts\pw_staged.py	nonascii=0	utf8_bom=False	gbk_risk=False
+scripts\pw_tree.py	nonascii=0	utf8_bom=False	gbk_risk=False
+scripts\r45_cutoff_delta.py	nonascii=30	utf8_bom=False	gbk_risk=False
+scripts\sync_r44.py	nonascii=26	utf8_bom=False	gbk_risk=False
+scripts\sync_r45.py	nonascii=128	utf8_bom=False	gbk_risk=False
+
+RISKY_PS1=0	[]
+⇒ 对报告「我没能验证 #7」（`r44_upload.ps1` / `r44_verify2.ps1` 是否含中文）的回答：两只均 nonascii=0 ⇒ 无 BOM 不构成风险；含中文的 `.ps1` 在本归档里只有 `r45_upload.ps1`，它带 BOM。
+注：本行读数本身也是"现跑即落盘"，时刻与输出同批写进本文件。

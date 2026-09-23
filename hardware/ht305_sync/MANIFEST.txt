@@ -1,0 +1,71 @@
+ht305_sync 归档清单（终态快照，现跑于 09-23 11:36:40；脚本 = scripts/gen_manifest.py）
+
+来源 = %TEMP% 的逐字节复制（shutil.copy2，保留 BOM）；本版之前另有三版：10:36:41 首批 49 只、10:38:51 后补 3 只、11:06:14 收 58 只。各版都被本版覆盖，因为清单是**快照**：它一旦写死就追不上还在增长的目录，只保留最后一版 + 这段说明，不留半旧版。
+本清单**不含自身**（列自己必然在写完后立刻过期）。
+明文门：ht305_sync 归档后的明文门复验（现跑于 09-23 11:36:40，脚本 = gate/cred_gate_recheck.py）；FILES_SCANNED 见该文件末行，两门均 0 命中。
+门与本清单的先后（按 mtime 现算，非人工登记）：门之后又被改写/新增 1 只 = MANIFEST.txt ⇒ 门未覆盖这几只的**当前字节**；其中清单只含"已扫文件的路径/大小/哈希"、编码体检只含"非 ASCII 计数"，均为派生信息、不含新载荷。
+
+path	bytes	md5	utf8_bom	mtime
+README.md	6689	f6c136f274c606d144f14730f8c817a0	False	11:05:55
+evidence/cred_gate_recheck.txt	474	f836d1082bf1bcb8b6c982494b2ee2c5	False	11:36:40
+evidence/cred_recount_0822.txt	527	b82714efb73f7f0050e21cc188df689b	False	08:22:53
+evidence/ps1_bom_scan.txt	2890	1f5c8fbcfdaf39554fa7206e5d1dfa52	False	10:45:38
+evidence/r43_r44_listdiff.txt	79	6d770df23fafd3151cf58db6f2d797ae	False	08:32:06
+evidence/r44_diff_rerun.txt	67	e2aa8b4c2e4451677098f305abdb1db6	False	08:29:28
+evidence/r44_local_names.txt	5764	3ae039b5e501ed154de0356c367cbd6f	False	08:20:16
+evidence/r44_scp_err.txt	622	ab6a074bd64b956ba37f9458e5b22cb0	True	08:16:47
+evidence/r44_verify.txt	884	45e10c86ec858fe94b8537c52ade09ce	True	08:16:53
+evidence/r44_verify2.txt	6764	ea59a69e21af48e4fe4f6931809f560f	True	08:20:25
+evidence/r45_cutoff_delta.txt	231	6f96da5f39bf1a2f075bc2c784942189	False	10:11:47
+evidence/r45_cutoff_delta_gen2_113401.txt	3253	856659ce5f298d8d1df939c3bd22c838	False	11:34:01
+evidence/r45_diff_and_cred.txt	1098	04f7c72ca286ca89b9b7759a88c1a149	False	10:04:46
+evidence/r45_dispose_evidence.txt	697	f92de53c4b4cc07d7558b6e623fbf36d	False	10:25:07
+evidence/r45_local.txt	594	649c077a214a45f3517d7755a5fe4a02	False	10:04:00
+evidence/r45_local_names.txt	5973	99dd7a86b78faaec2d1ae8edc3e9b08e	False	10:04:00
+evidence/r45_preprobe.txt	0	d41d8cd98f00b204e9800998ecf8427e	False	08:45:27
+evidence/r45_preprobe2.txt	336	8aaee913d2529203906db0fd14ba3870	False	08:45:46
+evidence/r45_preprobe_err.txt	6254	29c854c7f89b3026f9354f358c494eca	False	08:45:29
+evidence/r45_preprobe_err2.txt	222	80685af142753f59b1c04c5171d6ce8b	False	08:45:45
+evidence/r45_preprobe_time.txt	9	a76fe07ab749e4cff4ba6d6743870ad4	False	08:45:27
+evidence/r45_probe.txt	1808	1d55514a16ccf2aaa98427136f04c640	True	10:04:09
+evidence/r45_reject_evidence.txt	107	8cac8ce8b281a5eaa41a33d2fbf76820	False	10:22:31
+evidence/r45_run_log.txt	2330	5aa5f73801a99abd27fbd62a661d1488	True	10:04:15
+evidence/r45_scp_err.txt	679	fc113e4cae1686f9959f644d3391c1fc	True	10:04:11
+evidence/r45_verify.txt	7023	baf1ec8d53fd98b4ae7d557b50ea55c3	True	10:04:15
+gate/cred_gate_recheck.py	2281	b7924bde7d7075fe4c7208188f948bd3	False	10:43:11
+gate/ht305_sync_gate.py	1259	3272c29b0dc4f46ed8e530548207d5ee	False	10:34:20
+gate/ht305_sync_gate_ssh.ps1	1142	0d05326b3b7bcb9e81fca4885dc30c46	False	10:35:14
+gate/run_cred_gate_recheck.ps1	734	5b11af80c99769c0f5494196ffbe9570	False	10:43:11
+scripts/build_sync.py	2039	6369b8df2aa41e5ca6f5db7402bc8b2d	False	07:51:50
+scripts/build_zip.py	1132	52205398498006c228b375dc0f5f8b6b	False	07:53:58
+scripts/chk_r45.ps1	368	71d3a0fbb08ec3e2ffa14126c34eb67b	False	09:55:57
+scripts/collect_ht305_sync.py	2886	84d118b2f32974b5e056ae5eec665df6	False	11:01:19
+scripts/expected.py	549	22aec8130cf07f4afbb8704d4199ef6a	False	07:54:18
+scripts/expected2.py	610	4bd44f5c6894d9b9c301061773f3735b	False	07:55:59
+scripts/gen_manifest.py	2730	93148574265c657a76d2e5fe263dcff3	False	11:36:20
+scripts/ht305_agg.ps1	1324	249c0e84b15f9f4ea7ceee1630038485	False	07:56:09
+scripts/ht305_extract.ps1	1206	703b49fb954d3d9f62a7dce24f0f2619	False	07:53:06
+scripts/ht305_extract_zip.ps1	1504	ed70a805edc8dc140740eea10e90e92c	False	07:55:17
+scripts/ht305_probe.ps1	679	8688a4c375cbf2016b895c5d9f2b49e8	False	07:50:00
+scripts/ht305_probe2.ps1	859	98df93ad1541903907a14290ea613ec7	False	07:50:27
+scripts/ht305_rename.ps1	1171	fad6f5f0ad9997eb84dd142722da7d36	False	07:59:10
+scripts/ht305_upload.ps1	1345	20b539a4455916ea95705dcf9e3e3676	False	07:52:33
+scripts/ht305_upload_zip.ps1	1023	fa4f340c847448e5011afd74e7ef361c	False	07:54:34
+scripts/ht305_verify.ps1	804	40cf40f6c2a9a0a45731fd25a2a59b5b	False	07:52:50
+scripts/land_r44b_report.py	1552	e5011bd080b5614fed37ecf9862176ca	False	10:32:07
+scripts/probe_zip_vs_head.py	1298	c5bdfeeae4dfc92e7576402106294012	False	09:49:04
+scripts/probe_zip_vs_head2.py	1152	fcbb13e1b2fe8d449ed2d6b2649e4cff	False	09:49:41
+scripts/ps1_bom_scan.py	1494	913dfee8901d34e594936c83741383d4	False	10:45:38
+scripts/pw_census.py	1373	5ac8e7b78fb49f9141ff2560499705ce	False	07:45:28
+scripts/pw_staged.py	610	c37542edd4f125a1e7515fedd1c48106	False	07:48:12
+scripts/pw_tree.py	670	4c06ef50653e4fe6c4998e78c8e07a68	False	07:46:12
+scripts/r44_upload.ps1	2390	eccda0b4decf67afa16a0b1dcc8ef3ab	False	08:16:29
+scripts/r44_verify2.ps1	2198	5c1b0e906b3344ec960a26d7bdc7ac18	False	08:20:13
+scripts/r45_cutoff_delta.py	1783	9b081edc92c2d8d151672bc212ed25e6	False	10:11:34
+scripts/r45_upload.ps1	5616	32132d9a537c7329ad2958a095475370	True	09:55:48
+scripts/sync_r44.py	3171	ea3f506f26e39907054be6cc82a58c55	False	08:15:41
+scripts/sync_r45.py	4203	0d21383c9d3d58c5f48c0fa2bc54bac4	False	09:56:51
+
+TOTAL	59
+TOTAL_BYTES	108529
+BOM_FILES	8

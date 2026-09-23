@@ -1,0 +1,15 @@
+08:45:45
+deepseek-chat.bat
+deepseek-reasoner.bat
+idea_audit.bat
+Microsoft Edge.lnk
+RDP.bat
+serverDl.bat
+Start_DS_Server.bat
+SUPERSEDED-tar-cjk-mojibake_zizhao_sync_20260923_r43.tar.gz
+zizhao_20260923_r44final.zip
+zizhao_esp32s3_flash_notice_20260918.zip
+zizhao_sync_20260923_r43.zip
+学习Agent部署.bat
+此电脑.lnk
+SSH_EXIT=0

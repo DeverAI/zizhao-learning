@@ -1,0 +1,9 @@
+﻿scp.exe : ** WARNING: connection is not using a post-quantum key exchange algorithm.
+所在位置 C:\Users\david\AppData\Local\Temp\r44_upload.ps1:10 字符: 1
++ & scp -o StrictHostKeyChecking=accept-new $local "ht305:C:/Users/Admi ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (** WARNING: con...ange algorithm.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html

@@ -1,0 +1,15 @@
+T0=08:22:52
+unpushed_commits=8
+--- per-commit (count of files hit each):
+5246237ee637226550fc45b8a55f23eae0fe48ad hits=0
+592bb43049ec2ef1a9663ed0f5b23d3a5919c9d1 hits=0
+5905fcd8e86418a86749ae9ec853ee2d2bcad647 hits=2
+f9cf62bef6518031cb69beaed3087472f236bf71 hits=2
+3c37af343ad4d3cbf757b420887f799cba1c2139 hits=2
+489baad980ac138c19cdd1c31c2ca3686188c9fd hits=2
+7f3ed56355ca52fbf0a8b1373be55f5313ff94f0 hits=2
+73cbbfcc73459499e01745bf4d3b0811bead69b5 hits=2
+grep_HEAD_files=0
+grep_origin_files=0
+worktree_all_tree=5
+T1=08:22:53

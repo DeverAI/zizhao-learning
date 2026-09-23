@@ -1,0 +1,107 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+.Name : 无法将“.Name”项识别为 cmdlet、函数、脚本文件或可运行程序的名称。请检查名称的拼写，如果包括路径，请确保路径正
+确，然后再试一次。
+所在位置 行:1 字符: 85
++ ... istrator\Desktop -File | ForEach-Object { Write-Output (.Name + [char ...
++                                                             ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : 无法将“.Name”项识别为 cmdlet、函数、脚本文件或可运行程序的名称。请检查名称的拼写，如果包括路径，请确保路径正
+确，然后再试一次。
+所在位置 行:1 字符: 85
++ ... istrator\Desktop -File | ForEach-Object { Write-Output (.Name + [char ...
++                                                             ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : 无法将“.Name”项识别为 cmdlet、函数、脚本文件或可运行程序的名称。请检查名称的拼写，如果包括路径，请确保路径正
+确，然后再试一次。
+所在位置 行:1 字符: 85
++ ... istrator\Desktop -File | ForEach-Object { Write-Output (.Name + [char ...
++                                                             ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : 无法将“.Name”项识别为 cmdlet、函数、脚本文件或可运行程序的名称。请检查名称的拼写，如果包括路径，请确保路径正
+确，然后再试一次。
+所在位置 行:1 字符: 85
++ ... istrator\Desktop -File | ForEach-Object { Write-Output (.Name + [char ...
++                                                             ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : 无法将“.Name”项识别为 cmdlet、函数、脚本文件或可运行程序的名称。请检查名称的拼写，如果包括路径，请确保路径正
+确，然后再试一次。
+所在位置 行:1 字符: 85
++ ... istrator\Desktop -File | ForEach-Object { Write-Output (.Name + [char ...
++                                                             ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : 无法将“.Name”项识别为 cmdlet、函数、脚本文件或可运行程序的名称。请检查名称的拼写，如果包括路径，请确保路径正
+确，然后再试一次。
+所在位置 行:1 字符: 85
++ ... istrator\Desktop -File | ForEach-Object { Write-Output (.Name + [char ...
++                                                             ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : 无法将“.Name”项识别为 cmdlet、函数、脚本文件或可运行程序的名称。请检查名称的拼写，如果包括路径，请确保路径正
+确，然后再试一次。
+所在位置 行:1 字符: 85
++ ... istrator\Desktop -File | ForEach-Object { Write-Output (.Name + [char ...
++                                                             ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : 无法将“.Name”项识别为 cmdlet、函数、脚本文件或可运行程序的名称。请检查名称的拼写，如果包括路径，请确保路径正
+确，然后再试一次。
+所在位置 行:1 字符: 85
++ ... istrator\Desktop -File | ForEach-Object { Write-Output (.Name + [char ...
++                                                             ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : 无法将“.Name”项识别为 cmdlet、函数、脚本文件或可运行程序的名称。请检查名称的拼写，如果包括路径，请确保路径正
+确，然后再试一次。
+所在位置 行:1 字符: 85
++ ... istrator\Desktop -File | ForEach-Object { Write-Output (.Name + [char ...
++                                                             ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : 无法将“.Name”项识别为 cmdlet、函数、脚本文件或可运行程序的名称。请检查名称的拼写，如果包括路径，请确保路径正
+确，然后再试一次。
+所在位置 行:1 字符: 85
++ ... istrator\Desktop -File | ForEach-Object { Write-Output (.Name + [char ...
++                                                             ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : 无法将“.Name”项识别为 cmdlet、函数、脚本文件或可运行程序的名称。请检查名称的拼写，如果包括路径，请确保路径正
+确，然后再试一次。
+所在位置 行:1 字符: 85
++ ... istrator\Desktop -File | ForEach-Object { Write-Output (.Name + [char ...
++                                                             ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : 无法将“.Name”项识别为 cmdlet、函数、脚本文件或可运行程序的名称。请检查名称的拼写，如果包括路径，请确保路径正
+确，然后再试一次。
+所在位置 行:1 字符: 85
++ ... istrator\Desktop -File | ForEach-Object { Write-Output (.Name + [char ...
++                                                             ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : 无法将“.Name”项识别为 cmdlet、函数、脚本文件或可运行程序的名称。请检查名称的拼写，如果包括路径，请确保路径正
+确，然后再试一次。
+所在位置 行:1 字符: 85
++ ... istrator\Desktop -File | ForEach-Object { Write-Output (.Name + [char ...
++                                                             ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 

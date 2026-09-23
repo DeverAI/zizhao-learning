@@ -1,0 +1,17 @@
+﻿ssh.exe : ** WARNING: connection is not using a post-quantum key exchange algorithm.
+所在位置 C:\Users\david\AppData\Local\Temp\r44_upload.ps1:35 字符: 1
++ & ssh -o StrictHostKeyChecking=accept-new ht305 "powershell -NoProfil ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (** WARNING: con...ange algorithm.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+zizhao_20260923_r44final
+REMOTE_ZIP_SIZE=1135781
+REMOTE_ZIP_MD5=3df72e4068a6ddafbf4bf5e5d50bfb1a
+EXTRACT_EXIT=True
+REMOTE_FILES=165
+REMOTE_BYTES=2950892
+REMOTE_FORBIDDEN=0
+REMOTE_AGGREGATE=1b5d4593fdc2277d84a4f5f08aaca386763a07ec2d539e3ff76fc1b438ffa4cb
