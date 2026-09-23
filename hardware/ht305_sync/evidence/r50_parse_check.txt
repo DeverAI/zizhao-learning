@@ -1,0 +1,8 @@
+PARSE_CHECK_AT 2026-09-24 00:39:33  (stamp from runner's date; PS stdout is ASCII-only)
+CMD: powershell -NoProfile -ExecutionPolicy Bypass -File <archive>\hardware\ht305_sync\scripts\chk_r50.ps1
+FIRST3=239,187,191
+PARSE_ERRORS=0
+REMOVE_ITEM_HITS=0
+SCRIPT_LINES=91
+MD5_BOTH=B88D6ED05938401FC2069680D8C899AA
+PS_RC=0

@@ -64,7 +64,7 @@ gm = os.path.getmtime(GATE)
 after = [r[0] for r in rows if r[4] > gm] + ['MANIFEST.txt', LOGREL]
 
 head = [
-    'ht305_sync 归档清单（快照，现跑于 09-23 ' + now + '；脚本 = scripts/gen_manifest.py）',
+    'ht305_sync 归档清单（快照，现跑于 ' + now_full + '；脚本 = scripts/gen_manifest.py）',
     '',
     '**"快照"两个字有执行者**：跑 `python scripts/verify_manifest.py` 会把本清单逐行与盘上重算比对，'
     '漂了就点名是哪几只并返回非 0 ⇒ 引用本清单前跑它，别靠"我记得它是末版"。',

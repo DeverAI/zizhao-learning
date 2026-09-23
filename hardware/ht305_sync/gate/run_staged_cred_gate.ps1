@@ -19,4 +19,9 @@ $rc = $LASTEXITCODE
 Remove-Item Env:HT305_TMP_FOR_GATE   # 环境变量，不是文件：本目录"Remove-Item 计数 = 0"这把尺子只管删文件动作
 Write-Output ("OUT=" + (Split-Path -Leaf $out))
 Write-Output ("PY_EXIT=" + $rc)
+# 09-24 提交轮 #2：这两行打印必须落盘。上一轮（22:55:41）只留下了门自己那份输出，退出码只在控制台
+# ⇒ README 里那句"驱动的打印也必须落盘"当时没有执行者（同 FreqErr 的"打印 != 裁决"一族）。
+$pscopy = Join-Path $PSScriptRoot ('..\evidence\staged_cred_gate_' + $stamp + '_ps.txt')
+if (Test-Path -LiteralPath $pscopy) { Write-Output ('ABORT: ps-copy exists, refuse to overwrite ' + $pscopy); exit 1 }
+@(('DRIVER_PS_COPY ' + (Get-Date -Format 'yyyy-MM-dd HH:mm:ss')), ('LABEL=' + $label), ('OUT=' + (Split-Path -Leaf $out)), ('PY_EXIT=' + $rc)) | Set-Content -LiteralPath $pscopy -Encoding ascii
 exit $rc

@@ -2,7 +2,8 @@ import datetime, glob, os, sys
 
 os.chdir(r'C:/Users/david/Documents/all_projects/自招学习/hardware/ht305_sync')
 now = datetime.datetime.now().strftime('%H:%M:%S')
-out = ['ht305_sync 归档内脚本编码体检（现跑于 09-23 ' + now + '；脚本 = scripts/ps1_bom_scan.py）',
+now_full = datetime.datetime.now().strftime('%m-%d %H:%M:%S')
+out = ['ht305_sync 归档内脚本编码体检（现跑于 ' + now_full + '；脚本 = scripts/ps1_bom_scan.py）',
        '判据：非 ASCII 字节数 + 是否有 UTF-8 BOM（ef bb bf）。风险定义：`.ps1` 且 非ASCII>0 且 无 BOM',
        '（这种组合会被 Windows PowerShell 5 按 GBK 解码，中文注释会吞掉紧随其后的整行 ⇒ FreqErr 已登记的那次自伤）。',
        '']

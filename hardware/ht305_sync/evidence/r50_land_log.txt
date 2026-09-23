@@ -1,0 +1,15 @@
+LANDED_AT=2026-09-24 00:40:45
+FILES=10 BYTES=50406
+r50_local.txt	594	md5:e1717bd0
+r50_probe.txt	2038	md5:9cc6a885
+r50_scp_err.txt	679	md5:c86de5ea
+r50_verify.txt	15315	md5:c9b5a961
+r50_run_log.txt	2300	md5:753d3937
+r50_local_names.txt	14265	md5:67b5ada7
+r50_remote_names.txt	13931	md5:b4766ef1
+r50_listdiff.txt	784	md5:d02fde8c
+r50_cutoff_delta.txt	181	md5:51a07514
+r50_parse_check.txt	319	md5:20949a7e
+LOCAL_AGGREGATE     = d7439b287b06829e7235919fb25c1c749e636ed116599da36467b4ef1d4ac51f
+REMOTE_AGGREGATE=d7439b287b06829e7235919fb25c1c749e636ed116599da36467b4ef1d4ac51f
+AGGREGATE_MATCH=YES

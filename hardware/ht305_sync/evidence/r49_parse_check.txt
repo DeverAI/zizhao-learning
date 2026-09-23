@@ -1,0 +1,15 @@
+FIRST3=239,187,191
+PARSE_ERRORS=0
+REMOVE_ITEM_HITS=0
+SCRIPT_LINES=91
+MD5_BOTH=DF93891C2CC9F12063B9B47966E60592
+# ---- 来源块（本文件由一次性脚本落盘，上面五行是 PowerShell stdout 原文，逐字节未转写）----
+# RUN_AT=2026-09-24 00:08:00  PS_RC=0（同一次调用里取）
+# CMD: powershell -NoProfile -ExecutionPolicy Bypass -File hardware/ht305_sync/scripts/chk_r49.ps1
+# 这一遍复跑的是 09-24 00:07，不是第 7 代同步当场（09-23 23:00:10）那一次；
+# 那一次的 stdout 没有落盘 => 本文件是"读数第一次有载体"，不是"当时的原始副本"。
+# 被检字节：归档 scripts/r49_upload.ps1 复制到 TEMP/r49_upload.ps1 后两侧 md5 相等（MD5_BOTH= 那行），
+# 故本文件描述的就是将被执行的那只字节（守卫来自 chk_r49.ps1 第 6/8/11 行，逐字继承自 chk_r48.ps1）。
+# 与 R49 复查报告 P0-2 的对应：报告核出"五个键在 evidence/ 下 0 命中"，本文件即其处置。
+# 本来源块重写过一次：第一版有两处单反斜杠被 python 解释成回车符，往证据文件里混进 2 个 0x0D 字节，
+# 09-24 00:08:40 现跑 count == 2 抓到并替换；前 116 B（含它自己的 5 个 0x0D）未动。

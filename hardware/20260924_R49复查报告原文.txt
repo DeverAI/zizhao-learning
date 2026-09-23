@@ -1,0 +1,50 @@
+复查根路径 `C:/Users/david/Documents/all_projects/自招学习`（只读，未改任何文件、未执行任何 ht305 脚本）。结论：数字层面几乎全部可复算，但有 2 处 P0（gen 12 假冻结、第 7 代 chk 读数无载体且被指到错文件）、5 处 P1（口径越界/指针悬空/时刻与"第一次"标签）、4 处 P2。本轮无明文泄漏：`PROV_PASS` 宏值在 HEAD、75be24f、040af28 三棵树的 `git grep` 均 0 命中，工作树 74 处命中全在 `backups/`（.gitignore:19 忽略）、`hardware/*.log`（.gitignore:20 `*.log` 忽略）、`dev_log/20260919.md`（未跟踪未忽略、已被 make_staged_list.py 第 2 条 DROP 点名排除）与 `provision_ap.c` 本体。
+
+[/P0-1] hardware/ht305_sync/README.md:「清单代次」表 gen 12 行 +「建立时刻」line 16 — 把一个从未冻结的世代当成已登记的世代：该行"时刻/只数现读 MANIFEST.txt 首行与 TOTAL 行"取到的是 gen 11 的 22:23:26 / 132 / 370986 / 26，reason 格又写"r49final + 75be24f 都要冻进归档"（读起来像已做）— 验证：`head -1 MANIFEST.txt`=22:23:26、`tail TOTAL`=132、`manifest_gen_log.txt` 末行=同一组数（无 gen 12 行），MANIFEST 第 4 行自限"只对 22:23:26 之前的字节负责"，而我按 mtime 数出冻结之后目录里有 23 只更新（README 23:10:12/41,522 B，清单里那行仍是 33,090 B；9 只 r49 凭证 22:59:56~23:00:57；2 只脚本 23:05:50）；同目录 updates 文件 line 25 与任务 #131 明说"尚未冻结"，与 README 同页两说 — 建议：gen 12 行改写为"未冻结（第 4 遍链待跑）"或删行，跑完链再登记，否则现跑 verify_manifest.py 必判 STALE。
+
+[/P0-2] hardware/20260919_墨水屏点屏排查记录.md:§37.3 `chk_r49.ps1` 那一格 + README.md:「复算入口」末段/「没做」列表 — 断言"本代未单立 r49_parse_check.txt，因为读数写在 `r49_run_log.txt` 里""本轮一次跑完即落盘"：这五个键在 evidence/ 下 0 命中 — 验证：`grep -n "FIRST3|PARSE_ERRORS|REMOVE_ITEM_HITS|SCRIPT_LINES|MD5_BOTH" evidence/r49_*.txt` 无匹配（`r49_run_log.txt` 全文只有 START 23:00:19…VERIFY_FLUSHED 23:00:35 与远端命令回显）；gen 5/6 各有 `r47_parse_check.txt`/`r48_parse_check.txt` 逐字承载同五个键；仓库全树 `DF93891C…0592` 只出现在两只叙述文档里 — 建议：补一只 `evidence/r49_parse_check.txt`（我核过其中 4 个数可从 `scripts/r49_upload.ps1` 现算复现，见现场读数），或把句子改成"未落盘、仅本文复述"。这正是 `r47_parse_check.txt` 第 2 行自己立的规矩"读数不落盘等于没跑"被本代破了。
+
+[/P1-1] 排查记录:§36.4 末段 — "远端那份 `provision_ap.c` 仍带明文（本代实测 `1 / 287`）"是口径越界：1/287 不是远端读数 — 验证：`evidence/r48_diff_and_cred.txt` 第 2 行写明该次扫的是"包内条目"对应的本地字节、第 10 行才是"包内明文命中=1"；远端回给的只有 `REMOTE_FILES/REMOTE_BYTES/REMOTE_FORBIDDEN/REMOTE_AGGREGATE/REMOTE_NAMES`（见 `r49_verify.txt` 与 run_log 里的远端命令），从无明文行；`REMOTE_FORBIDDEN=0` 是黑名单计数 — 建议：把"实测"改成"包内实测（本地扫）"，远端那一半改用更强的证据：`REMOTE_AGGREGATE == LOCAL_AGGREGATE` + `provision_ap.c` 在 313 只名单内，故服务器那份逐字节等、必带明文（结论本身没错，别改结论）。（§37.3 与 README line 221 把 gen 7 的"暂存区扫描"标成弱一档，那两处是对的。）
+
+[/P1-2] README.md:「提交轮」现跑四条之第 2 条 + 排查记录:§37.1 末格 — 权威计数的指针两头都落不到：README 写"登记在排查记录'现场态'段"，排查记录里没有任何以"现场态"命名的段（4 次命中的字面都是句内词，line 1679/2613/3126/3213）；§37.1 则把权威计数推到仓库外的 `hardware-epaper397-power.md` — 验证：`grep -n "现场态" 排查记录` 无段名命中；真正的载体是 §三十五-④（line 3132）+ `evidence/unpushed_plaintext_hist_212353.txt`（1,737 B，现跑读到 `UNPUSHED_COMMITS 9 / DIRTY_COMMITS 6 / CLEAN_COMMITS 3`，6 只各 `tree_hits=2`、落点是 FreqErr.md 与排查记录两只）— 建议：两处指针统一改指"§三十五-④ + 那只凭证"。
+
+[/P1-3] README.md:「目录里有什么」evidence 行 + 排查记录:§37.1 门那格 — 把 `PY_EXIT=0` 说成出自 `staged_cred_gate_225541.txt`：那只文件里没有 PY_EXIT 行（末行是 `VERDICT=CLEAN`），退出码只由 `gate/run_staged_cred_gate.ps1` line 21 打到控制台，本代又没有 `_ps` 副本（21:3x 两轮对照才有 `…_ctrl_empty_ps.txt`/`…_ctrl_dirty_ps.txt`）— 验证：逐行读该凭证（第 6~10 行为 FILES_SCANNED=171 / PROV_PASS_FILES=0 / SSH_FILES=0 / TOTAL_HITS=0 / VERDICT=CLEAN）；README line 65 自己写了"门自己那份文件不含退出码，所以驱动的打印也必须落盘"，同文件两句打架 — 建议：补 `staged_cred_gate_225541_ps.txt`，或把 PY_EXIT 降级为"由 VERDICT=CLEAN + 该脚本 line 58 推得"。
+
+[/P1-4] 排查记录:§三十七 标题 + done.md 187 + updates 首段 — 链上"22:56:39 commit"与 git 读数差 30 秒：`git show -s --format=%ci 75be24f` = 2026-09-23 22:56:09 +0800（author date 同值）；22:56:39 在仓库里无任何来源，而同一句里的 22:56:47 现跑反倒只有在 22:56:09 之后才自洽 — 建议：以 git 读数为准改写，或点名 22:56:39 出自哪只读数。
+
+[/P1-5] README.md:「建立时刻」line 16 + 排查记录:§37.3 — "23:04:23 落 +9 只 r49 凭证（47,072 B）"里只有字节数可复算，时刻在仓库里查无载体：`land_r49_evidence.py` 的 `LANDED_AT` 只打 stdout，9 只文件因 `copy2` 保留源 mtime 而全在 22:59:56~23:00:57，且该脚本自身 mtime 23:05:50 晚于它所登记的那一遍（按 §34.8"校验的字节 == 真被执行的字节"，跑的那份不是归档里这份，`make_staged_list.py` 同）— 验证：见现场读数段 r49sum 与 mtime 列举 — 建议：让落地脚本自己往 evidence 写一行时刻，或把"23:04:23"标成"仅本节叙述、无凭证"。
+
+[/P1-6] README.md:「建立时刻」line 15"首批真提交" + 排查记录:§三十七 标题"第一次真提交 `75be24f`"（不带限定语）— 误导：本分支上 `75be24f` 之前已有 9 只未推送提交，`040af28`（11:44:36）本身就提交了 68 files/3,012 ins — 验证：`git log --oneline origin/main..HEAD | wc -l` = 10、`git show --stat 040af28` — 建议：只在"R44~R48 那批文档"这一限定下说"第一次"（README line 33 已是这种写法，把它当唯一口径），标题加同一限定语。
+
+[/P2-1] 排查记录:§36.1 表第 5 行聚合格 — 尾数略写错字：写 `83efb6fe…7e636`，载体是 `…34376fe636`（正确尾应作 `…fe636`）— 验证：`grep AGGREGATE evidence/r47_local.txt evidence/r47_verify.txt` 两端逐字符等、均以 fe636 收 — 建议：改尾数（前缀 83efb6fe 对，别整格重做）。
+
+[/P2-2] done.md 187⑤ / dev_log 第二十八批 / README line 191 — "10 只未推送提交里 6 只带明文"这句是对的，但它引的权威凭证头部是 `UNPUSHED_COMMITS 9`（21:23:53，提交前那一遍）：下一轮照凭证复算会得 10 而以为数字打架 — 验证：现跑 `git rev-list --count origin/main..HEAD`=10，且 `git grep -c` 对 75be24f 仍 0 命中（新增那只是干净的）— 建议：引用处补一句"凭证取提交前 9 只快照；75be24f 干净另由 git grep HEAD=0 证"。
+
+[/P2-3] 本轮"我跑了检验"这一族的守卫缺口 — 规矩（FreqErr ⑮/本段那条"空扫与干净同形"）是普适的，但只在 `gate/ht305_sync_gate.py`(line 41-43)、`scripts/collect_ht305_sync.py`(line 30-31)、`gen_manifest.py`(.pyc 即 ABORT)、`derive_r49.py`(替换 0 命中即 ABORT)、`staged_cred_gate.py`(空索引 ABORT + 命中即 exit 1) 五处成立：`gate/cred_gate_recheck.py` 既无"FILES_SCANNED=0 即 ABORT"、也完全没有退出码/VERDICT，且 `HT305_TMP_FOR_GATE` 未设时只写 `SSH_TOTAL_HITS=SKIPPED` 而 rc=0（同族索引侧门这时是 ABORT）；`make_staged_list.py`（KEEP=0 照样写清单）、`r49_listdiff.py`（两侧名单皆空时 ONLY_IN_LOCAL=0/ONLY_IN_REMOTE=0 与"全等"同形）、`land_r49_evidence.py`（`AGGREGATE_MATCH` 为字符串比对，两只都空即 YES）同理 — 验证：逐只读代码（未执行）— 建议：给这四只补 0 候选/0 字节 ABORT，或在 README line 215"三道门每次均 0 命中"旁注明"归档后那道只保证扫过、不保证扫到"。
+
+[/P2-4] README.md:「清单代次」表 vs 排查记录:§36.1 表 — 两套序数共用"第 N 代"这个词（README 的代=清单世代 1~12，§36.1 的代=同步代 1~7），标题"七轮全量同步"与表里 12 行同页并存；另 §37.1 引 TEMP 原件名 `make_staged_list_r50.py` 又开出第三种序数（r50=提交轮序号），该文件不在仓库、不可核 — 建议：清单世代一律写"清单 gen N"，TEMP 副本名不再引（或引时标"仅命名、非证据"）。序数登记仍只在 FreqErr ht305 段一处，这一条是对的。
+
+## 我的现场读数（现跑，时刻 2026-09-24 00:01:20）
+- branch=main；`git rev-list --count origin/main..HEAD`=10；`git log -3` = 75be24f / 040af28 / 5246237
+- `git show -s --format=%ci 75be24f` = 2026-09-23 22:56:09 +0800；`git show --stat 75be24f` = 171 files / 12,732 ins / 615 del；`--name-status` 构成 A=104 M=67 D=0
+- `git status --short | wc -l` = 30（`^ M`=7，`^??`=23）；`git ls-files | wc -l` = 304
+- provision_ap.c 行数：`git show HEAD:…` = 42，工作树 = 238（README/§37.2 那对数仍成立）；`PROV_PASS` 宏值长度 10（不打印）
+- 明文普查：`git grep -c -F -f <patternfile>` 对 HEAD / 75be24f / 040af28 均 rc=1（0 命中）；工作树全树（排 .git/backups 未排）命中 74 只，全部为 backups/、4 只 hardware/*.log、dev_log/20260919.md、provision_ap.c 本体及其备份
+- ht305 载荷可复算：`ls-files -c`=304、`-o --exclude-standard`=24、并集=328；扣 `sync_r49.py` 的两条规则（`.workbuddy/` 2 只 + `dev_log/20260919.md` 1 只）与冻结后新增的 12 只 = 313 = `r49_local_names.txt` 行数（含 provision_ap.c）
+- r49 九只凭证字节求和 = 47,072（时刻载体缺失见 P1-5）；9 只 mtime 区间 22:59:56 ~ 23:00:57
+- `chk_r49.ps1` 读数现算复现：`FIRST3`=239,187,191（即 r49_upload.ps1 的 UTF-8 BOM）、`SCRIPT_LINES`=91、`REMOVE_ITEM_HITS`=0、`MD5_BOTH`=DF93891C2CC9F12063B9B47966E60592；`PARSE_ERRORS=0` 需 PowerShell，未执行故未核
+- FreqErr ht305 段：段内 `[错误类型]` 条数=25（标题"本段二十五条"对）、全文件同前缀行数=140、`wc -l FreqErr.md`=1362 —— 与 23:17:06 台账行"本段25/全文件140/wc-l1362"逐字对
+- MANIFEST 首行=22:23:26；末三行 TOTAL=132 / TOTAL_BYTES=370,986 / BOM_FILES=26；manifest_gen_log 末行=同一组（无 gen 12 行）；README.md 盘上 41,522 B vs 清单记 33,090 B；mtime 晚于冻结时刻的归档文件=23 只
+- 冻结链各门：`staged_cred_gate_225541.txt` 末行 VERDICT=CLEAN（无 PY_EXIT 行）；`cred_gate_recheck_222326.txt` FILES_SCANNED=133、两侧 0 命中；`staged_list_225525.txt` 头行 68+108、ADD=171、DROP=5、9,294 B
+- cutoff 差集历代：r45 165/164(1 改)、r46 233/233、r47 261/260(1 改)、r48 287/287、r49 313/313；`r49_verify.txt` REMOTE_FILES=313 / BYTES=3,674,973 / FORBIDDEN=0 / AGGREGATE=85b059bc…1b812d（与本地逐字符等）；`r49_probe.txt` 列 7 只同步包（含 tar 1,002,599 与 r43.zip 1,117,960）+ 一只无关 flash_notice zip
+
+## 我没能核实的
+- %TEMP% 侧一切：`make_staged_list_r50.py`/`derive_r49.py`/`land_r49_evidence.py` 的执行副本、23:04:23 那遍的 stdout、`chk_r49.ps1` 的 `PARSE_ERRORS=0`（禁跑 PS 脚本）
+- 服务器现状：只有仓库内那几份 `REMOTE_*` 副本，副本之外无第二证据（README line 211 已自陈这条）
+- 项目记忆 `hardware-epaper397-power.md`（含"(46)""现场态"段）不在本仓库，未读、未判
+- MANIFEST 中 README.md 那 8,432 B 差额的逐只构成（属冻结后编辑，未做逐只归因）
+- gen 5"清单时刻被覆写"那一格的历史字节（README 已自陈不可复算）
+- done.md 182~187 与 dev_log 三批里所有以"某时刻现跑"形式出现的单板/串口类读数（本轮无串口动作，未涉及）
+
+## 看着像错、我核过是对的（别顺手改）
+`provision_ap.c` 确实在 313 只载荷内（README line 220"服务器 zip 含它"成立；黑名单实为 `.workbuddy/` 2 只 + `dev_log/20260919.md` 1 只，316/313/dupes=0 的算术可复算）；"第三次成立（前两次 233/0 改、287/0 改）"跳掉 gen 5 的 260/261 是对的；FreqErr line 974 那句"8（与'八条'一致）"是带括注的历史快照、与今天"二十五条"不冲突；`REMOTE_FORBIDDEN=0` 被 README/§37.3 明说"那是黑名单不是明文"，这两处口径正确；todo.md line 250 的"done.md 末节号=二十三 / 17 只名单 / ls-files 304"三条我现跑逐一对上；`git status --short` 目录折叠口径与展开口径差 1 只（107 vs 108）那族说法仍成立。

@@ -1,0 +1,10 @@
+提交前明文门（索引侧，现跑于 2026-09-23 22:55:42）
+LABEL=index-225541
+判据：字节级 count(口令明文)；PROV_PASS 现读宏本体、SSH 口令现解 DPAPI 后经环境变量传入，两侧都不内嵌字面量。
+口径：扫的是 `git diff --cached --name-only -z` 列出的**已 stage blob**（即真正会进 commit 的那份字节），不是工作树。
+
+FILES_SCANNED=171
+PROV_PASS_FILES=0 PROV_PASS_TOTAL_HITS=0 []
+SSH_FILES=0 SSH_TOTAL_HITS=0 []
+TOTAL_HITS=0
+VERDICT=CLEAN

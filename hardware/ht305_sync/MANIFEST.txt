@@ -1,18 +1,23 @@
-ht305_sync 归档清单（快照，现跑于 09-23 22:23:26；脚本 = scripts/gen_manifest.py）
+ht305_sync 归档清单（快照，现跑于 09-24 01:02:07；脚本 = scripts/gen_manifest.py）
 
 **"快照"两个字有执行者**：跑 `python scripts/verify_manifest.py` 会把本清单逐行与盘上重算比对，漂了就点名是哪几只并返回非 0 ⇒ 引用本清单前跑它，别靠"我记得它是末版"。
-本清单只对**生成时刻 22:23:26 之前**的字节负责；此后被改写的任何一只（含本清单自己、含 README）都不在本行的覆盖范围内 ⇒ 这一句是给"终态/末版"这类词定的有界窗口（R45 空上下文复查 P0-2）。
+本清单只对**生成时刻 01:02:07 之前**的字节负责；此后被改写的任何一只（含本清单自己、含 README）都不在本行的覆盖范围内 ⇒ 这一句是给"终态/末版"这类词定的有界窗口（R45 空上下文复查 P0-2）。
 来源 = %TEMP% 的逐字节复制（shutil.copy2，保留 BOM）。清单是**快照**：它一旦写死就追不上还在增长的目录，所以本目录只保留末版清单 + 这段说明，不留半旧版；历世代的**动因**统一记在 `README.md` 的"清单代次"一节（单一权威源），只数与时刻另有下面那条机器自追加的日志，本头部不重复登记。
 本清单**不含自身**（列自己必然在写完后立刻过期），同样**不含** `evidence/manifest_gen_log.txt`。
 代次日志：`evidence/manifest_gen_log.txt` 由本脚本在写清单**之前**追加一行 `时刻 / TOTAL / TOTAL_BYTES / BOM_FILES` ⇒ 自 09-23 gen 9 起，"上一代有几只"每一代都可复算，不再只靠 README 的人工叙述（gen 5 那种时刻被覆写的代价见该节）。
-明文门（取 `evidence/cred_gate_recheck*` 里 mtime 最新的那只 = evidence/cred_gate_recheck_222326.txt）：ht305_sync 归档后的明文门复验（现跑于 09-23 22:23:26，脚本 = gate/cred_gate_recheck.py）；FILES_SCANNED 见该文件末行，两种口令（`PROV_PASS` / ht305 SSH）各自累计均 0 命中。
+明文门（取 `evidence/cred_gate_recheck*` 里 mtime 最新的那只 = evidence/cred_gate_recheck_010207.txt）：ht305_sync 归档后的明文门复验（现跑于 2026-09-24 01:02:07，脚本 = gate/cred_gate_recheck.py）；FILES_SCANNED 见该文件末行，两种口令（`PROV_PASS` / ht305 SSH）各自累计均 0 命中。
 门与本清单的先后（按 mtime 现算，非人工登记）：门之后又被改写/新增 2 只 = MANIFEST.txt, evidence/manifest_gen_log.txt ⇒ 门未覆盖这几只的**当前字节**；其中清单只含"已扫文件的路径/大小/哈希"、编码体检只含"非 ASCII 计数"，均为派生信息、不含新载荷。
 
 path	bytes	md5	utf8_bom	mtime
-README.md	33090	059d7073f1bbb11b70b973b68de739a1	False	22:23:13
+README.md	58262	ce1aaf4ef265673b9f4d5d394f329f08	False	01:01:57
 evidence/arch_delta_r47_vs_gen9.txt	910	7f49cf67dd0a4c726ff55e33268acd91	False	13:53:14
 evidence/cred_gate_negative_control_130440.txt	93	f90ca2c4c81f35ba54fa71e5bc497fb7	False	13:04:40
 evidence/cred_gate_recheck.txt	720	ce27909ce2cb6ec8b809932de64b5877	False	12:00:02
+evidence/cred_gate_recheck_005428.txt	860	8826a7498eabd2abf088f3a0d25639e6	False	00:54:28
+evidence/cred_gate_recheck_005616.txt	860	3114b62b4b912d04ee5f655f2d737e9e	False	00:56:16
+evidence/cred_gate_recheck_005905.txt	860	2a68fea5d306247362980bc4bb4fb78f	False	00:59:06
+evidence/cred_gate_recheck_010100.txt	860	89990e9516447545c8e584df06a4dc9d	False	01:01:00
+evidence/cred_gate_recheck_010207.txt	860	295823d80e9fd2435138dbdf6e487508	False	01:02:07
 evidence/cred_gate_recheck_120757.txt	840	187984ff3aae178476004b3560355244	False	12:07:57
 evidence/cred_gate_recheck_121937.txt	840	69090b52e918490f05c887f5ea68eb0d	False	12:19:37
 evidence/cred_gate_recheck_122106.txt	840	bf3527a35cd45ab599b68b290c6c2a4d	False	12:21:06
@@ -28,7 +33,7 @@ evidence/cred_gate_recheck_222326.txt	852	cff11bd83071b4c1c3110ad9dc86da26	False
 evidence/cred_gate_selftest_120548.txt	492	9b3377df83078142ac53241927ad5af8	False	12:05:48
 evidence/cred_recount_0822.txt	527	b82714efb73f7f0050e21cc188df689b	False	08:22:53
 evidence/ht305_sync_gate_130414.txt	2818	b085e24b0f819d1a39bfc42837026334	False	13:04:16
-evidence/ps1_bom_scan.txt	4412	814413d7f2978801956879faa2b683ce	False	22:23:25
+evidence/ps1_bom_scan.txt	5481	9ecc2f845793fd517157c73949fa6393	False	01:02:06
 evidence/r43_r44_listdiff.txt	79	6d770df23fafd3151cf58db6f2d797ae	False	08:32:06
 evidence/r44_diff_rerun.txt	67	e2aa8b4c2e4451677098f305abdb1db6	False	08:29:28
 evidence/r44_local_names.txt	5764	3ae039b5e501ed154de0356c367cbd6f	False	08:20:16
@@ -83,17 +88,44 @@ evidence/r48_remote_names.txt	11701	fd11512b84df3815aacde39c68954694	False	21:53
 evidence/r48_run_log.txt	2298	9b23bfdcce9100d7c6a66916fb4f4e0e	True	21:46:50
 evidence/r48_scp_err.txt	679	76453ad17f0b562a08910bbc427a7bda	True	21:46:45
 evidence/r48_verify.txt	13038	57a7875ddff55f77dd555f7fdb225f83	True	21:46:50
+evidence/r49_cutoff_delta.txt	181	5acfd7d540f8a9765d373d29e25fda33	False	23:00:57
+evidence/r49_listdiff.txt	784	d0f0fcae2617332180f9101fb58523c9	False	23:00:56
+evidence/r49_local.txt	594	7b154a678b705a04b3308dd2d027cfa5	False	22:59:56
+evidence/r49_local_names.txt	13269	7ef05ef9e02e2a6845ecc61960f43791	False	22:59:56
+evidence/r49_parse_check.txt	1233	81343a48f907bec8b0b3b4c19681bfa4	False	00:09:00
+evidence/r49_probe.txt	1992	e480e4c332ea36ee2bbdc42f86b18c9b	True	23:00:23
+evidence/r49_remote_names.txt	12956	b9d22f4dafc3f75f032873bd46ed04e8	False	23:00:55
+evidence/r49_run_log.txt	2298	f53f4daac8aacf156dc0b88692f4196a	True	23:00:35
+evidence/r49_scp_err.txt	679	898507ad042dab1b78ff28b047f514a3	True	23:00:26
+evidence/r49_verify.txt	14319	f1af68175ac76a75ef873d7d89ededfd	True	23:00:35
+evidence/r50_cutoff_delta.txt	181	51a0751451d9391d2166d523f829c9a8	False	00:40:22
+evidence/r50_extra_land.txt	186	3886503ea4e9d26adba6b8a5e3350c81	False	00:44:44
+evidence/r50_land_log.txt	592	b46616746a7e9b01822dede9ee4b2330	False	00:40:45
+evidence/r50_listdiff.txt	784	d02fde8c4a86a219f2d0091c7d6f42c2	False	00:40:22
+evidence/r50_local.txt	594	e1717bd08163bc591366f9c29f3a17b7	False	00:38:48
+evidence/r50_local_names.txt	14265	67b5ada70879f7bf04e5b51499f26320	False	00:38:48
+evidence/r50_parse_check.txt	319	20949a7ea895aedb3f1d608aee94de23	False	00:39:34
+evidence/r50_probe.txt	2038	9cc6a885c0b04046e2f4cb2e2477975e	True	00:39:47
+evidence/r50_remote_names.txt	13931	b4766ef11b85d9d43e3e8ae56f145650	False	00:40:22
+evidence/r50_roundtrip.txt	549	bbc0d85d17d4e285fb8247fac4afbd8f	False	00:44:00
+evidence/r50_run_log.txt	2300	753d39376c9fa7546c43cc71075afab0	True	00:39:55
+evidence/r50_scp_err.txt	679	c86de5ea30105a638c3278a22b8ac1ae	True	00:39:49
+evidence/r50_verify.txt	15315	c9b5a961696efe658d2115ada7a1750a	True	00:39:55
 evidence/staged_cred_gate_114414.txt	478	46bfc12ebd983a2194348ea0911753fa	False	11:44:16
 evidence/staged_cred_gate_213942_ctrl_empty_ps.txt	98	00d7e2eb5da62979417a91547d3344dd	False	21:41:23
 evidence/staged_cred_gate_214001_ctrl_dirty.txt	568	27b8b517ff25d493eefd52235f2b2af1	False	21:40:02
 evidence/staged_cred_gate_214001_ctrl_dirty_ps.txt	625	f64e2d11d959564e7b84de93091df7ba	False	21:41:23
+evidence/staged_cred_gate_225541.txt	514	5bee42a8111d12c8184e5c81c978834b	False	22:55:49
+evidence/staged_list_005929.txt	3707	85b4e285ed0c271b97c738a881585c4d	False	00:59:29
+evidence/staged_list_010108.txt	3891	6839a42a0b081baff9a1e801f841de4e	False	01:01:08
+evidence/staged_list_225525.txt	9294	f526ed670492e17bcd33a4d90b33c09a	False	22:55:25
 evidence/unpushed_plaintext_hist_212353.txt	1737	9d112e31a4911a2acfa6524343b19ed0	False	21:23:53
-gate/cred_gate_recheck.py	4758	9b32602474c1ccb0d42db920110be1ed	False	12:44:23
+gate/cred_gate_recheck.py	6383	64e128d7183bc4aa6511ffdc67598aa1	False	00:10:55
 gate/cred_gate_selftest.py	2657	8c7afcafeeb701ac49f2c6e3e7693294	False	12:44:34
 gate/ht305_sync_gate.py	2703	5a2ffd8fddc9270d36f959352a7fb25b	False	12:43:59
 gate/ht305_sync_gate_ssh.ps1	1142	0d05326b3b7bcb9e81fca4885dc30c46	False	10:35:14
 gate/run_cred_gate_recheck.ps1	1563	46c21b2d866770a988e66fd75903f5ca	True	12:08:09
-gate/run_staged_cred_gate.ps1	1482	46acecd76b3f3d610e05586d17c09129	True	21:39:19
+gate/run_staged_cred_gate.ps1	2123	101bb0ffb12a639f33ffa60edde46720	True	01:00:14
 gate/staged_cred_gate.py	3193	6de0f25e4e2672d897747894243077b4	False	21:38:50
 scripts/arch_delta_r47.py	1276	0de41649aa31a27639cbfc59a479e46f	False	13:53:14
 scripts/build_sync.py	2039	6369b8df2aa41e5ca6f5db7402bc8b2d	False	07:51:50
@@ -102,11 +134,15 @@ scripts/chk_r45.ps1	368	71d3a0fbb08ec3e2ffa14126c34eb67b	False	09:55:57
 scripts/chk_r46.ps1	368	915291a936933cfadeb4d0e56d083d40	False	12:09:01
 scripts/chk_r47.ps1	1212	8a32f07cf975e72ce9c8991cb2e91b78	True	13:46:27
 scripts/chk_r48.ps1	1212	8a76775e2e50da064fc8df0888ad7e20	True	21:45:33
+scripts/chk_r49.ps1	1212	c1833a0bf3f8afcf853bce90ff8ea77e	True	22:59:45
+scripts/chk_r50.ps1	1212	8160d6b0198fb41b21b8925b180d7f99	True	00:37:54
 scripts/collect_ht305_sync.py	3407	1e23b87339ab9b0c506f48e14ff8fb1e	False	12:44:49
 scripts/derive_r48.py	1909	87fb479100468a81e018914325f08b38	False	21:45:24
+scripts/derive_r49.py	2328	3e3776b5a7b666e3cbca7b005d2b2955	False	22:59:32
+scripts/derive_r50.py	3052	f2a5f76b839b1d99f3cddadd96493f3c	False	00:37:42
 scripts/expected.py	549	22aec8130cf07f4afbb8704d4199ef6a	False	07:54:18
 scripts/expected2.py	610	4bd44f5c6894d9b9c301061773f3735b	False	07:55:59
-scripts/gen_manifest.py	6957	1ee503bbcee996f7730c5dd8a24f950c	False	13:17:04
+scripts/gen_manifest.py	6956	9d0d7258a6346e7ece05013d0414f241	False	00:41:55
 scripts/ht305_agg.ps1	1324	249c0e84b15f9f4ea7ceee1630038485	False	07:56:09
 scripts/ht305_extract.ps1	1206	703b49fb954d3d9f62a7dce24f0f2619	False	07:53:06
 scripts/ht305_extract_zip.ps1	1504	ed70a805edc8dc140740eea10e90e92c	False	07:55:17
@@ -118,9 +154,12 @@ scripts/ht305_upload_zip.ps1	1023	fa4f340c847448e5011afd74e7ef361c	False	07:54:3
 scripts/ht305_verify.ps1	804	40cf40f6c2a9a0a45731fd25a2a59b5b	False	07:52:50
 scripts/land_r44b_report.py	1552	e5011bd080b5614fed37ecf9862176ca	False	10:32:07
 scripts/land_r45_report.py	2825	490810cc3959cd9f55eddab9fd01c6dc	False	12:25:23
+scripts/land_r49_evidence.py	4158	23623a6288a897f25a2072e7329eb34a	False	00:23:54
+scripts/land_r50_evidence.py	3633	b768649d114d1316614117df97c97d3b	False	00:40:35
+scripts/make_staged_list.py	4488	daa9d0d4519544e2e253e6e0b6b2302a	False	00:11:56
 scripts/probe_zip_vs_head.py	1298	c5bdfeeae4dfc92e7576402106294012	False	09:49:04
 scripts/probe_zip_vs_head2.py	1152	fcbb13e1b2fe8d449ed2d6b2649e4cff	False	09:49:41
-scripts/ps1_bom_scan.py	1914	916f37dee8febcef00f2f87e212710e2	False	11:58:09
+scripts/ps1_bom_scan.py	1975	2bdc5cb184a2aff6a47e52d904b6e837	False	00:41:55
 scripts/pw_census.py	1373	5ac8e7b78fb49f9141ff2560499705ce	False	07:45:28
 scripts/pw_staged.py	610	c37542edd4f125a1e7515fedd1c48106	False	07:48:12
 scripts/pw_tree.py	670	4c06ef50653e4fe6c4998e78c8e07a68	False	07:46:12
@@ -135,13 +174,22 @@ scripts/r47_upload.ps1	5616	8981d2e85f6f85f934f9daae41535183	True	13:45:25
 scripts/r48_cutoff_delta.py	1780	47165be8406421f914de151000534e60	False	21:45:33
 scripts/r48_listdiff.py	3091	2a132f5b2528bb9b4964bd998b6788b1	False	21:49:10
 scripts/r48_upload.ps1	5525	43c2b524af76de029d246edabfa70d26	True	21:45:33
+scripts/r49_cutoff_delta.py	1780	39388b9ec8da4c35377d1b98a7bf4ee1	False	22:59:45
+scripts/r49_listdiff.py	3365	22a06ec0747705ac926da833898d53f4	False	00:11:19
+scripts/r49_upload.ps1	5525	df93891c2cc9f12063b9b47966e60592	True	22:59:44
+scripts/r50_cutoff_delta.py	1780	0b5cde0c5460419e89576abc98481d4a	False	00:37:54
+scripts/r50_listdiff.py	3365	8ca2422b135f291b33607d750810216a	False	00:37:54
+scripts/r50_roundtrip.py	3139	69d16b68aabf438361e6558944d8a0ab	False	00:43:46
+scripts/r50_upload.ps1	5527	b88d6ed05938401fc2069680d8c899aa	True	00:37:54
 scripts/sync_r44.py	3171	ea3f506f26e39907054be6cc82a58c55	False	08:15:41
 scripts/sync_r45.py	4203	0d21383c9d3d58c5f48c0fa2bc54bac4	False	09:56:51
 scripts/sync_r46.py	4203	8a616bbaab9d8b7125c418771eada22e	False	12:09:01
 scripts/sync_r47.py	4203	1b4f090bc31c01dbac7a9e09bec75653	False	13:45:25
 scripts/sync_r48.py	4203	bc8830c46a4cb2e23e07ea49666a7636	False	21:45:33
+scripts/sync_r49.py	4203	36840dfd9ea056f258e6718164f40495	False	22:59:44
+scripts/sync_r50.py	4203	e4357e2fccbce1ee6723e6f0a535f7f9	False	00:37:54
 scripts/verify_manifest.py	4309	e7b5754e32a1a229647f20ffd4d3e55e	False	13:13:05
 
-TOTAL	132
-TOTAL_BYTES	370986
-BOM_FILES	26
+TOTAL	180
+TOTAL_BYTES	574267
+BOM_FILES	38

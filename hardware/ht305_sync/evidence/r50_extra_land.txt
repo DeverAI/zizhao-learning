@@ -1,0 +1,4 @@
+LANDED_AT=2026-09-24 00:44:44
+FILES=1 BYTES=549
+r50_roundtrip.txt	549	md5:bbc0d85d
+NOTE=r50_land_log.txt is the 9+1 batch carrier; this file is the tail artifact landed after that batch

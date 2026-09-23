@@ -1,0 +1,11 @@
+ht305_sync 归档后的明文门复验（现跑于 2026-09-24 00:56:16，脚本 = gate/cred_gate_recheck.py）
+判据：字节级 count(口令明文)。PROV_PASS 由脚本按 `#define PROV_PASS` 现读；SSH 口令由 PS 侧 DPAPI 现解后经环境变量传入 —— 两侧都不内嵌字面量。
+口径：扫的是**归档后**的全部文件（含本门脚本自身与 README/MANIFEST），排除本输出文件。
+快照口径：本批"内容 → 门 → 清单"以 **打包截止时刻 00:38:42** 为界；早于它的字节进包，晚于它的改动（含本门输出与清单自身）**不在**同步包里 ⇒引用本文件时请连这个界一起引。
+只留末版已作废：本文件名带时刻 ⇒ 每一代的字节都在仓库里，被引用的那一代可复核。
+
+
+FILES_SCANNED=176
+PROV_PASS_TOTAL_HITS=0
+SSH_TOTAL_HITS=0
+VERDICT=CLEAN
