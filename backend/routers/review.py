@@ -2,16 +2,15 @@
 from __future__ import annotations
 
 import os
-import re
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from config import SETTINGS_FILE, STORAGE_DIR, atomic_write_json, load_settings, save_settings
+from config import STORAGE_DIR, atomic_write_json, load_settings, save_settings
 from models import database as db
 from routers.auth import current_user
-from services import review_service, user_api_service
+from services import review_service
 
 router = APIRouter(prefix="/api", tags=["review"])
 

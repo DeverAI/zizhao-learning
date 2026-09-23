@@ -1,0 +1,8 @@
+RAN_AT = 2026-09-23 12:10:29
+口径：远端名单取自 r46_verify.txt 的 REMOTE_NAMES 段（服务器自己报的解包后相对路径），本地名单取自 r46_local_names.txt（包内条目）
+踩坑登记：第一次比对报 233/233 只各侧独有——原因是 r46_local_names.txt 由 python 在 Windows 下写，行尾是 CRLF，而远端段经 tr -d '\r' 已变 LF ⇒ 两侧集合完全不相交。判据本身没错，错在尺子的行尾。第二次两侧统一剥 \r 后才是下面这组数。
+REMOTE_LINES=233 LOCAL_LINES=233
+ONLY_IN_REMOTE=0
+ONLY_IN_LOCAL=0
+包内条目数 = 234
+包内明文命中 = 1 ['hardware/zizhao-esp32s3/main/provision_ap.c']

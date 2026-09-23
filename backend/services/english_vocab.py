@@ -224,9 +224,7 @@ def vague_famous_sentence(word: str) -> dict:
     if not item:
         return {"ok": False, "error": "word not found"}
     correct = item.get("cn") or item.get("word")
-    # 干扰项：同库随机
-    bank_id = item.get("_bank") or "gaokao"
-    # 从三库随机取别的释义
+    # 干扰项：从三库随机取别的释义
     others = []
     for bid in BANK_IDS:
         for x in bank_items(bid):

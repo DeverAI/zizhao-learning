@@ -1,0 +1,6 @@
+RAN_AT   = 2026-09-23 12:10:40
+staged   = 233
+identical(内容逐字节等,  sha256) = 233
+changed_since_cutoff = 0 []
+deleted_since_cutoff = 0 []
+new_since_cutoff     = 0 []

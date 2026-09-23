@@ -23,7 +23,9 @@ def _read_json(path: str, default: Any) -> Any:
     try:
         with open(path, encoding="utf-8-sig") as f:
             return json.load(f)
-    except (json.JSONDecodeError, OSError):
+    except (json.JSONDecodeError, UnicodeDecodeError, OSError):
+        # UnicodeDecodeError：邻仓 settings/profile 若不是 UTF-8（如 GBK），
+        # utf-8-sig 读取会抛，它不属于 OSError，必须一并吞成 default，否则 get_ai_credentials 冒泡。
         return default
 
 
@@ -34,10 +36,14 @@ def _access_denied() -> bool:
     必须是独立成行的状态标记。
     """
     updates_dir = os.path.join(SHARED_AGENT_ROOT, "updates")
-    if os.path.isdir(updates_dir):
-        for name in os.listdir(updates_dir):
-            if name.endswith("_REVOKED.md") and "自招" in name:
-                return True
+    try:
+        names = os.listdir(updates_dir) if os.path.isdir(updates_dir) else []
+    except OSError:
+        # isdir 与 listdir 之间可被删/网络盘掉线/杀软占用 → TOCTOU，别让它冒泡
+        names = []
+    for name in names:
+        if name.endswith("_REVOKED.md") and "自招" in name:
+            return True
     letter = os.path.join(updates_dir, "20260912_自招系统共享调用告知.md")
     try:
         if os.path.exists(letter):

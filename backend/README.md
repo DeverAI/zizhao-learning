@@ -27,6 +27,8 @@ python -m uvicorn main:app --host 127.0.0.1 --port 8010
 
 ## 主要 API
 
+- `GET /api/system/time` **北京时间基准**（免鉴权）：`day_key` / `date_cn` / `weekday` / `hms` / `unix` / `tz=CST-8`  
+  网页顶栏时钟、板端校时、离线包 `day_key` 全部以它为准。板子若 SNTP 不通，调它做 HTTP 兜底对时。
 - `GET /api/home` 组件主页  
 - `POST /api/components/toggle|request`  
 - `GET/POST /api/timetable` · `POST /api/timetable/bulk`  
@@ -34,10 +36,27 @@ python -m uvicorn main:app --host 127.0.0.1 --port 8010
 - `POST /api/media/upload` OCR/文本/MP3 · `GET /api/media/{id}/download`  
 - `POST /api/material/today|chat|challenge` 自招链路  
 - `POST /api/auth/device/*` ESP  
+- 英语单词卡：`GET /api/english/banks|card|reveal|vague` · `POST /api/english/grade|wrong`（三库，会/模糊/不会 + 错词库）  
+- 段落背诵：`GET /api/recitation/next|items` · `POST /api/recitation/grade`（**按用户隔离**，需登录）  
+- 小工具：`POST /api/tools/calc`（口述→算式→本地安全求值）· `/api/tools/explain_question|explain_confirm`（邻仓讲题）
 
 ## 脱敏
 
 不含 API Key、`settings.json`、`storage/`、用户绝对路径。
+
+## 素材域与字数预算
+
+- `settings.material_domains` 白名单**真正生效**（`pick_next_plan(domains=...)`）：
+  `philosophy` / `history` / `classics` / `shared_curriculum` / `gap_fill` / `upload` / `knowledge`
+- 字数：`material_body_min_chars` / `max_chars`（默认 1500–4500）→ 约 `material_mp3_min_sec`(300s) MP3。
+  生成 prompt、审核 `rule_review`、审核改写 `_rewrite_body` 三处共用 `generator.body_char_budget()`。
+- 生成会显式传 `max_tokens`（按上限 ×1.6）；模型一次写不满则自动续写补足下限。
+
+## 错误处理（Err.log）
+
+任何 RE / 未捕获异常经 `logger.record_error` 落项目根 `Err.log`：
+夜间巡检、全局异常处理器、素材 JSON 解析失败均已接入。
+**流程：修复前先读 `Err.log`，修完清空内容（不删文件）。**
 
 ## 审核门控（硬约定）
 

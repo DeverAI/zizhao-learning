@@ -1,9 +1,10 @@
 # Name,   Type, SubType, Offset,  Size, Flags
 # 双 OTA 分区：烧固件中断不会变砖（仍跑旧分区）
-nvs,      data, nvs,     0x9000,   0x6000,
-otadata,  data, ota,     0xf000,   0x2000,
-phy_init, data, phy,     0x11000,  0x1000,
+# ESP32-S3-PICO-1 内置 8MB flash：0x20000 + 3M + 3M ≈ 6.1MB，留 ~1.9MB 余量
+# 离线音频/文本走 SD 卡（/sdcard），不再占用 flash 的 storage/fat 分区
+# nvs 扩到 0xC000(48KB)：本轮新增 otafail/clock 两个 namespace + IDF phy 校准每天重写，24KB 会撑满触发变砖
+nvs,      data, nvs,     0x9000,   0xC000,
+otadata,  data, ota,     0x15000,  0x2000,
+phy_init, data, phy,     0x17000,  0x1000,
 ota_0,    app,  ota_0,   0x20000,  3M,
-ota_1,    app,  ota_1,   ,         3M,
-storage,  data, spiffs,  ,         2M,
-fat,      data, fat,     ,         6M,
+ota_1,    app,  ota_1,   0x320000, 3M,

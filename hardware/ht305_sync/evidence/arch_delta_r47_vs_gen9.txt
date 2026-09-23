@@ -1,0 +1,24 @@
+RAN_AT = 2026-09-23 13:53:14
+口径：拿 gen 9 那份 `MANIFEST.txt` 的逐名行 与 盘上现状 做差集（判"第 5 代同步往归档里放了几只"）
+listed(gen 9 manifest) = 87
+on disk now            = 104
+NEW since gen 9        = 17
+  + MANIFEST.txt
+  + evidence/cred_gate_recheck_134926.txt
+  + evidence/manifest_gen_log.txt
+  + evidence/r47_cutoff_delta.txt
+  + evidence/r47_diff_and_cred.txt
+  + evidence/r47_local.txt
+  + evidence/r47_local_names.sorted.txt
+  + evidence/r47_local_names.txt
+  + evidence/r47_probe.txt
+  + evidence/r47_remote_names.txt
+  + evidence/r47_run_log.txt
+  + evidence/r47_scp_err.txt
+  + evidence/r47_verify.txt
+  + scripts/chk_r47.ps1
+  + scripts/r47_cutoff_delta.py
+  + scripts/r47_upload.ps1
+  + scripts/sync_r47.py
+GONE = []
+入清单只数 = NEW 减去 `MANIFEST.txt`（清单不自列）与 `evidence/manifest_gen_log.txt`（代次日志按设计不进清单）

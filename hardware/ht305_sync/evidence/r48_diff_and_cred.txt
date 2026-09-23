@@ -1,0 +1,15 @@
+RAN_AT = 2026-09-23 21:53:40
+口径：远端名单取自 r48_verify.txt 的 REMOTE_NAMES 段（服务器自己报的解包后相对路径），本地名单取自 r48_local_names.txt（包内条目）
+行尾前置读数（(56) 的固化：先证明两侧原始字节各自是什么，再报差集）：r48_local_names.txt CRLF=287 裸LF=0 | r48_verify.txt CRLF=310 裸LF=0
+比对前两侧都剥 \r（归一到 LF）
+REMOTE_LINES=287 LOCAL_LINES=287
+ONLY_IN_REMOTE=0
+ONLY_IN_LOCAL=0
+包名/尺寸/md5 = zizhao_20260923_r48final.zip / 1409955 / ec7389fa6a23690293990857cbf668cf
+包内条目数 = 288
+包内明文命中（按只数、只列路径）= 1 ['hardware/zizhao-esp32s3/main/provision_ap.c']
+LOCAL_AGGREGATE  = 17279b0c64780da2ec92ba5b7d2bd44b164b96667d2102c382d001b22d7319ac
+REMOTE_AGGREGATE = 17279b0c64780da2ec92ba5b7d2bd44b164b96667d2102c382d001b22d7319ac
+AGGREGATE_MATCH=YES（定义钉在排查记录 §31.2：剥顶层目录、逐只 sha256(相对路径+字节)、排序、单个 LF 串接、再 sha256，排除 SYNC_MANIFEST.txt）
+截止时刻 = 2026-09-23 21:46:16（copy begin）/ 21:46:21（zip 落盘）；探测 21:46:41、scp 21:46:43、远端解包 21:46:47→21:46:50；差集复算 21:49:21
+登记：本差集脚本的第一版漏剥行尾 \n，当场造出 287/287 全量假差集（与 (56) 同族，栽在本轮新写的脚本自己身上）。修 rstrip(b'\r\n') 后 21:49:21 复跑才是本文件的 0/0。假读数未落进任何文档，但脚本内注释保留了这条（见 scripts/r48_listdiff.py）。

@@ -111,10 +111,11 @@ async def get_or_create_today(force_domain: Optional[str] = None, user_id: str =
         return existing
 
     ensure_seed_plan()
+    allow_domains = list(settings.get("material_domains") or [])
     picked: Optional[dict] = None
     last_err: Optional[dict] = None
     for _ in range(5):
-        plan = db.pick_next_plan(force_domain)
+        plan = db.pick_next_plan(force_domain, domains=allow_domains)
         if not plan:
             break
         # 网络生成期间绝不持 threading.Lock（会堵死事件循环）
@@ -181,9 +182,10 @@ async def refresh_material(domain: Optional[str] = None, user_id: str = "") -> d
 async def _create_forced(domain: Optional[str] = None, user_id: str = "") -> dict:
     day_key = beijing_today()
     ensure_seed_plan()
+    allow_domains = list(load_settings().get("material_domains") or [])
     picked = None
     for _ in range(5):
-        plan = db.pick_next_plan(domain)
+        plan = db.pick_next_plan(domain, domains=allow_domains)
         if not plan:
             break
         result = await _generate_with_dedup(plan, domain or plan["domain"], user_id=user_id)
@@ -200,22 +202,22 @@ async def _create_forced(domain: Optional[str] = None, user_id: str = "") -> dic
             db.update_material_status(existing["id"], "recent")
         db.demote_old_active(except_id="", user_id=user_id)
         material = db.insert_material(
-        {
-            "plan_id": plan.get("id") or "",
-            "domain": picked.get("domain") or plan.get("domain"),
-            "title": picked.get("title") or plan.get("title"),
-            "source": picked.get("source") or plan.get("source_hint") or "",
-            "body": picked.get("body") or "",
-            "key_points": picked.get("key_points") or [],
-            "followups": picked.get("followups") or [],
-            "concept_keys": picked.get("concept_keys") or [],
-            "fingerprint": picked.get("fingerprint") or {},
-            "status": "active",
-            "day_key": day_key,
-            "degraded": picked.get("degraded"),
-            "user_id": user_id,
-        }
-    )
+            {
+                "plan_id": plan.get("id") or "",
+                "domain": picked.get("domain") or plan.get("domain"),
+                "title": picked.get("title") or plan.get("title"),
+                "source": picked.get("source") or plan.get("source_hint") or "",
+                "body": picked.get("body") or "",
+                "key_points": picked.get("key_points") or [],
+                "followups": picked.get("followups") or [],
+                "concept_keys": picked.get("concept_keys") or [],
+                "fingerprint": picked.get("fingerprint") or {},
+                "status": "active",
+                "day_key": day_key,
+                "degraded": picked.get("degraded"),
+                "user_id": user_id,
+            }
+        )
     db.mark_plan_used(plan["id"], material["id"])
     material["reused"] = False
     material["provider"] = picked.get("provider")

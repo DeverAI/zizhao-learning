@@ -8,7 +8,6 @@
 #include "nvs_creds.h"
 #include "net_http.h"
 #include "offline_store.h"
-#include "ota_bg.h"
 
 static const char *TAG = "dl";
 #define BASE "/sdcard"
@@ -24,6 +23,7 @@ void dl_mgr_cleanup_partial(void)
     /* 启动时丢掉所有 *.part，避免把半截当成品 */
     /* 简化：目录枚举可后续补；当前路径固定 */
     unlink(BASE "/offline/bundle.json.part");
+    unlink(BASE "/offline/bundle.json.new");
     for (int i = 0; i < 64; i++) {
         char p[96];
         snprintf(p, sizeof(p), BASE "/offline/mp3/seg_%03d.mp3.part", i);
@@ -58,6 +58,7 @@ bool dl_http_get_atomic(const char *sid, const char *url, const char *dest_path,
         .buffer_size_tx = 1024,
     };
     esp_http_client_handle_t c = esp_http_client_init(&cfg);
+    if (!c) { ESP_LOGE(TAG, "http init fail %s", url); return false; }
     char cookie[160];
     snprintf(cookie, sizeof(cookie), "zsid=%s", sid ? sid : "");
     esp_http_client_set_header(c, "Cookie", cookie);
@@ -75,6 +76,10 @@ bool dl_http_get_atomic(const char *sid, const char *url, const char *dest_path,
     int status = esp_http_client_fetch_headers(c);
     (void)status;
     int code = esp_http_client_get_status_code(c);
+    /* 预期总字节：200=全长；206=已有 have + 本次剩余 clen。
+     * esp_http_client_get_content_length 返回 int64_t，chunked/无长度时为 -1，
+     * 必须用 int64_t 收，否则窄化成 int 会丢高位。必须在 close 之前取。 */
+    int64_t clen = esp_http_client_get_content_length(c);
     if (code != 200 && code != 206) {
         ESP_LOGW(TAG, "GET %s status=%d", url, code);
         esp_http_client_close(c);
@@ -104,7 +109,22 @@ bool dl_http_get_atomic(const char *sid, const char *url, const char *dest_path,
     fclose(f);
     esp_http_client_close(c);
     esp_http_client_cleanup(c);
-    /* 原子提交：rename 后才算完成 */
+    /* 完整性校验：esp_http_client_read 返回 0 既可能是读完，也可能是超时/连接被断。
+     * 不校验就会把半截文件 rename 成"成品"，覆盖好文件并让 sync_audio 永远认为已完成。 */
+    if (clen <= 0) {
+        /* 无 Content-Length / chunked：无从判断是否收全，宁可不提交也不覆盖好文件。
+         * 后端固定发 Content-Length，正常下载不会走到这里。 */
+        ESP_LOGW(TAG, "no length for %s, refuse to commit unverified body", dest_path);
+        return false; /* 保留 .part 续传 */
+    }
+    long expected = (code == 206) ? (have + (long)clen) : (long)clen;
+    if (total == 0 || (long)total != expected) {
+        ESP_LOGW(TAG, "truncated %s: got %u want %ld (keep .part)", dest_path, (unsigned)total, expected);
+        return false; /* 保留 .part 续传，绝不 rename */
+    }
+    /* 原子提交：FatFs 的 rename 目标已存在会返回 FR_EXIST(EEXIST) 而不覆盖，
+     * 且重命名的 dest 若是上次崩在半路留下的空/残文件会永远卡住提交。先 unlink 再 rename。 */
+    unlink(dest_path);
     if (rename(part, dest_path) != 0) {
         ESP_LOGE(TAG, "rename fail %s", dest_path);
         return false;
@@ -121,22 +141,29 @@ static bool sync_bundle_text(const char *sid, const char *server, dl_state_t *st
     snprintf(dest, sizeof(dest), BASE "/offline/bundle.json");
     mkdir(BASE "/offline", 0777);
     /* JSON 短，整包重下即可；失败保留旧文件 */
-    char tmp[96];
+    char tmp[sizeof(dest) + 8];
     snprintf(tmp, sizeof(tmp), "%s.new", dest);
+    unlink(tmp);   /* 丢掉上次崩在"已下 .new 未改名"时留下的残骸，否则下面 rename 恒 EEXIST */
     if (!dl_http_get_atomic(sid, url, tmp, false)) {
         snprintf(st->last_error, sizeof(st->last_error), "bundle_fail");
         return false;
     }
-    /* 旧→bak，new→正式 */
+    /* 旧→正式：dest 可能已存在，FatFs rename 不覆盖，先 unlink；改名失败要如实报错，
+     * 不能无条件 text_done=true（那会让它拿不到新 bundle 却自以为成功）。 */
     unlink(dest);
-    rename(tmp, dest);
+    if (rename(tmp, dest) != 0) {
+        ESP_LOGE(TAG, "bundle promote %s -> %s failed", tmp, dest);
+        snprintf(st->last_error, sizeof(st->last_error), "bundle_rename_fail");
+        return false;
+    }
     st->text_done = true;
     /* 粗读 audio_ready */
     FILE *f = fopen(dest, "rb");
     if (f) {
-        char head[4096] = {0};
+        static char head[4096];   /* 4KB 放栈上易压爆任务栈，移静态。
+                                  * 仅限主任务、进主循环前单线程调用；非可重入，勿加第二个调用方。 */
         size_t n = fread(head, 1, sizeof(head) - 1, f);
-        (void)n;
+        head[n] = 0;              /* 静态缓冲不会每次清零，显式截断 */
         fclose(f);
         st->audio_allowed = (strstr(head, "\"audio_ready\": true") != NULL)
                             || (strstr(head, "\"audio_ready\":true") != NULL);
@@ -211,7 +238,7 @@ bool dl_mgr_sync_once(const char *sid, const char *server, dl_state_t *st)
     }
     /* P2 音频（可断点） */
     sync_audio(sid, server, st->day_key[0] ? st->day_key : "today", st);
-    /* P3 固件：最后、后台 */
-    ota_bg_check_and_update(sid, server);
+    /* 固件 OTA 不在此触发：唯一入口在 main.c 主循环里（每开机一次、且 !s_playing 时），
+     * 避免这里 + 那里同一轮下载里两次 esp_https_ota 抢 flash。 */
     return st->text_done;
 }

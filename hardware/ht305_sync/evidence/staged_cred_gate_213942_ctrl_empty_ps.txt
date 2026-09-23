@@ -1,0 +1,3 @@
+ABORT: 索引里没有已 stage 的文件
+OUT=staged_cred_gate_213942_ctrl_empty.txt
+PY_EXIT=1

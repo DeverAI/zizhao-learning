@@ -367,42 +367,48 @@ def list_plan(status: Optional[str] = None) -> list[dict]:
     return [_row_plan(r) for r in rows]
 
 
-def pick_next_plan(domain: Optional[str] = None) -> Optional[dict]:
+def pick_next_plan(domain: Optional[str] = None, domains: Optional[list[str]] = None) -> Optional[dict]:
+    """取下一条计划。
+
+    domains 为域白名单（来自 settings.material_domains）：
+    - 显式指定 domain 时，domain 优先，但仍受白名单约束（不在白名单则按无结果处理）
+    - 未指定 domain 时，只在白名单内挑选；白名单为空表示不限制
+    """
+    allow = [str(d) for d in (domains or []) if d]
+    if domain and domain != "any" and allow and domain not in allow:
+        allow = [domain]  # 显式指定的域始终允许
+    elif domain and domain != "any":
+        allow = [domain]
+
+    def _query(conn, limit: int):
+        sql = "SELECT * FROM material_plan WHERE status='pending'"
+        args: tuple = ()
+        if allow:
+            sql += " AND domain IN (%s)" % ",".join("?" * len(allow))
+            args = tuple(allow)
+        sql += " ORDER BY seq, rowid LIMIT ?"
+        return conn.execute(sql, args + (limit,)).fetchall()
+
     with get_conn() as conn:
-        if domain and domain != "any":
-            rows = conn.execute(
-                "SELECT * FROM material_plan WHERE status='pending' AND domain=? "
-                "ORDER BY seq, rowid LIMIT 5",
-                (domain,),
-            ).fetchall()
-        else:
-            rows = conn.execute(
-                "SELECT * FROM material_plan WHERE status='pending' ORDER BY seq, rowid LIMIT 20"
-            ).fetchall()
+        rows = _query(conn, 20 if not (domain and domain != "any") else 5)
         # pending 耗尽：回收 skipped（仍避开 used）
         if not rows:
             conn.execute(
                 "UPDATE material_plan SET status='pending', note='' WHERE status='skipped'"
             )
-            if domain and domain != "any":
-                rows = conn.execute(
-                    "SELECT * FROM material_plan WHERE status='pending' AND domain=? "
-                    "ORDER BY seq, rowid LIMIT 5",
-                    (domain,),
-                ).fetchall()
-            else:
-                rows = conn.execute(
-                    "SELECT * FROM material_plan WHERE status='pending' ORDER BY seq, rowid LIMIT 20"
-                ).fetchall()
+            rows = _query(conn, 20 if not (domain and domain != "any") else 5)
     if not rows:
         return None
     pending = [_row_plan(r) for r in rows]
     if domain and domain != "any":
         return pending[0]
-    # round_robin：按最近已用 domain 轮换
-    used = last_used_domains()
+    # round_robin：避开最近用过的 2 个域，做真正的三方向轮转
+    used = last_used_domains(limit=3)
+    pending_domains = {p["domain"] for p in pending}
+    skip_n = max(1, min(2, len(pending_domains) - 1))
+    skip = set(used[:skip_n])
     for plan in pending:
-        if plan["domain"] not in used[:1]:
+        if plan["domain"] not in skip:
             return plan
     return pending[0]
 

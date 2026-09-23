@@ -11,12 +11,16 @@ idf_component_register(
         "clock_sync.c"
         "ota_bg.c"
         "eink_display.c"
+        "epd_driver.c"
+        "axp_panel_power.c"
+        "ui_font.c"
         "download_mgr.c"
     INCLUDE_DIRS "."
     REQUIRES
         nvs_flash
         esp_wifi
         esp_http_client
+        esp_http_server
         esp_https_ota
         esp_app_format
         esp_timer
@@ -25,5 +29,7 @@ idf_component_register(
         fatfs
         sdmmc
         driver
-        esp_sntp
+        esp_rom
+        lwip
+        app_update
 )

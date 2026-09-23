@@ -22,6 +22,7 @@ from config import (
     ensure_dirs,
     load_settings,
 )
+from logger import record_error
 from models import database as db
 from routers import auth as auth_router
 from routers import device_fw as device_fw_router
@@ -69,11 +70,11 @@ async def _night_archive_loop():
                 rev = await review_service.review_all_users_optimize()
                 print(f"[night-review] {rev.get('count')} users")
             except Exception as rev_exc:  # noqa: BLE001
-                print(f"[night-review] error: {rev_exc}")
+                record_error("night_review", rev_exc)
         except asyncio.CancelledError:
             raise
         except Exception as exc:  # noqa: BLE001 — 后台巡检不应拖垮主服务
-            print(f"[night-archive] error: {exc}")
+            record_error("night_archive", exc)
 
 
 @asynccontextmanager
@@ -113,6 +114,7 @@ _OPEN_PATHS = {
     "/openapi.json",
     "/redoc",
     "/api/system/health",
+    "/api/system/time",
 }
 
 
@@ -151,6 +153,15 @@ async def optional_bearer_auth(request: Request, call_next):
     if token != pwd:
         return JSONResponse({"detail": "unauthorized", "degraded": False}, status_code=401)
     return await call_next(request)
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    """兜底：任何未捕获异常都必须落 Err.log，不得静默吞没。"""
+    record_error(f"UNHANDLED {request.method} {request.url.path}", exc)
+    return JSONResponse(
+        {"detail": "internal error", "degraded": True}, status_code=500
+    )
 
 
 app.include_router(auth_router.router)

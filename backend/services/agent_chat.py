@@ -70,7 +70,10 @@ async def _chat_once(messages: list[dict], tools: bool = True, user_id: str = ""
                         )
                         if resp.status_code < 400:
                             msg = (resp.json().get("choices") or [{}])[0].get("message") or {}
-                            return msg.get("content") or "", True, "user_api", msg
+                            content = msg.get("content") or ""
+                            # 200 但既无正文又无工具调用 = 空回包，别当成功，落空再试共享源
+                            if content or msg.get("tool_calls"):
+                                return content, True, "user_api", msg
                 except (httpx.HTTPError, KeyError, IndexError, TypeError, ValueError):
                     pass
         except Exception:  # noqa: BLE001
@@ -111,6 +114,9 @@ async def _chat_once(messages: list[dict], tools: bool = True, user_id: str = ""
                 data = resp.json()
                 msg = (data.get("choices") or [{}])[0].get("message") or {}
                 content = msg.get("content") or ""
+                # 200 空正文且无工具调用：换下一个 provider，别把空串当成功返回
+                if not content and not msg.get("tool_calls"):
+                    continue
                 return content, True, name, msg
         except (httpx.HTTPError, KeyError, IndexError, TypeError, ValueError):
             continue
@@ -139,13 +145,18 @@ async def agent_chat(
     max_rounds: int = 4,
     user_id: str = "",
 ) -> dict:
+    # 归属校验：不得用 material_id 读他人素材（跨用户泄漏防护）
     mid = material_id or db.get_session_material(session_id)
-    if not mid:
+    material = None
+    if mid:
+        candidate = db.get_material(mid)
+        if candidate:
+            owner = str(candidate.get("user_id") or "")
+            if not user_id or not owner or owner == user_id:
+                material = candidate
+    if material is None:
         material = await material_service.get_or_create_today(user_id=user_id)
-        mid = material["id"]
-    else:
-        material = db.get_material(mid) or await material_service.get_or_create_today(user_id=user_id)
-        mid = material["id"]
+    mid = material["id"]
 
     db.bind_session_material(session_id, mid)
 

@@ -58,16 +58,25 @@ def audio_allowed(mat: dict) -> bool:
     return (mat.get("review_status") or "pending") == "passed"
 
 
-def rule_review(mat: dict) -> dict:
-    """不依赖 LLM 的底线挑刺。"""
+def rule_review(mat: dict, body_min: int = 0, body_max: int = 0) -> dict:
+    """不依赖 LLM 的底线挑刺。
+
+    字数门槛取自 settings（material_body_min_chars / max_chars），
+    与 MP3 时长预算（material_mp3_min_sec…）同源：不足字数 = 音频撑不满体育课长听。
+    """
     issues = []
+    settings = load_settings()
+    lo = int(body_min or settings.get("material_body_min_chars", 1500) or 0)
+    hi = int(body_max or settings.get("material_body_max_chars", 4500) or 0)
     body = mat.get("body") or ""
     title = mat.get("title") or ""
     source = mat.get("source") or ""
     if not title:
         issues.append("无标题")
-    if len(body) < 200:
-        issues.append(f"正文过短 len={len(body)}")
+    if lo and len(body) < lo:
+        issues.append(f"正文过短 len={len(body)}<{lo}（朗读不足，音频撑不满 {int(settings.get('material_mp3_min_sec', 300))}s）")
+    if hi and len(body) > hi:
+        issues.append(f"正文过长 len={len(body)}>{hi}")
     if not source:
         issues.append("无出处")
     if mat.get("degraded"):
@@ -147,22 +156,33 @@ async def llm_critique(mat: dict, user_id: str = "", round_no: int = 1) -> dict:
 
 
 async def _rewrite_body(mat: dict, hints: list[str], user_id: str = "") -> str:
+    lo, hi = generator.body_char_budget()
+    settings = load_settings()
+    min_sec = int(settings.get("material_mp3_min_sec", 300) or 300)
     messages = [
         {
             "role": "user",
             "content": (
-                "改写初三自招讲解稿。纯文本，禁止 Markdown，1800-3500字，保留出处。"
-                "目标朗读至少 300 秒（体育课长听），禁止缩成提纲。\n"
+                f"改写初三自招讲解稿。纯文本，禁止 Markdown，{lo}-{hi}字，保留出处。"
+                f"目标朗读至少 {min_sec} 秒（体育课长听），禁止缩成提纲。\n"
                 f"原标题：{mat.get('title')}\n原出处：{mat.get('source')}\n"
                 f"原正文：\n{(mat.get('body') or '')[:2500]}\n"
                 f"必须处理：{hints}\n只输出改写正文。"
             ),
         }
     ]
-    content, ok, _ = await generator._chat_completion(messages, temperature=0.4, user_id=user_id)
+    # 重写整篇，max_tokens 必须按字数预算给，否则默认 2048 会把长稿截成半截
+    content, ok, _ = await generator._chat_completion(
+        messages, temperature=0.4, user_id=user_id, max_tokens=max(2048, int(hi * 1.6))
+    )
     if not ok:
         return ""
-    return persona.strip_markdown(content)
+    new_body = persona.strip_markdown(content)
+    # 改写后仍不够长：用同一套续写逻辑补足，避免下一轮继续判"过短"死循环。
+    # _extend_body 内部按 lo*1.1 补，留出安全余量（见其注释：1498 卡门实测）。
+    if new_body and len(new_body) < lo:
+        new_body = await generator._extend_body(new_body, lo, user_id, max(2048, int(hi * 1.6)))
+    return new_body
 
 
 def _update_body(material_id: str, body: str) -> None:

@@ -3,6 +3,12 @@
 命中即 ABORT，不复制任何文件。二进制复制（copy2）保留 BOM/字节，不重排内容。"""
 import glob, hashlib, os, shutil, sys, datetime
 
+# GBK 控制台下的非 ASCII print 会崩（见 `FreqErr.md` ht305 段"`rc≠0` 被读成'没产出'"那条）
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+except AttributeError:
+    pass
+
 REPO = r'C:/Users/david/Documents/all_projects/自招学习'
 DST = os.path.join(REPO, 'hardware', 'ht305_sync')
 TMP = os.environ['TEMP']
@@ -14,11 +20,15 @@ if not m:
     print('ABORT: 读不到 PROV_PASS 宏本体'); sys.exit(1)
 secret = m.group(1)
 
-PATTERNS = ['r43_*.txt', 'ht305_*.ps1', 'build_sync.py', 'build_zip.py', 'expected*.py', 'pw_*.py',
-            'sync_r4*.py', 'r44_*.ps1', 'r44_*.txt', 'r45_*.ps1', 'r45_*.txt', 'r45_*.py',
-            'chk_r45.ps1', 'probe_zip_vs_head*.py', 'cred_recount_0822.txt',
-            'land_r44b_report.py', 'ht305_sync_gate.py', 'ht305_sync_gate_ssh.ps1']
+# 与 gate/ht305_sync_gate.py 同一批修订：**不按代枚举**（原来只列到 r45 ⇒ 用这只脚本重建会得到一个
+# 少了整个第 4 代的归档，而它自己不会报任何错）。跨代通配 + "候选为 0 即 ABORT"。
+PATTERNS = ['r43_*.txt', 'r4*_*.txt', 'ht305_*.ps1', 'build_sync.py', 'build_zip.py', 'expected*.py',
+            'pw_*.py', 'sync_r4*.py', 'r4*_*.ps1', 'r4*_*.py', 'chk_r4*.ps1',
+            'probe_zip_vs_head*.py', 'cred_recount_*.txt', 'land_r4*.py',
+            'ht305_sync_gate.py', 'ht305_sync_gate_ssh.ps1']
 files = sorted({p for pat in PATTERNS for p in glob.glob(os.path.join(TMP, pat))})
+if not files:
+    print('ABORT: %TEMP% 里一只候选都没匹配到 ⇒ 不是"干净"，是"没扫"'); sys.exit(1)
 dirty = [(os.path.basename(p), open(p, 'rb').read().count(secret)) for p in files]
 dirty = [d for d in dirty if d[1]]
 if dirty:

@@ -162,6 +162,11 @@ async def archive_body(material_id: str):
     """归档正文冷存回读。"""
     from config import ARCHIVE_BODY_DIR
     import os
+    import re
+
+    # material_id 是 uuid4().hex[:12]；严格白名单，杜绝 ../ 或 ..\ 拼进文件路径穿越
+    if not re.fullmatch(r"[0-9a-fA-F]{1,64}", material_id or ""):
+        raise HTTPException(status_code=400, detail="bad material_id")
 
     path = os.path.join(ARCHIVE_BODY_DIR, f"{material_id}.txt")
     if not os.path.exists(path):
@@ -173,7 +178,7 @@ async def archive_body(material_id: str):
     try:
         with open(path, encoding="utf-8") as f:
             body = f.read()
-    except OSError as exc:
+    except (OSError, UnicodeDecodeError) as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
     return {"material_id": material_id, "body": body, "from": "archive_bodies", "degraded": False}
 

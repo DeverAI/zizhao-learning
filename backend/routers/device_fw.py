@@ -32,7 +32,7 @@ async def firmware_latest(user: dict = Depends(current_user)):
     try:
         with open(man, encoding="utf-8") as f:
             data = json.load(f)
-    except (json.JSONDecodeError, OSError) as exc:
+    except (json.JSONDecodeError, UnicodeDecodeError, OSError) as exc:
         raise HTTPException(status_code=500, detail="bad manifest") from exc
     if not isinstance(data, dict) or not data.get("version"):
         raise HTTPException(status_code=500, detail="manifest missing version")

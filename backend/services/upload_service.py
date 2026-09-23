@@ -194,11 +194,11 @@ def save_upload(
             ]
         )
     if framework == "英语背诵" and text:
-        _seed_recitation_from_text(uid, title, text, source)
+        _seed_recitation_from_text(uid, title, text, source, user_id)
     return item
 
 
-def _seed_recitation_from_text(upload_id: str, title: str, text: str, source: str) -> None:
+def _seed_recitation_from_text(upload_id: str, title: str, text: str, source: str, user_id: str = "") -> None:
     # 按空行/句号粗切段，生成可背诵条目
     paras = [p.strip() for p in re.split(r"\n\s*\n|\r\n\r\n", text) if p.strip()]
     if not paras:
@@ -216,9 +216,10 @@ def _seed_recitation_from_text(upload_id: str, title: str, text: str, source: st
                 "status": "pending",
             }
         )
-    from config import STORAGE_DIR
+    from services import recitation
 
-    path = os.path.join(STORAGE_DIR, "recitation_items.json")
+    # 按上传者隔离，避免三人分用时互相污染背诵库
+    path = recitation._items_path(user_id)
     existing = []
     if os.path.exists(path):
         try:

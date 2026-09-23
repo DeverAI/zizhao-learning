@@ -121,6 +121,23 @@ def build_default_plan_seeds() -> list[dict]:
     return items
 
 
+def body_char_budget() -> tuple[int, int]:
+    """正文长度区间，与 settings 及审核 rule_review 同源。
+
+    单独抽出来，避免 prompt / 审核 / 音频预算三处各写各的字数。
+    """
+    from config import load_settings
+
+    settings = load_settings()
+    lo = int(settings.get("material_body_min_chars", 1500) or 0)
+    hi = int(settings.get("material_body_max_chars", 4500) or 0)
+    if lo <= 0:
+        lo = 1500
+    if hi < lo:
+        hi = lo
+    return lo, hi
+
+
 def jaccard(a: list[str] | set[str], b: list[str] | set[str]) -> float:
     sa, sb = set(a or []), set(b or [])
     if not sa or not sb:
@@ -144,6 +161,73 @@ def used_fingerprint_prompt(archive_rows: list[dict], limit: int = 80) -> str:
     return "已使用过的素材（禁止重复，也不要换皮重出同一概念）：\n" + "\n".join(lines)
 
 
+def _try_json(text: str) -> dict:
+    """整体解析；失败则退回首/尾大括号截取。"""
+    try:
+        data = json.loads(text)
+        return data if isinstance(data, dict) else {}
+    except (json.JSONDecodeError, TypeError, ValueError):
+        pass
+    start, end = text.find("{"), text.rfind("}")
+    if start >= 0 and end > start:
+        try:
+            data = json.loads(text[start : end + 1])
+            return data if isinstance(data, dict) else {}
+        except (json.JSONDecodeError, TypeError, ValueError):
+            return {}
+    return {}
+
+
+def _repair_json(text: str) -> str:
+    """修常见破损：尾逗号、括号不闭合、键名单引号。"""
+    t = text.strip()
+    # 尾逗号：, } / , ]
+    t = re.sub(r",\s*(?=[\]\}])", "", t)
+    # 键名/字符串的单引号换成双引号（只处理紧跟冒号的键名，风险最低）
+    t = re.sub(r"'([^'\n]{0,40}?)'\s*:", r'"\1":', t)
+    # 补闭合：按计数补，宁多勿少（多出的 } 由 _try_json 失败后再退化）
+    diff_brace = t.count("{") - t.count("}")
+    diff_brack = t.count("[") - t.count("]")
+    if diff_brack > 0:
+        t += "]" * diff_brack
+    if diff_brace > 0:
+        t += "}" * diff_brace
+    return t
+
+
+def _salvage_fields(text: str) -> dict:
+    """JSON 彻底坏了：至少把 title / body 抢回来，别整篇丢掉。
+
+    免费小模型（glm-4-flash 等）经常把长 JSON 写残；整篇丢弃 = 素材变占位模板。
+    """
+    def grab(key: str) -> str:
+        m = re.search(rf"""["']?{key}["']?\s*[:：]\s*(["'])([\s\S]*?)\1""", text)
+        return m.group(2).strip() if m else ""
+
+    title, body, source = grab("title"), grab("body"), grab("source")
+    if not (title or body):
+        return {}
+    out: dict = {"title": title, "body": body}
+    if source:
+        out["source"] = source
+    m = re.search(r"""["']?concept_keys["']?\s*[:：]\s*\[([\s\S]*?)\]""", text)
+    if m:
+        out["concept_keys"] = [
+            x.strip().strip("'\" ")
+            for x in m.group(1).split(",")
+            if x.strip().strip("'\" ")
+        ]
+    m2 = re.search(r"""["']?key_points["']?\s*[:：]\s*\[([\s\S]*?)\]""", text)
+    if m2:
+        out["key_points"] = [
+            x.strip().strip("'\" ")
+            for x in m2.group(1).split("\",\"")
+            if x.strip().strip("'\" ")
+        ]
+    out["_salvaged"] = True
+    return out
+
+
 def _parse_json_block(text: str) -> dict:
     text = (text or "").strip()
     if not text:
@@ -152,26 +236,25 @@ def _parse_json_block(text: str) -> dict:
     fenced = re.search(r"```(?:json)?\s*([\s\S]*?)```", text)
     if fenced:
         text = fenced.group(1).strip()
-    try:
-        data = json.loads(text)
-        return data if isinstance(data, dict) else {}
-    except json.JSONDecodeError:
-        start, end = text.find("{"), text.rfind("}")
-        if start >= 0 and end > start:
-            try:
-                data = json.loads(text[start : end + 1])
-                return data if isinstance(data, dict) else {}
-            except json.JSONDecodeError:
-                return {}
-    return {}
+    data = _try_json(text)
+    if not data:
+        data = _try_json(_repair_json(text))
+    if not data:
+        data = _salvage_fields(text)
+    return data
 
 
 async def _chat_completion(
     messages: list[dict],
     temperature: float = 0.4,
     user_id: str = "",
+    max_tokens: int = 0,
 ) -> tuple[str, bool, str]:
-    """返回 (content, ok, provider)。优先用户自注册 OpenAI Key。"""
+    """返回 (content, ok, provider)。优先用户自注册 OpenAI Key。
+
+    max_tokens 必须显式给：不少兼容端点默认只给 1024，写 1500+ 字的讲解稿会被截断，
+    截断后 JSON 不闭合 → 解析失败 → 静默降级成模板。
+    """
     from config import ENABLE_LLM_GENERATION
 
     if not ENABLE_LLM_GENERATION:
@@ -193,6 +276,7 @@ async def _chat_completion(
                                 "model": cred["model"],
                                 "messages": messages,
                                 "temperature": temperature,
+                                "max_tokens": max_tokens or 2048,
                             },
                         )
                         if resp.status_code < 400:
@@ -239,6 +323,7 @@ async def _chat_completion(
             "model": cfg.get("model") or "deepseek-chat",
             "messages": messages,
             "temperature": temperature,
+            "max_tokens": max_tokens or 2048,
         }
         try:
             async with httpx.AsyncClient(timeout=90) as client:
@@ -305,22 +390,12 @@ def fallback_material(plan: dict, domain: str) -> dict:
 
 
 async def xiaomi_web_search(query: str) -> str:
-    """小米模型联网搜索（若共享 settings 提供 token-plan）。失败返回空串，不伪造。"""
-    from config import SHARED_SETTINGS
-    import os
-
-    if not os.path.exists(SHARED_SETTINGS):
-        return ""
-    try:
-        import json
-
-        with open(SHARED_SETTINGS, encoding="utf-8-sig") as f:
-            s = json.load(f)
-    except (json.JSONDecodeError, OSError):
-        return ""
-    key = s.get("xiaomi_token_plan_api_key") or ""
-    base = (s.get("xiaomi_token_plan_base_url") or "https://token-plan-cn.xiaomimimo.com/v1").rstrip("/")
-    model = s.get("xiaomi_vision_model") or "mimo-v2.5"
+    """小米模型联网搜索。走 get_ai_credentials（含 _access_denied 闸门），
+    共享被撤销时不再偷用邻仓 token-plan key。失败返回空串，不伪造。"""
+    xi = agent_bridge.get_ai_credentials().get("xiaomi") or {}
+    key = xi.get("api_key") or ""
+    base = (xi.get("base_url") or "https://token-plan-cn.xiaomimimo.com/v1").rstrip("/")
+    model = xi.get("model") or "mimo-v2.5"
     if not key:
         return ""
     import httpx
@@ -366,11 +441,13 @@ async def generate_from_plan(
         f"{w.get('topic')}(mastery={w.get('mastery')})" for w in weak[:5]
     ) or "无"
 
+    lo, hi = body_char_budget()
     system = (
         "你是上海中考自主招生备考教练，擅长哲学、历史、高中古诗文与初中拔高知识点。"
         "输出严格 JSON，不要 markdown。字段："
         "title, source, body, key_points, followups, concept_keys, fingerprint。"
-        "body 是可朗读讲解稿，1800-3500字（约对应 MP3 5–12 分钟，体育课可听完）；concept_keys 为3-8个短概念词。"
+        f"body 是可朗读讲解稿，{lo}-{hi}字（约对应 MP3 {int(lo/5)}–{int(hi/5)} 秒，体育课长听可听完）；"
+        "concept_keys 为3-8个短概念词。"
         "fingerprint 形如 {person, work, concept, era, syntax}。"
         "可结合提供的检索摘要，但 source 必须可追溯。"
     )
@@ -401,15 +478,31 @@ tags: {json.dumps(plan.get('tags') or [], ensure_ascii=False)}
 3. key_points 供对话追溯，followups 是多轮追问火种；
 4. source 必须保留出处或检索线索。
 """
+    max_tok = max(2048, int(hi * 1.6))
     content, ok, provider = await _chat_completion(
         [
             {"role": "system", "content": system},
             {"role": "user", "content": user},
         ],
         user_id=user_id,
+        max_tokens=max_tok,
     )
     if ok:
         data = _parse_json_block(content)
+        salvaged = bool(data.get("_salvaged"))
+        data.pop("_salvaged", None)
+        if not (data.get("body") and data.get("title")):
+            # 不再静默吞掉：模型写了但解析不出，必须留痕，否则只会看到"素材是模板"却查不到原因
+            try:
+                from logger import record_error
+
+                record_error(
+                    "generate_from_plan:parse_failed",
+                    f"provider={provider} len={len(content)} salvaged={salvaged} "
+                    f"head={content[:200]!r} tail={content[-120:]!r}",
+                )
+            except Exception:  # noqa: BLE001
+                pass
         if data.get("body") and data.get("title"):
             keys = data.get("concept_keys") or []
             if isinstance(keys, str):
@@ -417,10 +510,13 @@ tags: {json.dumps(plan.get('tags') or [], ensure_ascii=False)}
             fp = data.get("fingerprint") or {}
             if not isinstance(fp, dict):
                 fp = {}
+            body = str(data.get("body") or "")
+            # 免费小模型一次写不满 1500 字：续写补足，避免审核必然判"过短"
+            body = await _extend_body(body, lo, user_id, max_tok)
             return {
                 "title": str(data.get("title") or title),
                 "source": str(data.get("source") or source),
-                "body": str(data.get("body") or ""),
+                "body": body,
                 "key_points": list(data.get("key_points") or []),
                 "followups": list(data.get("followups") or []),
                 "concept_keys": [str(x) for x in keys],
@@ -429,3 +525,56 @@ tags: {json.dumps(plan.get('tags') or [], ensure_ascii=False)}
                 "provider": provider,
             }
     return fallback_material(plan, domain)
+
+
+async def _extend_body(
+    body: str, lo: int, user_id: str, max_tokens: int, rounds: int = 3
+) -> str:
+    """正文不够长就接着写：免费模型单次输出短，这是让它仍可用的兜底。
+
+    只补写、不改写原文；最多 3 轮，凑够下限就停。
+    """
+    body = (body or "").strip()
+    # 目标不是「刚好等于 lo」，而是「lo 之上留出安全余量」。
+    # 实测踩过的坑：续写凑到 1498 字，离下限差 2 字，审核第 1 轮直接判
+    # 「正文过短 len=1498<1500」，白烧 4 轮才放过。免费模型的输出长度天然抖动，
+    # 必须按 lo 的 110% 补，否则每轮都在门槛上反复摩擦。
+    target = int(lo * 1.1) if lo > 0 else lo
+    for _ in range(rounds):
+        if len(body) >= target:
+            break
+        need = target - len(body)
+        prompt = (
+            "下面是讲解稿已写好的部分，请从结尾处继续往下写，"
+            f"再写约 {need} 字（中文），要求：\n"
+            "1) 与上文同一主题、同一风格，直接衔接，不要重复已写内容；\n"
+            "2) 不要写开场白、不要写「以下是续写」这类说明；\n"
+            "3) 只输出续写正文，纯文本。\n\n"
+            f"----- 已写部分（结尾 {min(600, len(body))} 字）-----\n{body[-600:]}"
+        )
+        content, ok, _p = await _chat_completion(
+            [{"role": "user", "content": prompt}],
+            temperature=0.5,
+            user_id=user_id,
+            max_tokens=max_tokens,
+        )
+        if not ok or not content:
+            break
+        add = content.strip()
+        # 模型偶尔会把已写部分复读一遍，太相似就丢弃
+        if not add or add[:60] in body:
+            break
+        body = body.rstrip() + "\n" + add
+    if len(body) < lo and body:
+        # 补不上去也要留痕：否则只会看到「审核莫名 4 轮才过」
+        try:
+            from logger import record_error
+
+            record_error(
+                "generator:extend_body_short",
+                f"续写后仍不足下限 len={len(body)}<lo={lo}（target={target}）",
+                level="WARN",
+            )
+        except Exception:  # noqa: BLE001
+            pass
+    return body

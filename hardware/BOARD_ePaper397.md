@@ -12,14 +12,14 @@
 | 外放听素材 | NS4150B 功放 + ES8311 + MX1.25 喇叭口 |
 | 锂电 | TG28 充放管理 + 3.7V 接口 |
 | 交互 | 三方向拨轮 + PWR/BOOT |
-| 存离线包 | Micro SD + 16MB Flash / 8MB PSRAM |
+| 存离线包 | Micro SD（离线音频/文本写这里）+ 8MB Flash / 8MB PSRAM（PICO-1 内置，boot 实测 8MB） |
 | 传感器 | QMI8658、SHTC3、RTC（便于定时开关机） |
 
 ## 待到手实测（写进联调清单）
 
 1. 局刷是否够「一段一刷」体验  
 2. **麦克风单/双、有无 AEC**（外放回声）  
-3. 中文字库体积 vs 16MB Flash  
+3. 中文字库体积 vs 8MB Flash（分区仅 nvs+otadata+phy+双 OTA，flash 无富余；离线包与大字库都指望 Micro SD）  
 4. 外壳/3D 打印  
 
 ## 与服务端契约（已实现）

@@ -84,7 +84,7 @@ def build_daily_bundle(user_id: str) -> dict:
             audio_segments = []
             degraded_audio = True
 
-    rec = recitation.pick_random("pending")
+    rec = recitation.pick_random("pending", user_id)
     bundle = {
         "ok": True,
         "day_key": day,

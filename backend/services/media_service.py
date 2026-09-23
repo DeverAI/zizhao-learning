@@ -117,7 +117,8 @@ def _tts_chunk(text: str, size: int = 1600, min_size: int = 120) -> list[str]:
     # 1) 段落
     paras = [p.strip() for p in re.split(r"\n\s*\n|\n", text) if p.strip()]
 
-    def pack(units: list[str], hard: bool) -> list[str]:
+    def pack(units: list[str]) -> list[str]:
+        """贪心装箱：能拼就拼，单个 unit 超长时独立成块交给上层再细切。"""
         chunks: list[str] = []
         buf = ""
         for u in units:
@@ -127,8 +128,7 @@ def _tts_chunk(text: str, size: int = 1600, min_size: int = 120) -> list[str]:
             else:
                 if buf.strip():
                     chunks.append(buf.strip())
-                # 单 unit 仍超长：交给上层再细切
-                buf = u if not hard or len(u) <= size else u
+                buf = u
         if buf.strip():
             chunks.append(buf.strip())
         return chunks
@@ -144,7 +144,7 @@ def _tts_chunk(text: str, size: int = 1600, min_size: int = 120) -> list[str]:
                 sents = [para]
             sent_units.extend(sents)
 
-    chunks = pack(sent_units, hard=False)
+    chunks = pack(sent_units)
 
     # 3) 仍超长的 chunk：软标点
     refined: list[str] = []
@@ -154,7 +154,7 @@ def _tts_chunk(text: str, size: int = 1600, min_size: int = 120) -> list[str]:
             continue
         soft = _split_keep_seps(c, _SOFT_BREAK)
         if soft:
-            refined.extend(pack(soft, hard=False))
+            refined.extend(pack(soft))
         else:
             refined.append(c)
 
@@ -166,7 +166,7 @@ def _tts_chunk(text: str, size: int = 1600, min_size: int = 120) -> list[str]:
             continue
         words = _split_keep_seps(c, _WORD_BREAK)
         if words:
-            final.extend(pack(words, hard=False))
+            final.extend(pack(words))
         else:
             # 纯中文无空格超长句：按 size 切，但保证不切断在数字/小数点中间
             i = 0
@@ -259,22 +259,22 @@ def synthesize_mp3(text: str, out_name: str, user_id: str = "") -> tuple[str, bo
         return None
 
     def _call_xiaomi(chunk: str) -> bytes | None:
-        from config import SHARED_SETTINGS
-        import json as _json
-
+        # 整段包在 try 里：get_ai_credentials 读邻仓 settings/listdir 可能抛
+        # (UnicodeDecodeError/OSError)，绝不能让异常逃出把上传入库变 500 丢文件。
+        # 走 get_ai_credentials（含 _access_denied 闸门），共享被撤销时不再偷用邻仓 key。
         try:
-            if not os.path.exists(SHARED_SETTINGS):
-                return None
-            with open(SHARED_SETTINGS, encoding="utf-8-sig") as f:
-                s = _json.load(f)
-            key = s.get("xiaomi_token_plan_api_key") or s.get("xiaomi_api_key") or ""
+            xi = agent_bridge.get_ai_credentials().get("xiaomi") or {}
+            key = xi.get("api_key") or ""
             if not key:
                 return None
+            base = (xi.get("base_url") or "https://token-plan-cn.xiaomimimo.com/v1").rstrip("/")
+            if base.endswith("/chat/completions"):
+                base = base[: -len("/chat/completions")].rstrip("/")
             import httpx
 
             with httpx.Client(timeout=90) as client:
                 resp = client.post(
-                    "https://token-plan-cn.xiaomimimo.com/v1/audio/speech",
+                    f"{base}/audio/speech",
                     headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
                     json={
                         "model": "mimo-v2.5-tts",

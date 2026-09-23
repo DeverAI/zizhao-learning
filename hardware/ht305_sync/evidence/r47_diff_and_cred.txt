@@ -1,0 +1,11 @@
+RAN_AT = 2026-09-23 13:49:13
+口径：远端名单取自 r47_verify.txt 的 REMOTE_NAMES 段（服务器自己报的解包后相对路径），本地名单取自 r47_local_names.txt（包内条目）
+行尾前置读数（(56) 的固化：先证明两侧原始字节各自是什么，再报差集）：r47_local_names.txt CRLF=261 裸LF=0 | r47_verify.txt CRLF=284
+比对前两侧都剥 \r（归一到 LF）
+REMOTE_LINES=261 LOCAL_LINES=261
+ONLY_IN_REMOTE=0
+ONLY_IN_LOCAL=0
+包名/尺寸/md5 = zizhao_20260923_r47final.zip / 1349354 / c15f614ea3c087a6f879f5bc3be2a4e5
+包内条目数 = 262
+包内明文命中（按只数、只列路径）= 1 ['hardware/zizhao-esp32s3/main/provision_ap.c']
+AGGREGATE (both sides, pinned in r47_local.txt / r47_verify.txt) = 83efb6fefe8c10c5c794b2aa088a7a799e4245fc6e772ada573dcb34376fe636

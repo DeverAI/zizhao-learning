@@ -99,19 +99,12 @@ async def _speech_to_text(audio_b64: str, user_id: str) -> str:
     from services import user_api_service
 
     cred = user_api_service.get_text_creds(user_id)  # 未必是 ASR；尝试 shared xiaomi
-    # 小米 ASR：优先共享 settings
-    from config import SHARED_SETTINGS
+    # 小米 ASR：走 get_ai_credentials（含 _access_denied 闸门），撤销后不偷用邻仓 key
+    from services import agent_bridge
 
-    key = ""
-    base = ""
-    try:
-        if os.path.exists(SHARED_SETTINGS):
-            with open(SHARED_SETTINGS, encoding="utf-8-sig") as f:
-                s = json.load(f)
-            key = s.get("xiaomi_token_plan_api_key") or ""
-            base = (s.get("xiaomi_token_plan_base_url") or "https://token-plan-cn.xiaomimimo.com/v1").rstrip("/")
-    except (json.JSONDecodeError, OSError):
-        key = ""
+    xi = agent_bridge.get_ai_credentials().get("xiaomi") or {}
+    key = xi.get("api_key") or ""
+    base = (xi.get("base_url") or "https://token-plan-cn.xiaomimimo.com/v1").rstrip("/")
     if not key:
         return ""
     import httpx
@@ -131,6 +124,126 @@ async def _speech_to_text(audio_b64: str, user_id: str) -> str:
     return ""
 
 
+_CN_DIGIT = {
+    "零": 0, "〇": 0, "一": 1, "二": 2, "两": 2, "三": 3, "四": 4, "五": 5,
+    "六": 6, "七": 7, "八": 8, "九": 9,
+}
+
+
+def _cn_num(s: str) -> float | None:
+    """中文数字 → 数值。支持 十/百/千/万 与混写（如「一百二十」）。"""
+    s = (s or "").strip()
+    if not s:
+        return None
+    if re.fullmatch(r"\d+(\.\d+)?", s):
+        return float(s)
+    units = {"十": 10, "百": 100, "千": 1000, "万": 10000}
+    total, section, num = 0.0, 0.0, 0.0
+    seen = False
+    i = 0
+    while i < len(s):
+        ch = s[i]
+        if ch in _CN_DIGIT:
+            num = _CN_DIGIT[ch]
+            seen = True
+            i += 1
+            continue
+        if ch in units:
+            u = units[ch]
+            seen = True
+            if u == 10000:
+                section = (section + num) * u
+                total += section
+                section, num = 0.0, 0.0
+            else:
+                # 「一百二」这种省略写法：二 直接乘下级单位
+                section += (num if num else 1) * u
+                num = 0.0
+            i += 1
+            continue
+        return None
+    if not seen:
+        return None
+    return total + section + num
+
+
+def _cn_power_expr(text: str) -> str:
+    """中文幂表达 → python 幂算式。
+
+    只处理「X 的 N 次方/次幂」这一种说法（含中文数字）。
+    其余一律返回空串交给模型，避免规则误伤正常算式。
+    """
+    m = re.search(r"([\d零〇一二两三四五六七八九十百千万.]+)\s*的\s*"
+                  r"([\d零〇一二两三四五六七八九十百千万.]+)\s*次(?:方|幂)", text)
+    if not m:
+        return ""
+    base = _cn_num(m.group(1))
+    exp = _cn_num(m.group(2))
+    if base is None or exp is None:
+        return ""
+    return f"{base:g}**{exp:g}"
+
+
+# 中文运算符 → 算术符号。
+# 顺序敏感：长词必须排在短词前面，否则「除以」会被「除」先吃掉变成 "/以"。
+_CN_OP = [
+    # 先剔除「问句尾巴」：这些词数量多、不含运算语义，早删早干净。
+    # 「百分之多少」「占几成」是提问，不是「除以100」——不能当成运算符。
+    ("百分之多少", ""), ("百分之几", ""), ("是多少", ""), ("多少", ""),
+    ("占几成", ""), ("几成", ""), ("等于", ""), ("然后", ""), ("再", ""),
+    # 真运算符
+    ("除以", "/"), ("乘以", "*"), ("加上", "+"), ("减去", "-"),
+    ("的平方", "**2"), ("的立方", "**3"),
+    ("除", "/"), ("乘", "*"), ("加", "+"), ("减", "-"),
+]
+
+# 「A分之B」= B/A（中文分数是反的：八分之三 = 3/8）
+_FRACTION_RE = re.compile(
+    r"([\d零〇一二两三四五六七八九十百千万.]+)\s*分之\s*"
+    r"([\d零〇一二两三四五六七八九十百千万.]+)"
+)
+
+
+def _cn_arith_expr(text: str) -> str:
+    """纯中文口述 → 算式（无模型时的确定性兜底）。
+
+    处理「三除以八再乘一百」这类：中文数字逐个转阿拉伯数字，
+    中文运算符换符号。转不出来就返回空串，让上层报错，绝不猜。
+    """
+    s = (text or "").strip()
+    if not s:
+        return ""
+    # 1) 「X的N次方」——必须最先做，「的」不能被后面的规则啃掉
+    s = re.sub(
+        r"([\d零〇一二两三四五六七八九十百千万.]+)\s*的\s*"
+        r"([\d零〇一二两三四五六七八九十百千万.]+)\s*次(?:方|幂)",
+        lambda m: f"{_cn_num(m.group(1)) or 0:g}**{_cn_num(m.group(2)) or 0:g}",
+        s,
+    )
+    # 2) 「A分之B」= B/A。中文分数是反着说的：
+    #    「八分之三」= 3/8。不处理的话「八分之三」会被抽成 83（灾难性错值）。
+    def _frac(m: "re.Match[str]") -> str:
+        den = _cn_num(m.group(1))
+        num = _cn_num(m.group(2))
+        if den in (None, 0) or num is None:
+            return ""
+        return f"({num:g}/{den:g})"
+
+    s = _FRACTION_RE.sub(_frac, s)
+    # 3) 中文运算符
+    for cn, op in _CN_OP:
+        s = s.replace(cn, op)
+    # 中文数字 → 阿拉伯数字（长词优先，避免「一百」被「一」先切走）
+    def _num_repl(m: "re.Match[str]") -> str:
+        v = _cn_num(m.group(0))
+        return f"{v:g}" if v is not None else m.group(0)
+
+    s = re.sub(r"[\d零〇一二两三四五六七八九十百千万]+(?:\.[\d]+)?", _num_repl, s)
+    # 只留算式字符；** 要保住
+    s = re.sub(r"[^0-9+\-*/().]", "", s)
+    return s if re.search(r"\d", s) else ""
+
+
 class CalcVoiceBody(BaseModel):
     audio_base64: Optional[str] = None
     text: Optional[str] = None
@@ -147,37 +260,93 @@ async def calc(body: CalcVoiceBody, user: dict = Depends(current_user)):
             status_code=400,
             detail="需要语音或文本；无网络/无语音服务时不显示录音，请改用文本",
         )
-    # LLM 解析成算式
-    prompt = (
-        "把用户口述转成一行可计算算式。只输出算式本身，不要解释。\n"
-        f"口述：{text}\n"
-        "示例输入：三除以八再乘一百 → 输出：(3/8)*100"
-    )
-    content, ok, provider = await generator._chat_completion(
-        [{"role": "user", "content": prompt}], temperature=0.0, user_id=user["id"]
-    )
-    expr = ""
-    if ok and content:
-        expr = re.sub(r"[`*\n]", "", content).strip()
-        # 取第一行像算式的
-        for line in expr.splitlines():
+    # 先本地抽「幂」：模型会把「二的一百次方」写成 2100（把"一百"当数字拼上去），
+    # 数字对了算式全错，而且不会报错 —— 静默错结果比报错更坏。
+    # 这里一次性拦截中文幂表达，交给下面的安全求值器（支持 **）。
+    pow_expr = _cn_power_expr(text)
+    content, ok, provider = "", False, "cn_power_rule"
+    if not pow_expr:
+        # LLM 解析成算式
+        prompt = (
+            "把用户口述转成一行可计算算式。只输出算式本身，不要解释。\n"
+            f"口述：{text}\n"
+            "示例输入：三除以八再乘一百 → 输出：(3/8)*100\n"
+            "示例输入：二的一百次方 → 输出：2**100\n"
+            "示例输入：根号二 → 输出：2**0.5\n"
+            "硬规则：\n"
+            "1) 幂用 ** 表示，绝不允许把「二的一百次方」写成 2100；\n"
+            "2) 禁止出现 % 号（百分比写成 /100 或 *100）；\n"
+            "3) 禁止中文与单位，只使用 0-9 + - * / ( ) . 这些字符（幂额外用 **）。\n"
+            "4) 「百分之多少」「占几成」这类是问句，不是运算；"
+            "按字面把前面的算式照抄，不要额外补 /100。"
+        )
+        content, ok, provider = await generator._chat_completion(
+            [{"role": "user", "content": prompt}], temperature=0.0, user_id=user["id"]
+        )
+    # 本地幂规则命中就直接用；否则走模型输出解析。不能无条件重置 expr，
+    # 否则会把上面算好的 pow_expr 冲掉（这个 bug 真发生过：改了规则却一点不生效）。
+    expr = pow_expr or ""
+    if not expr and ok and content:
+        # 只剥 Markdown 外壳（反引号 / **加粗** / 列表符号），
+        # 绝不能全局删 * —— 那会把乘法运算符一起删掉，(3/8)*100 变成 (3/8)100。
+        cleaned = content.replace("```", "").replace("`", "")
+        cleaned = re.sub(r"\*\*(.+?)\*\*", r"\1", cleaned)
+        for line in cleaned.splitlines():
+            line = re.sub(r"^\s*[*\-]\s+", "", line).strip()
             if re.search(r"[\d(]", line):
-                expr = line.strip()
+                expr = line
                 break
     if not expr:
-        # 降级：直接从文本抽数字与符号
-        expr = re.sub(r"[^\d+\-*/().%]", "", text.replace("×", "*").replace("÷", "/"))
-        if not expr:
-            raise HTTPException(status_code=422, detail="无法解析算式")
-    result = agent_tools.dispatch("calculator", {"expression": expr})
+        # 降级 1：再扫一遍幂表达（模型可能把「的/次方」也照抄出来）
+        expr = _cn_power_expr(text)
+        if expr:
+            provider = "cn_power_rule"
+    if not expr:
+        # 降级 2：中文数字 + 中文运算符整句转换（「三除以八再乘一百」）
+        expr = _cn_arith_expr(text)
+        if expr:
+            provider = "cn_rule"
+    if not expr:
+        raise HTTPException(
+            status_code=422,
+            detail=f"无法解析算式（原文：{text}）",
+        )
+
+    def _try(e: str) -> dict:
+        try:
+            return agent_tools.dispatch("calculator", {"expression": e})
+        except Exception as exc:  # noqa: BLE001
+            return {"ok": False, "error": str(exc)}
+
+    result = _try(expr)
     if not result.get("ok"):
-        raise HTTPException(status_code=422, detail=result.get("error") or "calc failed")
+        # 模型爱写 "3/8*100%"：% 是取模运算符，后面没有操作数 → 直接语法错误。
+        # 清洗后再试一次，别让用户为一个百分号拿不到结果。
+        # 注意保留 * 与 **：原来的字符类会连幂运算符一起删掉，2**100 变 2100。
+        cleaned = expr.replace("%", "").replace(" ", "").replace("×", "*").replace("÷", "/")
+        cleaned = re.sub(r"[^\d+\-*/().]", "", cleaned)
+        if cleaned and cleaned != expr:
+            retry = _try(cleaned)
+            if retry.get("ok"):
+                expr = cleaned
+                result = retry
+    if not result.get("ok"):
+        raise HTTPException(
+            status_code=422,
+            detail=f"{result.get('error') or 'calc failed'}（算式：{expr}）",
+        )
+    # provider 语义：
+    #   user_api / shared_api —— 模型给的算式
+    #   cn_power_rule        —— 本地中文幂规则命中（不走模型，确定性最高）
+    #   fallback_regex       —— 模型不可用，正则兜底抽的算式
+    if not ok and provider in ("", None):
+        provider = "fallback_regex"
     return {
         "ok": True,
         "spoken": text,
         "expression": expr,
         "value": result.get("value"),
-        "provider": provider if ok else "fallback_regex",
+        "provider": provider,
         "degraded": not ok,
         "no_markdown": True,
     }

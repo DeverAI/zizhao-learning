@@ -67,9 +67,14 @@ class ToolInvokeBody(BaseModel):
 
 
 @router.post("/agent/tool")
-async def invoke_tool(body: ToolInvokeBody):
-    result = agent_tools.dispatch(body.name, body.arguments)
-    return result
+async def invoke_tool(body: ToolInvokeBody, user: dict = Depends(current_user)):
+    """直接调工具（调试/板端）。user_id 自动注入，禁止越权传他人 uid。"""
+    args = dict(body.arguments or {})
+    if "user_id" in args and str(args["user_id"]) != user["id"]:
+        args["user_id"] = user["id"]
+    else:
+        args.setdefault("user_id", user["id"])
+    return agent_tools.dispatch(body.name, args)
 
 
 class ReciteGradeBody(BaseModel):
@@ -79,8 +84,9 @@ class ReciteGradeBody(BaseModel):
 
 
 @router.get("/recitation/next")
-async def recitation_next():
-    item = recitation.pick_random("pending") or recitation.pick_random("done")
+async def recitation_next(user: dict = Depends(current_user)):
+    uid = user["id"]
+    item = recitation.pick_random("pending", uid) or recitation.pick_random("done", uid)
     if not item:
         raise HTTPException(status_code=404, detail="no items")
     # 不把全文以外的内部字段漏出
@@ -89,16 +95,18 @@ async def recitation_next():
 
 
 @router.post("/recitation/grade")
-async def recitation_grade(body: ReciteGradeBody):
-    grade = recitation.grade_attempt(body.item_id, body.text)
+async def recitation_grade(body: ReciteGradeBody, user: dict = Depends(current_user)):
+    uid = user["id"]
+    grade = recitation.grade_attempt(body.item_id, body.text, uid)
     if not grade.get("ok"):
         raise HTTPException(status_code=404, detail=grade.get("error"))
     if body.use_llm:
-        coach = await recitation.coach_comment(body.item_id, body.text, grade)
+        coach = await recitation.coach_comment(body.item_id, body.text, grade, uid)
         grade["coach"] = coach
     return grade
 
 
 @router.get("/recitation/items")
-async def recitation_items():
-    return {"items": recitation.load_items(), "log_tail": recitation.load_log()[-10:]}
+async def recitation_items(user: dict = Depends(current_user)):
+    uid = user["id"]
+    return {"items": recitation.load_items(uid), "log_tail": recitation.load_log(uid)[-10:]}

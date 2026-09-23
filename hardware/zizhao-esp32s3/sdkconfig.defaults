@@ -1,6 +1,6 @@
 # 微雪 ESP32-S3-ePaper-3.97 倾向配置（联调可改）
 CONFIG_IDF_TARGET="esp32s3"
-CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+CONFIG_ESPTOOLPY_FLASHSIZE_8MB=y
 CONFIG_ESPTOOLPY_FLASHMODE_QIO=y
 CONFIG_ESPTOOLPY_FLASHFREQ_80M=y
 CONFIG_PARTITION_TABLE_CUSTOM=y
@@ -16,3 +16,16 @@ CONFIG_ESP_WIFI_STATIC_TX_BUFFER_NUM=10
 CONFIG_ESP_WIFI_DYNAMIC_TX_BUFFER_NUM=32
 CONFIG_MBEDTLS_SSL_IN_CONTENT_LEN=16384
 CONFIG_MBEDTLS_SSL_OUT_CONTENT_LEN=4096
+# 长文件名：默认 LFN_NONE 时 FatFs 对基名>8字符/含第二个点的名字一律 FR_INVALID_NAME，
+# today_bundle.json / audio_ready.flag / *.json.part / seg_*.mp3.part 会全部静默开不了 → 离线功能恒 0。
+CONFIG_FATFS_LFN_HEAP=y
+# 正确的符号名是 FATFS_MAX_LFN（不是 MAX_FILENAME）：写错会被 kconfig 静默丢弃，形同没设。
+CONFIG_FATFS_MAX_LFN=128
+# default event loop 任务栈默认仅 2304B，被 netif/IP/WiFi 事件共用；STA 断线回调里
+# 会直接调 esp_wifi_connect()，给到 4096 防止与并发事件挤爆该任务。
+CONFIG_ESP_SYSTEM_EVENT_TASK_STACK_SIZE=4096
+# 整套"屏为什么不亮"的诊断都靠 epd/axp 两个模块的 LOGW/LOGI 行（唯一交付物就是那几行日志）。
+# 默认值恰好也是 3(INFO)，但依赖默认值意味着以后任何一次 kconfig 变动都可能把闸门改成 0/1/2，
+# 那时固件仍在跑、仍在点屏，只是**一行都不打** —— 排查会直接退化成"没有证据"。显式钉死。
+# 全工程没有一处 ESP_LOGD/LOGV（grep 过），所以不需要动 LOG_MAXIMUM_LEVEL。
+CONFIG_LOG_DEFAULT_LEVEL=3

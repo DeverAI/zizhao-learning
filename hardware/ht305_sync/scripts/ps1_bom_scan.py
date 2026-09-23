@@ -17,7 +17,14 @@ for p in sorted(glob.glob('**/*.ps1', recursive=True)) + sorted(glob.glob('**/*.
     out.append(f'{p}\tnonascii={non}\tutf8_bom={bom}\tgbk_risk={r}')
 out += ['', f'RISKY_PS1={len(risky)}\t{risky}',
         '⇒ 对报告「我没能验证 #7」（`r44_upload.ps1` / `r44_verify2.ps1` 是否含中文）的回答：'
-        '两只均 nonascii=0 ⇒ 无 BOM 不构成风险；含中文的 `.ps1` 在本归档里只有 `r45_upload.ps1`，它带 BOM。',
+        '两只均 nonascii=0 ⇒ 无 BOM 不构成风险。',
+        '含中文的 `.ps1` 名单**不写死在本脚本里**（写死了就会漂：09-23 11:5x 给 `run_cred_gate_recheck.ps1` '
+        '加中文注释时，上一版的这句就已经过时）⇒ 现读 = 上表里 `.ps1` 且 nonascii>0 的那些只，逐只看 utf8_bom。',
         '注：本行读数本身也是"现跑即落盘"，时刻与输出同批写进本文件。']
 open(os.path.join('evidence', 'ps1_bom_scan.txt'), 'w', encoding='utf-8', newline='').write('\n'.join(out) + '\n')
-print('\n'.join(out[-4:]))
+# stdout 在 GBK 控制台下会因 '\u21d2' 崩（11:57:51 实测：文件已写出、进程仍非 0 退出）⇒ 显式换编码。
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+except Exception:
+    pass
+print('\n'.join(out[-5:]))

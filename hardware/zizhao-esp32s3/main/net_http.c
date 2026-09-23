@@ -6,20 +6,42 @@
 
 static const char *TAG = "net";
 
+/* esp_http_client_perform() 会在内部读完 body 并以 HTTP_EVENT_ON_DATA 回调；
+ * perform 之后再 esp_http_client_read() 只会拿到 0（体已被读空）。
+ * 因此响应体必须在这里累积进调用方缓冲，out 为空时不收集。 */
+typedef struct {
+    char  *buf;
+    size_t cap;
+    size_t len;
+} http_buf_t;
+
 static esp_err_t http_event(esp_http_client_event_t *evt)
 {
+    if (evt->event_id == HTTP_EVENT_ON_DATA && evt->user_data && evt->data_len > 0) {
+        http_buf_t *hb = (http_buf_t *)evt->user_data;
+        size_t avail = (hb->cap > hb->len + 1) ? (hb->cap - hb->len - 1) : 0;
+        size_t n = ((size_t)evt->data_len < avail) ? (size_t)evt->data_len : avail;
+        if (n > 0) {
+            memcpy(hb->buf + hb->len, evt->data, n);
+            hb->len += n;
+            hb->buf[hb->len] = 0;
+        }
+    }
     return ESP_OK;
 }
 
 static bool http_post_json(const char *url, const char *body, char *out, size_t out_len, const char *sid)
 {
+    http_buf_t hb = { .buf = out, .cap = out_len, .len = 0 };
     esp_http_client_config_t cfg = {
         .url = url,
         .method = HTTP_METHOD_POST,
         .event_handler = http_event,
+        .user_data = (out && out_len) ? &hb : NULL,
         .timeout_ms = 20000,
     };
     esp_http_client_handle_t client = esp_http_client_init(&cfg);
+    if (!client) { ESP_LOGE(TAG, "POST init fail %s", url); return false; }
     esp_http_client_set_header(client, "Content-Type", "application/json");
     if (sid && sid[0]) {
         char cookie[160];
@@ -29,26 +51,26 @@ static bool http_post_json(const char *url, const char *body, char *out, size_t 
     esp_http_client_set_post_field(client, body, strlen(body));
     esp_err_t err = esp_http_client_perform(client);
     int status = esp_http_client_get_status_code(client);
-    if (err == ESP_OK && status >= 200 && status < 300 && out && out_len) {
-        int n = esp_http_client_read(client, out, out_len - 1);
-        if (n < 0) n = 0;
-        out[n] = 0;
-    } else {
+    if (err != ESP_OK || status < 200 || status >= 300) {
         ESP_LOGW(TAG, "POST %s -> err=%d status=%d", url, err, status);
     }
     esp_http_client_cleanup(client);
     return err == ESP_OK && status >= 200 && status < 300;
 }
 
-static bool http_get(const char *url, char *out, size_t out_len, const char *sid)
+bool net_http_get(const char *url, char *out, size_t out_len, const char *sid)
 {
+    http_buf_t hb = { .buf = out, .cap = out_len, .len = 0 };
+    if (out && out_len) out[0] = 0;
     esp_http_client_config_t cfg = {
         .url = url,
         .method = HTTP_METHOD_GET,
         .event_handler = http_event,
+        .user_data = (out && out_len) ? &hb : NULL,
         .timeout_ms = 20000,
     };
     esp_http_client_handle_t client = esp_http_client_init(&cfg);
+    if (!client) { ESP_LOGE(TAG, "GET init fail %s", url); return false; }
     if (sid && sid[0]) {
         char cookie[160];
         snprintf(cookie, sizeof(cookie), "zsid=%s", sid);
@@ -56,12 +78,7 @@ static bool http_get(const char *url, char *out, size_t out_len, const char *sid
     }
     esp_err_t err = esp_http_client_perform(client);
     int status = esp_http_client_get_status_code(client);
-    bool ok = (err == ESP_OK && status >= 200 && status < 300 && out && out_len);
-    if (ok) {
-        int n = esp_http_client_read(client, out, out_len - 1);
-        if (n < 0) n = 0;
-        out[n] = 0;
-    }
+    bool ok = (err == ESP_OK && status >= 200 && status < 300);
     esp_http_client_cleanup(client);
     return ok;
 }
@@ -95,7 +112,7 @@ bool net_http_get_bundle(const char *sid, const char *server, char *buf, size_t 
 {
     char url[192];
     snprintf(url, sizeof(url), "%s/api/offline/bundle", server);
-    return http_get(url, buf, buf_len, sid);
+    return net_http_get(url, buf, buf_len, sid);
 }
 
 bool net_http_report_progress(const char *sid, const char *server, int material_id_hash, int seg, int offset_ms)
@@ -113,5 +130,5 @@ bool net_http_get_power_policy(const char *sid, const char *server, char *buf, s
 {
     char url[192];
     snprintf(url, sizeof(url), "%s/api/device/power", server);
-    return http_get(url, buf, buf_len, sid);
+    return net_http_get(url, buf, buf_len, sid);
 }

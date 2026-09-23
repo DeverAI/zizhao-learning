@@ -1,0 +1,7 @@
+# 明文门哨兵 selftest（阴性对照）；跑于 09-23 12:05:48，脚本 = gate/cred_gate_selftest.py
+# 时刻与输出同批：本行与下面的 stdout 由同一条命令链写入同一只文件
+T1 命中会亮           OK  files=3 hits=2 rows=['HIT dirty.txt CANARY=2']
+T2 干净集合不假响      OK  files=3 hits=0
+T3 排除项真的被排掉    OK  files=2 hits=0
+T4 两种口令同时计      OK  {'A': 2, 'B': 0}
+SELFTEST_PASS=4/4  (哨兵串，未触碰任何真口令)

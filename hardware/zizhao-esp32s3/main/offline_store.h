@@ -12,6 +12,8 @@ bool offline_store_load_text(const char *day_key, char *out, size_t out_len);
 bool offline_store_has_audio(const char *day_key);
 /* audio_ready 必须来自服务端 bundle；本地仅存事实文件 */
 bool offline_store_read_audio_ready_flag(const char *day_key);
+/* 深睡/重启前把 FATFS 写缓存落盘并卸载 SD（幂等） */
+void offline_store_flush(void);
 
 #ifdef __cplusplus
 }

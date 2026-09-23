@@ -26,7 +26,7 @@ BUILTIN_COMPONENTS: list[dict] = [
         "id": "english",
         "name": "英语小组件",
         "icon": "EN",
-        "description": "高词/介词搭配/熟词生义；会模糊不会、错词库、新库",
+        "description": "单词卡（高考高频/介词搭配/熟词生义，会·模糊·不会 + 错词库）+ 段落背诵找茬",
         "entry": "#/english",
         "builtin": True,
         "default_on": True,
@@ -35,7 +35,7 @@ BUILTIN_COMPONENTS: list[dict] = [
         "id": "tools",
         "name": "小工具",
         "icon": "工",
-        "description": "计算器：口述→算式→结果；板子屏小不点按键",
+        "description": "语音/文本计算器（口述→算式→结果）+ 邻仓讲题黑板稿",
         "entry": "#/tools",
         "builtin": True,
         "default_on": True,
@@ -91,8 +91,33 @@ def get_component(cid: str) -> dict | None:
 
 
 def ensure_user_defaults(user_id: str) -> list[dict]:
+    """初始化；并对老用户补齐后加入的内置组件（只初始化一次会漏掉新增项）。"""
     existing = db.list_user_components(user_id)
     if existing:
+        have = {x.get("component_id") for x in existing}
+        missing = [c for c in BUILTIN_COMPONENTS if c.get("default_on") and c["id"] not in have]
+        if missing:
+            items = [
+                {
+                    "component_id": x.get("component_id"),
+                    "enabled": bool(x.get("enabled", True)),
+                    "order_index": x.get("order_index") or 0,
+                    "config": x.get("config") or {},
+                }
+                for x in existing
+            ]
+            base = max([x.get("order_index") or 0 for x in existing] + [0])
+            for i, c in enumerate(missing):
+                items.append(
+                    {
+                        "component_id": c["id"],
+                        "enabled": True,
+                        "order_index": base + i + 1,
+                        "config": {},
+                    }
+                )
+            db.set_user_components(user_id, items)
+            return db.list_user_components(user_id)
         return existing
     items = []
     for i, c in enumerate(BUILTIN_COMPONENTS):

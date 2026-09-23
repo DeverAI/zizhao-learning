@@ -2,7 +2,13 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from config import beijing_today, load_settings, ENABLE_MATERIAL_SYSTEM
+from config import (
+    ENABLE_MATERIAL_SYSTEM,
+    beijing_now,
+    beijing_today,
+    beijing_weekday_cn,
+    load_settings,
+)
 from services import agent_bridge, material_service
 from models import database as db
 
@@ -17,6 +23,29 @@ async def health():
         "material_system": ENABLE_MATERIAL_SYSTEM,
         "day_key": beijing_today(),
         "shared": agent_bridge.shared_status(),
+    }
+
+
+@router.get("/time")
+async def server_time():
+    """北京时间基准。
+
+    网页顶栏、板端 RTC 校时、离线包 day_key 全部以这里为准。
+    板端若拿不到 SNTP（校园网常封 UDP 123），改调本接口用 HTTP 日期兜底。
+    """
+    now = beijing_now()
+    return {
+        "ok": True,
+        "day_key": now.strftime("%Y-%m-%d"),
+        "date_cn": now.strftime("%Y年%m月%d日"),
+        "weekday": beijing_weekday_cn(),
+        "weekday_index": now.weekday(),
+        "hm": now.strftime("%H:%M"),
+        "hms": now.strftime("%H:%M:%S"),
+        "iso": now.isoformat(timespec="seconds"),
+        "unix": int(now.timestamp()),
+        "tz": "CST-8",
+        "source": "server_beijing",
     }
 
 

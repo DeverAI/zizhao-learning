@@ -61,7 +61,17 @@ DEFAULT_SETTINGS = {
     "material_dedup_threshold": 0.6,
     "material_pick_strategy": "round_robin",
     "material_generate_timeout": 90,
-    "material_domains": ["philosophy", "history", "classics", "shared_curriculum"],
+    # 取用域白名单：pick_next_plan 只从这里挑（空列表=不限制）
+    # gap_fill=初三补漏（海马体弱项/课程中档难节点），upload=上传收纳，knowledge=知识体系待灌
+    "material_domains": [
+        "philosophy",
+        "history",
+        "classics",
+        "shared_curriculum",
+        "gap_fill",
+        "upload",
+        "knowledge",
+    ],
     "api_password": "",
     "port": 8010,
     "smtp_host": "",
@@ -88,7 +98,15 @@ DEFAULT_SETTINGS = {
     "material_body_max_chars": 4500,
 }
 
-DOMAIN_ORDER = ["philosophy", "history", "classics", "shared_curriculum"]
+DOMAIN_ORDER = [
+    "philosophy",
+    "history",
+    "classics",
+    "shared_curriculum",
+    "gap_fill",
+    "upload",
+    "knowledge",
+]
 
 
 def ensure_dirs() -> None:
@@ -116,7 +134,7 @@ def load_settings() -> dict:
                 data = json.load(f)
             if isinstance(data, dict):
                 merged.update(data)
-        except (json.JSONDecodeError, OSError):
+        except (json.JSONDecodeError, UnicodeDecodeError, OSError):
             pass
     return merged
 
@@ -172,8 +190,28 @@ def atomic_write_json(path: str, data: object) -> None:
                 pass
 
 
+BEIJING_TZ = timezone(timedelta(hours=8))
+
+
+def beijing_now() -> datetime:
+    """北京时间（tz-aware）。全项目时间基准，勿再用裸 datetime.now()。"""
+    return datetime.now(BEIJING_TZ)
+
+
 def beijing_today() -> str:
-    return (datetime.now(timezone.utc) + timedelta(hours=8)).strftime("%Y-%m-%d")
+    return beijing_now().strftime("%Y-%m-%d")
+
+
+def beijing_now_iso() -> str:
+    return beijing_now().isoformat(timespec="seconds")
+
+
+# 星期名（前端/板端共用的唯一口径）
+WEEKDAY_CN = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
+
+
+def beijing_weekday_cn() -> str:
+    return WEEKDAY_CN[beijing_now().weekday()]
 
 
 def utcnow() -> datetime:

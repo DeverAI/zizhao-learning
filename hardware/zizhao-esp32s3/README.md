@@ -16,12 +16,16 @@ SNTP（`ntp.aliyun.com`，UTC+8）→ 每分钟刷新 `HH:MM` + 日期（墨水�
 
 ## 固件更新（仅后台静默）
 
-- 约每 6h 拉 `GET /api/device/firmware/latest`（需已登录）  
-- 有新版本才 OTA；失败只记日志  
-- 服务端：`storage/firmware/manifest.json` + `firmware.bin`  
-- `policy: background_only_no_user_ui`
+- 每次开机（登录后约 2 分钟）查一次 `GET /api/device/firmware/latest`（带 `zsid` Cookie）；设备每日定时唤醒 → 天然每日检查。不能用“连续运行 6h”判：深睡唤醒后 `esp_timer` 归零，那样永不触发  
+- 版本比对用 `esp_app_desc.version`，其来源是顶层 `CMakeLists.txt` 的 `set(PROJECT_VER "x.y.z")`（**不是** `VERSION` 文件，IDF 5.1 不认）；与 manifest `version` 不同才 OTA，避免每轮重下  
+- manifest 的 `url` 可写相对路径 `/api/device/firmware/bin`，固件会用 `server_url` 补成绝对地址  
+- 发版流程：改 `CMakeLists.txt` 的 `PROJECT_VER` → `idf.py build` → 把 **`build/zizhao_esp32s3.bin`**（别拷错成 bootloader/partition_table）拷成 `storage/firmware/firmware.bin` → 更新 `manifest.json` 的 `version`/`sha256`  
+- 失败只记日志；`policy: background_only_no_user_ui`（无用户升级入口）  
+- 服务端：`storage/firmware/manifest.json` + `firmware.bin`
 
 ## 编译
+
+> 从零到烧录 + NVS 配网的保姆级步骤见 [`hardware/FIRST_FLASH_GUIDE.md`](../FIRST_FLASH_GUIDE.md)。
 
 ```powershell
 cd hardware/zizhao-esp32s3

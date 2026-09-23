@@ -1,10 +1,14 @@
 """时间表：CRUD + Agent 可读可写（不依赖邻仓）。"""
 from __future__ import annotations
 
+import re
+
 from models import database as db
 from services import security
 
 WEEKDAYS = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
+# 单字星期 → weekday 下标（0=周一）
+WEEKDAY_CHARS = {"一": 0, "二": 1, "三": 2, "四": 3, "五": 4, "六": 5, "日": 6, "天": 6}
 
 
 def _fmt_min(m: int) -> str:
@@ -81,7 +85,11 @@ def as_prompt_block(user_id: str) -> str:
 
 
 def bulk_from_text(user_id: str, text: str) -> dict:
-    """Agent 整理：每行「周X HH:MM-HH:MM 标题」。"""
+    """Agent 整理：每行「周X HH:MM-HH:MM 标题」。
+
+    星期必须显式写成「周一/星期二」形式且落在行首附近：
+    否则「下午三点 数学」里的「三」会被误判成周三。
+    """
     added = 0
     errors = []
     for raw in (text or "").splitlines():
@@ -89,17 +97,15 @@ def bulk_from_text(user_id: str, text: str) -> dict:
         if not line or line.startswith("#"):
             continue
         try:
-            # 周一 08:00-09:00 数学
-            wd = None
-            for i, name in enumerate(WEEKDAYS):
-                if name in line or name[1] in line[:3]:
-                    wd = i
-                    break
+            # 周一 / 星期二 —— 只在行首 12 字内认，避免误吃正文里的数字
+            m_wd = re.search(r"(?:周|星期)\s*([一二三四五六日天])", line[:12])
+            if not m_wd:
+                errors.append(line)
+                continue
+            wd = WEEKDAY_CHARS.get(m_wd.group(1))
             if wd is None:
                 errors.append(line)
                 continue
-            import re
-
             m = re.search(r"(\d{1,2}:\d{2})\s*[-–~]\s*(\d{1,2}:\d{2})", line)
             if not m:
                 errors.append(line)

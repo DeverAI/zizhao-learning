@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import os
 import random
+import re
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -11,16 +12,25 @@ from config import atomic_write_json, ensure_dirs
 from services import agent_bridge, persona
 
 
-def _items_path() -> str:
+def _uid_key(user_id: str) -> str:
+    """用户目录/文件名消毒。空 uid 走全局文件（兼容旧数据与单测）。"""
+    return re.sub(r"[^\w-]", "_", (user_id or "").strip())[:40]
+
+
+def _items_path(user_id: str = "") -> str:
     from config import STORAGE_DIR
 
-    return os.path.join(STORAGE_DIR, "recitation_items.json")
+    key = _uid_key(user_id)
+    name = "recitation_items.json" if not key else f"recitation_items_{key}.json"
+    return os.path.join(STORAGE_DIR, name)
 
 
-def _log_path() -> str:
+def _log_path(user_id: str = "") -> str:
     from config import STORAGE_DIR
 
-    return os.path.join(STORAGE_DIR, "recitation_log.json")
+    key = _uid_key(user_id)
+    name = "recitation_log.json" if not key else f"recitation_log_{key}.json"
+    return os.path.join(STORAGE_DIR, name)
 
 
 DEFAULT_ITEMS = [
@@ -55,46 +65,50 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def load_items() -> list[dict]:
+def load_items(user_id: str = "") -> list[dict]:
     ensure_dirs()
-    if os.path.exists(_items_path()):
+    path = _items_path(user_id)
+    if os.path.exists(path):
         try:
-            with open(_items_path(), encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 data = json.load(f)
             if isinstance(data, list) and data:
                 return data
         except (json.JSONDecodeError, OSError):
             pass
     items = [dict(x) for x in DEFAULT_ITEMS]
-    atomic_write_json(_items_path(), items)
+    atomic_write_json(path, items)
     return items
 
 
-def save_items(items: list[dict]) -> None:
-    atomic_write_json(_items_path(), items)
+def save_items(items: list[dict], user_id: str = "") -> None:
+    atomic_write_json(_items_path(user_id), items)
 
 
-def load_log() -> list[dict]:
-    if not os.path.exists(_log_path()):
+def load_log(user_id: str = "") -> list[dict]:
+    path = _log_path(user_id)
+    if not os.path.exists(path):
         return []
     try:
-        with open(_log_path(), encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             data = json.load(f)
         return data if isinstance(data, list) else []
     except (json.JSONDecodeError, OSError):
         return []
 
 
-def pick_random(status: str = "pending") -> Optional[dict]:
-    items = [x for x in load_items() if x.get("status", "pending") == status] or load_items()
-    if not items:
+def pick_random(status: str = "pending", user_id: str = "") -> Optional[dict]:
+    items = load_items(user_id)
+    pending = [x for x in items if x.get("status", "pending") == status]
+    pool = pending or items
+    if not pool:
         return None
-    return random.choice(items)
+    return random.choice(pool)
 
 
-def grade_attempt(item_id: str, user_text: str) -> dict:
+def grade_attempt(item_id: str, user_text: str, user_id: str = "") -> dict:
     """对用户复述做找茬：错漏、次序、用词。优先规则，可选 LLM。"""
-    items = {x.get("id"): x for x in load_items()}
+    items = {x.get("id"): x for x in load_items(user_id)}
     item = items.get(item_id)
     if not item:
         return {"ok": False, "error": "item not found"}
@@ -136,9 +150,9 @@ def grade_attempt(item_id: str, user_text: str) -> dict:
     ok = coverage >= 0.75 and order_ratio >= 0.6
     if ok:
         item["status"] = "done"
-    save_items(list(items.values()))
+    save_items(list(items.values()), user_id)
 
-    log = load_log()
+    log = load_log(user_id)
     log.append(
         {
             "date": _now(),
@@ -148,7 +162,7 @@ def grade_attempt(item_id: str, user_text: str) -> dict:
             "ok": ok,
         }
     )
-    atomic_write_json(_log_path(), log[-200:])
+    atomic_write_json(_log_path(user_id), log[-200:])
 
     return {
         "ok": True,
@@ -167,9 +181,9 @@ def grade_attempt(item_id: str, user_text: str) -> dict:
     }
 
 
-async def coach_comment(item_id: str, user_text: str, grade: dict) -> dict:
+async def coach_comment(item_id: str, user_text: str, grade: dict, user_id: str = "") -> dict:
     """可选 LLM 找茬点评；失败则回退规则结果。"""
-    items = {x.get("id"): x for x in load_items()}
+    items = {x.get("id"): x for x in load_items(user_id)}
     item = items.get(item_id) or {}
     from services import generator
 

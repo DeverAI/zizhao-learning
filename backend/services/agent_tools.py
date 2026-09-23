@@ -21,16 +21,84 @@ _OPS = {
     ast.UAdd: operator.pos,
 }
 
+# 幂运算防护：真正的危险是「嵌套幂」9**9**9 —— 底数被反复放大成天文数字，
+# 会把 CPU/内存打满。单层幂 2**100 就是 1.27e30，Python 毫秒级算完，无害。
+#
+# 这里用「结果量级预判」而不是粗暴限指数：
+# 原来 MAX_POW_EXPONENT=64 会误杀 2**100 这种初高中常见题（学生真的会算），
+# 而 MAX_ABS_VALUE 已经能兜住越界，双层防护里第一层纯属误伤。
+MAX_POW_RESULT = 1e308  # float 上限附近，超了就没有实际意义
+# 中间结果上限。取 1e308（float 上限）而非 1e15：
+# 初中数学就会遇到 2**100、阶乘、复利这类量级，1e15 会把正常题误判成越界。
+# 真正的爆炸（9**9**9 ≈ 1e369693099）在 _pow_ok 里就被挡了，
+# 这里的上限是「兜底」，不该是「主要闸门」。
+MAX_ABS_VALUE = 1e308
+
+
+def _pow_ok(base: float, exp: float) -> bool:
+    """预判 base**exp 的量级，挡掉 9**9**9 这类爆炸式嵌套幂。
+
+    用对数算量级，避免真的去构造天文数字：
+      exp*log10(|base|) > 308（float 上限）→ 拒绝
+    指数本身极大（>1e4）且底数>1 也直接拒，防 log 溢出。
+    """
+    try:
+        b = abs(float(base))
+        e = float(exp)
+    except (TypeError, ValueError, OverflowError):
+        return False
+    if e != e or b != b:
+        return False
+    if b == 0 or b == 1:
+        return True
+    # 负底数 + 非整数指数 → 复数，直接拒
+    if base < 0 and e != int(e):
+        return False
+    if e > 1e4:
+        return False
+    try:
+        import math
+
+        return e * math.log10(b) <= 308.0
+    except (ValueError, OverflowError):
+        return False
+
+
+def _guard(value: float) -> float:
+    """拦截越界中间结果，避免超大整数把进程拖死。
+
+    用比值比较而非 abs(value) > MAX_ABS_VALUE：超大 int 与 float 比较
+    在某些边界会走 int→float 转换，1e400 这种会 OverflowError。
+    """
+    if isinstance(value, complex):
+        raise ValueError("complex not allowed")
+    if isinstance(value, float):
+        if value != value or value == float("inf") or value == float("-inf"):
+            raise ValueError("result not finite")
+    try:
+        if abs(value) > MAX_ABS_VALUE:
+            raise ValueError("result out of range")
+    except OverflowError as exc:  # 超大 int 转 float 溢出 = 必然越界
+        raise ValueError("result out of range") from exc
+    return value
+
 
 def _eval_node(node: ast.AST) -> float:
     if isinstance(node, ast.Expression):
         return _eval_node(node.body)
     if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
-        return node.value
+        return _guard(node.value)
     if isinstance(node, ast.UnaryOp) and type(node.op) in _OPS:
-        return _OPS[type(node.op)](_eval_node(node.operand))
+        return _guard(_OPS[type(node.op)](_eval_node(node.operand)))
     if isinstance(node, ast.BinOp) and type(node.op) in _OPS:
-        return _OPS[type(node.op)](_eval_node(node.left), _eval_node(node.right))
+        left = _eval_node(node.left)
+        right = _eval_node(node.right)
+        if isinstance(node.op, ast.Pow):
+            # 只放「结果量级合理」的幂通过：2**10、2**100、1.05**20 都行；
+            # 拒绝 9**9**9 这类嵌套爆炸幂。
+            if not _pow_ok(left, right):
+                raise ValueError("exponent too large / result out of range")
+        return _guard(_OPS[type(node.op)](left, right))
     raise ValueError("unsupported expression")
 
 
