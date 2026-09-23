@@ -1,0 +1,36 @@
+gen 13 冻结后的 verify_manifest 复验（两遍）
+脚本 = scripts/verify_manifest.py，无管道、读真实退出码（"读数不落盘等于没跑"）
+执行顺序：A 遍（本文件不存在）→ 写本文件 → B 遍（本文件在盘上）→ 用两遍结果重写本文件。
+
+=== A 遍 2026-09-24 04:36:37：MISMATCH=0 MISSING=0 UNLISTED=3 RC=1 ===
+ht305_sync 归档清单（快照，现跑于 09-24 04:32:48；脚本 = scripts/gen_manifest.py）
+UNLISTED_NAMES shown=3 total=3（下面逐行列全表，不再截断）
+  UNLISTED evidence/r51_postfreeze_verify_try1_043556.txt
+  UNLISTED evidence/r51_postfreeze_verify_try1_script_043556.txt
+  UNLISTED evidence/r51_verify_manifest_043603.txt
+ROWS=241  MISMATCH=0  MISSING=0  UNLISTED(盘上有、清单没记)=3
+GEN_LOG 末行=09-24 04:32:48	241	713174	44 / 清单汇总应为=09-24 04:32:48	241	713174	44 ⇒ OK
+TOTAL 行=TOTAL	241 / TOTAL_BYTES 行=TOTAL_BYTES	713174 / 逐行求和=713174 ⇒ OK
+VERDICT=MANIFEST_STALE(下面几只已漂或汇总行不符，重跑 scripts/gen_manifest.py)
+
+=== B 遍：MISMATCH=0 MISSING=0 UNLISTED=4 RC=1 ===
+ht305_sync 归档清单（快照，现跑于 09-24 04:32:48；脚本 = scripts/gen_manifest.py）
+UNLISTED_NAMES shown=4 total=4（下面逐行列全表，不再截断）
+  UNLISTED evidence/r51_postfreeze_verify_try1_043556.txt
+  UNLISTED evidence/r51_postfreeze_verify_try1_script_043556.txt
+  UNLISTED evidence/r51_verify_manifest_043603.txt
+  UNLISTED evidence/r51_verify_manifest_043637.txt
+ROWS=241  MISMATCH=0  MISSING=0  UNLISTED(盘上有、清单没记)=4
+GEN_LOG 末行=09-24 04:32:48	241	713174	44 / 清单汇总应为=09-24 04:32:48	241	713174	44 ⇒ OK
+TOTAL 行=TOTAL	241 / TOTAL_BYTES 行=TOTAL_BYTES	713174 / 逐行求和=713174 ⇒ OK
+VERDICT=MANIFEST_STALE(下面几只已漂或汇总行不符，重跑 scripts/gen_manifest.py)
+
+=== 本脚本自己算的差集（不靠人读上面两段）===
+UNLISTED_A=3 UNLISTED_B=4（差应恰为 1，且那 1 只 = 本文件）
+NEWLY_UNLISTED=['evidence/r51_verify_manifest_043637.txt']
+NO_LONGER_UNLISTED=[]
+UNLISTED 全名册（B 遍，4 只）=['evidence/r51_postfreeze_verify_try1_043556.txt', 'evidence/r51_postfreeze_verify_try1_script_043556.txt', 'evidence/r51_verify_manifest_043603.txt', 'evidence/r51_verify_manifest_043637.txt']
+VERDICT=AS_EXPECTED
+盘上只数（os.walk 现数，含本文件）=247；A 遍时=246
+本代已知残留（不洗绿）：清单未记的 4 只全部是本 gen 冻结（04:32:48）之后落盘的证件，
+逐只见上面名册；rc 因此为 1，这是设计行为，不是漂移。留给下一次冻结收。

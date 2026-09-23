@@ -1,0 +1,12 @@
+git-listed (dupes)  = 405 / dupes = 0
+selected            = 402 | copy failures = 0 []
+staged files        = 402 | bytes = 4180991
+plaintext in staging= 1 ['hardware/zizhao-esp32s3/main/provision_ap.c']
+any .log/.bin/.elf/.map = []
+any backups/nvs     = False False
+zip entries         = 403 | utf8-flagged = 63
+zip size/md5        = 1696912 dfd53a67c43693d59ba33053c5d0c7f3
+content files/bytes = 402 / 4180991
+LOCAL_AGGREGATE     = ca3d7def044cd15a66dda0dd7334873684e44e3e673031200b34baa9c76ac494
+CUTOFF_COPY_BEGIN   = 2026-09-24 04:05:53
+CUTOFF_ZIP_MADE     = 2026-09-24 04:05:58

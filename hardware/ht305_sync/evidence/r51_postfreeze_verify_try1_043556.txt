@@ -1,0 +1,13 @@
+r51 gen 13 收口第三处自抓：复跑（不是手抄）首跑失败的载体
+RUN_AT=2026-09-24 04:35:56
+CMD=python C:/Users/david/AppData/Local/Temp\land_postfreeze_verify_r51_try1_broken.py（该脚本 = 冻结后 verify 复验落地器的首版）
+RC=1
+缺陷：field() 用 `UNLISTED=` 去 match，而 verify_manifest.py 的汇总行实际写作
+      `UNLISTED(盘上有、清单没记)=N` ⇒ 匹配不到即 ABORT（这正是"不许把缺项当 0 放过"那条守卫在起作用）。
+处置：正则改成 `UNLISTED(?:\([^)]*\))?=`；失败样本按规则复跑生成本文件，不手抄。
+
+--- stdout 逐字 ---
+
+--- stderr 逐字 ---
+ABORT: 输出里找不到 UNLISTED= 这一项（汇总行格式变了？不许静默放行）
+

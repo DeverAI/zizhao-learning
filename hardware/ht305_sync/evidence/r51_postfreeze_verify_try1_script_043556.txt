@@ -1,0 +1,86 @@
+本代首跑失败的脚本本体（逐字，来自 C:/Users/david/AppData/Local/Temp\land_postfreeze_verify_r51_try1_broken.py，3891 B md5:a2d6fb65297b8fca3f1f0367ecdb14ec）
+
+import datetime, hashlib, os, re, subprocess, sys
+
+D = 'C:/Users/david/Documents/all_projects/自招学习/hardware/ht305_sync'
+sys.stdout.reconfigure(encoding='utf-8')
+ts = datetime.datetime.now().strftime('%H%M%S')
+rel = os.path.join('evidence', 'r51_verify_manifest_%s.txt' % ts)
+tgt = os.path.join(D, rel)
+if os.path.exists(tgt):
+    raise SystemExit('ABORT: 目标已存在 ' + rel)
+BSL = chr(92)
+
+
+def run():
+    return subprocess.run([sys.executable, os.path.join(D, 'scripts', 'verify_manifest.py')],
+                          cwd=D, capture_output=True, text=True, encoding='utf-8')
+
+
+def stamp():
+    return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+
+def field(out, key):
+    m = re.search(key + r'=(\d+)', out)
+    if not m:
+        raise SystemExit('ABORT: 输出里找不到 %s= 这一项（汇总行格式变了？不许静默放行）' % key)
+    return int(m.group(1))
+
+
+def unlisted_names(out):
+    return sorted(l.strip()[len('UNLISTED '):] for l in out.splitlines()
+                  if l.strip().startswith('UNLISTED ') and not l.strip().startswith('UNLISTED_NAMES'))
+
+
+# A 遍：本证件还不存在。
+a = run()
+ra = (field(a.stdout, 'MISMATCH'), field(a.stdout, 'MISSING'), field(a.stdout, 'UNLISTED'))
+names_a = unlisted_names(a.stdout)
+# 先把 A 遍落盘（本证件从此存在），再跑 B 遍，这样 B 遍的名册里必然含本只的名字。
+with open(tgt, 'w', encoding='utf-8', newline='') as f:
+    f.write('A 遍（初版，写出即被 B 遍看见）\nRUN_AT=%s\n%s' % (stamp(), a.stdout))
+b = run()
+rb = (field(b.stdout, 'MISMATCH'), field(b.stdout, 'MISSING'), field(b.stdout, 'UNLISTED'))
+names_b = unlisted_names(b.stdout)
+
+relf = rel.replace(BSL, '/')
+added = sorted(set(names_b) - set(names_a))
+removed = sorted(set(names_a) - set(names_b))
+ok = (ra[0] == 0 and rb[0] == 0 and rb[1] == 0 and added == [relf] and not removed
+      and rb[2] == ra[2] + 1 and a.returncode == 0 and b.returncode == 0)
+
+disk = sum(len(fn) for _, _, fn in os.walk(D))
+txt = ['gen 13 冻结后的 verify_manifest 复验（两遍）',
+       '脚本 = scripts/verify_manifest.py，无管道、读真实退出码（"读数不落盘等于没跑"）',
+       '执行顺序：A 遍（本文件不存在）→ 写本文件 → B 遍（本文件在盘上）→ 用两遍结果重写本文件。',
+       '',
+       '=== A 遍 %s：MISMATCH=%d MISSING=%d UNLISTED=%d RC=%d ==='
+       % (stamp(), ra[0], ra[1], ra[2], a.returncode),
+       a.stdout,
+       '=== B 遍：MISMATCH=%d MISSING=%d UNLISTED=%d RC=%d ===' % (rb[0], rb[1], rb[2], b.returncode),
+       b.stdout,
+       '=== 本脚本自己算的差集（不靠人读上面两段）===',
+       'UNLISTED_A=%d UNLISTED_B=%d（差应恰为 1，且那 1 只 = 本文件）' % (ra[2], rb[2]),
+       'NEWLY_UNLISTED=%s' % added,
+       'NO_LONGER_UNLISTED=%s' % removed,
+       'VERDICT=%s' % ('AS_EXPECTED' if ok else 'UNEXPECTED'),
+       '盘上只数（os.walk 现数，含本文件）=%d；A 遍时=%d' % (disk, disk - 1),
+       '本代已知残留（不洗绿）：清单未记的只有本文件这一只，留给下一次冻结收。',
+       '']
+if a.stderr:
+    txt += ['--- A 遍 stderr 逐字 ---', a.stderr]
+if b.stderr:
+    txt += ['--- B 遍 stderr 逐字 ---', b.stderr]
+body = '\n'.join(txt)
+if not body.endswith('\n'):
+    body += '\n'
+with open(tgt, 'w', encoding='utf-8', newline='') as f:
+    f.write(body)
+r = open(tgt, 'rb').read()
+print('WROTE %s | %d B | md5:%s' % (relf, len(r), hashlib.md5(r).hexdigest()[:8]))
+print('A: MISMATCH=%d MISSING=%d UNLISTED=%d rc=%d' % (ra[0], ra[1], ra[2], a.returncode))
+print('B: MISMATCH=%d MISSING=%d UNLISTED=%d rc=%d' % (rb[0], rb[1], rb[2], b.returncode))
+print('NEWLY=%s REMOVED=%s VERDICT=%s' % (added, removed, 'AS_EXPECTED' if ok else 'UNEXPECTED'))
+if not ok:
+    raise SystemExit('UNEXPECTED：差集与"只多本证件一只"不符')

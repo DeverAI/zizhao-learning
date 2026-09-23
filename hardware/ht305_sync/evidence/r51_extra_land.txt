@@ -1,0 +1,20 @@
+CHECKED_AT=2026-09-24 04:13:06
+FILES=1 BYTES=549
+r51_roundtrip.txt	549	md5:e8ff57a0
+NOTE=r51_land_log.txt is the 10+1 batch carrier; this file is the tail artifact landed after that batch
+FETCH=r51_remote_provision_ap.c bytes=10199 md5=0419bf1628f399f399ca41daf8ed3494 (留在 %TEMP%，未进仓库)
+BYTE_TWINS_IN_REPO=28 SOURCE=hardware/zizhao-esp32s3/main/provision_ap.c BACKUP_COPIES=27 OUTSIDE_BACKUPS=0
+FETCH_NAME_LEAKED_INTO_REPO=0
+r51_cutoff_delta.txt	181	hits=0	md5:d5ba0d99
+r51_land_log.txt	592	hits=0	md5:478dd9b6
+r51_listdiff.txt	784	hits=0	md5:8b4bc340
+r51_local.txt	594	hits=0	md5:c4478afe
+r51_local_names.txt	17939	hits=0	md5:f1e3e515
+r51_parse_check.txt	116	hits=0	md5:46baae76
+r51_probe.txt	2129	hits=0	md5:1422142a
+r51_remote_names.txt	17537	hits=0	md5:881e41a7
+r51_run_log.txt	2300	hits=0	md5:45388aea
+r51_scp_err.txt	724	hits=0	md5:a5c91935
+r51_verify.txt	19034	hits=0	md5:96e0416c
+r51_roundtrip.txt	549	hits=0	md5:e8ff57a0
+VERDICT=R51_LANDED_12_CARRIERS_ALL_HITS_0

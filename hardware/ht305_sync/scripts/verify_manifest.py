@@ -60,8 +60,13 @@ exp_log = (gen_line.split('现跑于 ')[1].split('；')[0] + '\t'
            + (bom_line or '').replace('BOM_FILES\t', ''))
 
 print(gen_line)
-print('ROWS=%d  MISMATCH=%d  MISSING=%d  UNLISTED(盘上有、清单没记)=%d %s'
-      % (len(rows), len(bad), len(missing), len(unlisted), unlisted[:10]))
+# gen 13 修正之二（登记于排查记录 §38.9 末段，缺陷本体见规则 (82)）：汇总行曾印 `UNLISTED=12` 而名单只给 10 只
+# ⇒ "看起来完整"的截断视图。现在名单全量逐行输出，且汇总行自己说"印了几只 / 共几只"。
+print('UNLISTED_NAMES shown=%d total=%d（下面逐行列全表，不再截断）' % (len(unlisted), len(unlisted)))
+for u in unlisted:
+    print('  UNLISTED ' + u)
+print('ROWS=%d  MISMATCH=%d  MISSING=%d  UNLISTED(盘上有、清单没记)=%d'
+      % (len(rows), len(bad), len(missing), len(unlisted)))
 for x in bad + ['MISSING ' + m for m in missing]:
     print('  ' + x)
 print('GEN_LOG 末行=%s / 清单汇总应为=%s ⇒ %s'

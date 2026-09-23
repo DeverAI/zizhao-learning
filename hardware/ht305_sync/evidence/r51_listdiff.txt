@@ -1,0 +1,16 @@
+第 9 代同步（r51final）双向差集 + 行尾前置读数，现跑于 2026-09-24 04:07:01
+口径：两侧先剥 \r 再比（(56) 那条），行尾原样登记在下一段，不事后归一。
+EOL  LOCAL bytes=17939 lines=402 CRLF=402 bareLF=0 BOM=False
+EOL  REMOTE(剥后名单) bytes=17537 lines=402 CRLF=0 bareLF=402 BOM=False
+EOL  VERIFY(远端 stdout 落盘原件，差集就是从它切的) bytes=19034 lines=425 CRLF=425 bareLF=0 BOM=True
+LOCAL_LINES=402 REMOTE_LINES=402
+ONLY_IN_LOCAL=0 []
+ONLY_IN_REMOTE=0 []
+
+--- 包 ↔ 工作树差集（r51_cutoff_delta.py 同批现跑）---
+RAN_AT   = 2026-09-24 04:07:01
+staged   = 402
+identical(内容逐字节等,  sha256) = 402
+changed_since_cutoff = 0 []
+deleted_since_cutoff = 0 []
+new_since_cutoff     = 0 []

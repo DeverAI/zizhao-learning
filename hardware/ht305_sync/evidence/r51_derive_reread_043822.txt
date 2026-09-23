@@ -1,0 +1,31 @@
+r51 派生器复跑取证（首跑 04:0x 的读数当时没有载体 ⇒ 按"读数不落盘等于没跑"补）
+RUN_AT=2026-09-24 04:38:22
+CMD=python scripts/derive_r51.py（原地复跑，不删不改已有件）
+RC=0
+本次复跑的真正判据：脚本目录里**没有任何一只字节发生变化**（前后各算一遍 md5 做差集）
+⇒ 这一条比派生器自己的 SKIP_IDENTICAL 更硬：它证明 `scripts/` 现有 7 只 r51 工具
+   逐字节等于"从 r50 工具派生而来"，即派生链可复算，而不是我只说过一遍。
+SCRIPTS_CHANGED=0 []
+派生 ABORT 与否：见下面 stdout；出现任何 DERIVED 行都算本次复跑失败（那意味着字节会变）。
+
+--- stdout 逐字 ---
+SKIP_IDENTICAL sync_r51.py 4203 B
+SKIP_IDENTICAL r51_upload.ps1 5527 B
+SKIP_IDENTICAL chk_r51.ps1 1212 B
+SKIP_IDENTICAL r51_cutoff_delta.py 1780 B
+SKIP_IDENTICAL r51_listdiff.py 3365 B
+SKIP_IDENTICAL land_r51_evidence.py 3633 B
+SKIP_IDENTICAL r51_roundtrip.py 3139 B
+LEFTOVER_CHECK sync_r51.py CLEAN
+LEFTOVER_CHECK r51_upload.ps1 CLEAN
+LEFTOVER_CHECK chk_r51.ps1 CLEAN
+LEFTOVER_CHECK r51_cutoff_delta.py CLEAN
+LEFTOVER_CHECK r51_listdiff.py CLEAN
+LEFTOVER_CHECK land_r51_evidence.py CLEAN
+LEFTOVER_CHECK r51_roundtrip.py CLEAN
+AST_OK sync_r51.py
+AST_OK r51_cutoff_delta.py
+AST_OK r51_listdiff.py
+AST_OK land_r51_evidence.py
+AST_OK r51_roundtrip.py
+VERDICT=IDEMPOTENT_REREAD

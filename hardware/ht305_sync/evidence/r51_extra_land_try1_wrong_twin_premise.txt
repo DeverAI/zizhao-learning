@@ -1,0 +1,36 @@
+FETCH_BYTES=10199 md5=0419bf1628f399f399ca41daf8ed3494 PROV_PASS_HITS=1
+BYTE_TWINS_IN_REPO=28
+  backups/r16b_20260919_155532/main/provision_ap.c
+  backups/r20_epd_20260920_125045/main/provision_ap.c
+  backups/r21_epd_20260920_135332/main/provision_ap.c
+  backups/r22_epd_20260920_204830/main/provision_ap.c
+  backups/r23_20260920_215341/hardware/zizhao-esp32s3/main/provision_ap.c
+  backups/r24_20260920_225948/main/provision_ap.c
+  backups/r25_20260920_233320/main/provision_ap.c
+  backups/r26_20260921_001714/main/provision_ap.c
+  backups/r27b_20260921_005018/main/provision_ap.c
+  backups/r27_20260921_004318/main/provision_ap.c
+  backups/r28_20260921_010649/main/provision_ap.c
+  backups/r29b_20260921_020818/main/provision_ap.c
+  backups/r29_20260921_020430/main/provision_ap.c
+  backups/r30_20260921_025024/provision_ap.c
+  backups/r31b_20260921_040018/main/provision_ap.c
+  backups/r31_20260921_033823/main/provision_ap.c
+  backups/r32final2_20260921_055048/main/provision_ap.c
+  backups/r32final3_20260921_060500/main/provision_ap.c
+  backups/r32final_20260921_053422/main/provision_ap.c
+  backups/r32_20260921_043512/main/provision_ap.c
+  backups/r33_20260921_211609/main/provision_ap.c
+  backups/r38c_20260922_005729/main/provision_ap.c
+  backups/r39_20260922_032453/main/provision_ap.c
+  backups/r40_20260922_052906/main/provision_ap.c
+  backups/r43_20260922_131029/main/provision_ap.c
+  backups/r44_sourceonly_20260923_084628/main/provision_ap.c
+  hardware/zizhao-esp32s3/backups/r43_20260922_131029/main/provision_ap.c
+  hardware/zizhao-esp32s3/main/provision_ap.c
+TRY1_ASSERTION=twin == [hardware/zizhao-esp32s3/main/provision_ap.c]
+Traceback (most recent call last):
+  File "C:\Users\david\AppData\Local\Temp\rerun_try1_twin.py", line 23, in <module>
+    assert twin == ['hardware/zizhao-esp32s3/main/provision_ap.c'], '与抓回件逐字节相同的仓库文件不是唯一那一只源头'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 与抓回件逐字节相同的仓库文件不是唯一那一只源头

@@ -1,0 +1,24 @@
+# 复跑第 9 代尾件落地器**第一遍**那条假断言，产生真正的执行载体（不是手抄）。
+# 第一遍写的是 `twin == [工作树那一只]`，隐含前提"仓库里与抓回件逐字节相同的文件只有一只"，实测 28 只（备份根 27 + 源头 1）⇒ ABORT，rc=1，且当时一行未写。
+import hashlib, os, re, sys
+sys.stdout.reconfigure(encoding='utf-8')
+REPO = r'C:/Users/david/Documents/all_projects/自招学习'
+TMP = os.environ.get('TEMP')
+REL = os.path.join('hardware','zizhao-esp32s3','main','provision_ap.c')
+sec = re.search(rb'#define\s+PROV_PASS\s+"([^"]*)"', open(os.path.join(REPO,REL),'rb').read()).group(1)
+fb = open(os.path.join(TMP,'r51_remote_provision_ap.c'),'rb').read()
+def rel(p): return os.path.relpath(p,REPO).replace(chr(92),'/')
+twin=[]
+for root,dirs,files in os.walk(REPO):
+    dirs[:]=[d for d in dirs if d!='.git']
+    for f in files:
+        p=os.path.join(root,f)
+        try:
+            if os.path.getsize(p)==len(fb) and open(p,'rb').read()==fb: twin.append(rel(p))
+        except OSError: pass
+print('FETCH_BYTES=%d md5=%s PROV_PASS_HITS=%d' % (len(fb), hashlib.md5(fb).hexdigest(), fb.count(sec)))
+print('BYTE_TWINS_IN_REPO=%d' % len(twin))
+for t in twin: print(' ', t)
+print('TRY1_ASSERTION=twin == [hardware/zizhao-esp32s3/main/provision_ap.c]')
+assert twin == ['hardware/zizhao-esp32s3/main/provision_ap.c'], '与抓回件逐字节相同的仓库文件不是唯一那一只源头'
+print('UNREACHABLE: 断言竟然成立，说明本载体的前提不成立')

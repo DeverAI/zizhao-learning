@@ -1,0 +1,4 @@
+DRIVER_PS_COPY 2026-09-24 03:58:07
+LABEL=index-035806
+OUT=staged_cred_gate_035806.txt
+PY_EXIT=0

@@ -1,0 +1,5 @@
+ht305_sync 归档清单（快照，现跑于 09-24 01:02:07；脚本 = scripts/gen_manifest.py）
+ROWS=180  MISMATCH=0  MISSING=0  UNLISTED(盘上有、清单没记)=57 ['evidence/frozen_scan_overwrite_035733.txt', 'evidence/head_tree_662fd7e_040152.txt', 'evidence/head_tree_9a8ac16_032957.txt', 'evidence/head_tree_c752d0e_025721.txt', 'evidence/head_tree_try1_025653_bad_ls_tree_option.txt', 'evidence/index_vs_list_032030.txt', 'evidence/index_vs_list_032233.txt', 'evidence/index_vs_list_035633.txt', 'evidence/index_vs_list_035919.txt', 'evidence/index_vs_list_040035.txt']
+GEN_LOG 末行=09-24 01:02:07	180	574267	38 / 清单汇总应为=09-24 01:02:07	180	574267	38 ⇒ OK
+TOTAL 行=TOTAL	180 / TOTAL_BYTES 行=TOTAL_BYTES	574267 / 逐行求和=574267 ⇒ OK
+VERDICT=MANIFEST_STALE(下面几只已漂或汇总行不符，重跑 scripts/gen_manifest.py)

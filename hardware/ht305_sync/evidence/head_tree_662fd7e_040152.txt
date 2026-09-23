@@ -1,0 +1,12 @@
+HEAD 树全量明文扫描（现跑于 2026-09-24 04:01:52）
+HEAD 662fd7eb4 2026-09-24 04:01:02 +0800
+SECRET_LEN_BYTES PROV=10 SSH=10（只报长度）
+SHOULD_FIRE PROV hardware/zizhao-esp32s3/main/provision_ap.c hits=1 / dev_log/20260919.md hits=1
+SHOULD_FIRE SSH in-memory/buffer hits=2
+TREE_BLOBS 382 NONBLOB_ENTRIES 0（后者是口径：`ls-tree -r` 只列 blob）
+TREE_HITS=0 []
+PATCH_ADDED_LINES=283 PATCH_HITS={'PROV': 0, 'SSH': 0}
+NUMSTAT_ADDED=283 NUMSTAT_DELETED=3（第三把尺：`git show --numstat` 逐文件求和）
+NUMSTAT_VS_SELF_PATCH_LINES added 283 == 283 ? True
+ARMS=2/2（PROV 与 SSH 各自扫过树 blob 与 patch）
+VERDICT=CLEAN（树 382 只 blob / patch 283 行，两条口令命中均为 0）
