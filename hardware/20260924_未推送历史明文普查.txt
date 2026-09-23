@@ -1,0 +1,227 @@
+自招学习 · 未推送提交历史里的 `PROV_PASS` 明文普查（第三次口径收紧）
+==================================================================
+普查时刻：2026-09-24 02:13:37 ~ 02:17:0x（`ee1b3bb` 成为 HEAD 之后现跑）
+本轮性质：只读 `git` 对象库，零写盘、零网络、零串口动作。**口令全程不打印、不进命令文本**（脚本从宏本体读，见下方"判据定义"）。
+
+【为什么要再跑一遍：把"文档已脱敏"和"历史已干净"分开】
+  09-23 08:22:52 那一版在册的口径是：「全树 5 只 / `git grep HEAD` 0 / `origin/main` 0」，
+  以及「未推送提交里 6 只各带 2 处明文（最早 `73cbbfc`；干净的只有 `592bb43`/`5246237`）」。
+  那两句量的是**每一棵提交树**（`<sha>:<path>` 的 blob 里有没有），它们**没量**：
+  ①脏的到底是**哪几只文件**；②**做脱敏的那一次提交自己**的 patch 里有没有明文。
+  本轮把两把尺都补上：一把扫**区间内全部新对象**（不是只看两棵树），一把逐提交算 **diff 的 `+`/`-` 行命中数**。
+
+【读数 A：区间全 blob 普查（权威载体 `%TEMP%\pw_unpushed_blobs_r50b.py` → `.out`，02:22:19~02:22:20 现跑，RC=0）】
+  UNPUSHED_COMMITS=12（`git rev-list --count origin/main..HEAD`，02:13:37 现跑；**现场态，非常量**）
+  FRESH_OBJECTS_IN_UNPUSHED_RANGE=488  BLOBS_IN_RANGE=396  BLOBS_PARSED=396  DESYNC=0  BLOBS_WITH_PLAINTEXT=**12**
+  构成（逐只点名，oid 非机密）：
+    6 只 `FreqErr.md` 的历史版本：c93f6658 bb794ca5 62a8cecc 42eac0a5 1b81206a 8673e53f（各 1 处）
+    6 只 `hardware/20260919_墨水屏点屏排查记录.md` 的历史版本：1767b374 5c7970ea bb8fde5d ae66cf86 3d7e843d 7febb4ca（各 1 处）
+    `hardware/zizhao-esp32s3/main/provision_ap.c` —— **历史 blob 命中 0**（提交进去的那份一直是脱敏版；带明文的是**工作树那一只未提交的改动**）
+  ⇒ `COMMIT_WOULD_EXPOSE_PLAINTEXT=YES`：一句 `git push` 会把这 12 只历史 blob 公开。
+  同一把尺子的**双向对照**（都在同一次扫描的 stdout 里，见下面逐字副本的末两行 `CONTROL_HEAD`）：
+  `CONTROL_HEAD FreqErr.md blob=c68c2878 hits=0`、`CONTROL_HEAD 20260919_墨水屏点屏排查记录.md blob=40a5f500 hits=0`
+  ⇒ "命中 12" 与 "命中 0" 出自同一次扫描、同一判据，不是换尺子换来的。
+  **v1 → v2 这一层要单独记**：第一版 `%TEMP%\pw_unpushed_blobs_r50.py`（02:15，`.out` 752 B）印的 `BLOBS_SCANNED 396 / BLOBS_WITH_PLAINTEXT 12`
+  与 12 行 `DIRTY` 名单，和第二版**逐字相同**（`diff` 无输出 ⇒ 已现跑核对）。但 v1 的解析循环只在遇到 `blob` 头时按 size 跳过内容，
+  中间 commit/tree 对象的**内容**会被当成下一行"头"来读 ⇒ 它**没有证明**自己没错位；v2 先 `--batch-check` 只挑 blob、再断言"解出的只数 == 名单只数、DESYNC=0"。
+  所以本轮把 v2 当权威载体，v1 的读数**保留**并标注为"数值对但过程未证明"（同族：`FreqErr.md` ㉞ 那类"看起来成功的产物"）。
+
+【读数 B：逐提交归因（载体 `%TEMP%\pw_unpushed_attr_r50.out` 02:16 与 `%TEMP%\pw_unpushed_attr_r50b.out` 02:22 两次独立运行，`md5sum` 两侧等 = `da41a4b133a0fcbd4c9ae5c519555e6c`，rc=0）】
+  sha        提交时刻            diff(+/-)   树里脏文件数   点名
+  ee1b3bbf   09-24 02:13:37      +0 / -0     0            clean
+  a7be5164   09-24 01:03:21      +0 / -0     0            clean
+  75be24f4   09-23 22:56:09      +0 / -0     0            clean
+  040af283   09-23 11:44:36      +0 / -0     0            clean
+  5246237e   09-23 08:15:00      +0 / -0     0            clean
+  **592bb430 09-23 07:48:20      +0 / -2     0**          树已干净，但**它的 patch 里写着那 2 行明文**（脱敏那一次就是把它们删掉的那一次）
+  5905fcd8   09-22 15:51:29      +0 / -0     2            FreqErr.md + 排查记录 各 1 处
+  f9cf62be   09-22 15:41:41      +0 / -0     2            同上
+  3c37af34   09-22 14:49:56      +0 / -0     2            同上
+  489baad9   09-22 12:20:21      +0 / -0     2            同上
+  7f3ed563   09-22 09:27:48      +0 / -0     2            同上
+  73cbbfcc   09-22 06:58:39      **+2** / -0 2            明文**从这里进仓**（FreqErr.md + 排查记录 各加 1 行）
+  小结：树脏 **6 只**（与 08:22:52 那句"6 只各带 2 处"合得上，且本轮把"2 处"落到**具体两只文件名**）；
+  但按"会不会因 push 而公开"来判，脏的**至少 7 只** = 那 6 只 + `592bb43`（patch 级）。
+
+【与旧口径的关系（旧数不改，主语补上）】
+  ①"全树 5 只" / "载荷 1 只（ht305）" / "载荷 11 只（mindog 闸掉）"三只尺量的仍是**工作树/载荷**，本轮不动它们；
+  ②"HEAD=0 ⇒ 不能推"那句原本给的阻断理由是**未推送历史里有脏树**，本轮补第二条**独立**阻断理由：**脱敏提交自己的 diff 含明文** ⇒
+    "把所有脏树之后的提交都推上去就安全"这种"部分推"思路也不成立（`592bb43` 在中间，推它=泄它）。
+  ③因此"历史脱敏"这一项的**验收口径**要写成：push 之前必须让 `origin/main..HEAD` 区间内**每一只 blob 与每一段 diff 文本**都 0 命中，
+    而不是只看 `git grep <HEAD>`。现跑复算 = 下面"判据定义"那两只脚本。
+
+【未做（点名）】
+  **未做任何历史重写**（`rebase`/`filter-branch`/`commit --amend` 全都没碰）⇒ 这是破坏性动作，等用户裁决；
+  未 `git push`（本轮之后 `rev-list` = 12）；没有验证"重写之后是否归零"（要做重写时才需要，本轮不预写结论）。
+
+【判据定义（连定义一起落盘，别只信上面那张表）】
+  下面两段是**逐字副本**（不是摘要）：A = `%TEMP%\pw_unpushed_blobs_r50b.py`（`wc -l` = 91 行，权威那版），
+  B = `%TEMP%\pw_unpushed_attr_r50.py`（`wc -l` = 55 行）。"逐字"不靠承诺：02:2x 现跑把本文件这两段与 `%TEMP%` 原件做 `difflib` 比对，
+  两侧 `EMBEDDED_IDENTICAL = True`（判据 = 去掉段首/段尾换行后逐字节等）。仓库侧不需要 `%TEMP%` 也能复算：把对应一段原样存成 `.py` 直接跑即可
+  （口令**不在脚本里**，运行时从 `provision_ap.c` 的宏现读 ⇒ 宏值一改判据自动跟着改，不会数着一个旧口令说"干净"）。
+  ⚠ 为什么仓库里只有这一份、不再另存 `.py`：这两只脚本读的判据已经全文落在本文件里，再放一份可执行副本 = 造出**第二代尺子**
+  （两份会漂），与本仓库"清单/门/内容互为快照要钉顺序"那条相反。需要真跑时按本段重建，或用 `%TEMP%` 里还在的那两只（09-24 02:1x~02:2x）。
+
+===== A. pw_unpushed_blobs_r50b.py（读数 A 的判据）=============================
+# 未推送区间的**全 blob 普查**（09-24 02:1x 第一版；02:2x 重写，理由见下面 NOTE）。
+# 口令只从宏本体读出，不进命令行、不打印。
+# NOTE（为什么要重写）：第一版把 `rev-list --objects` 的**全部** oid 直接喂给 `cat-file --batch`，
+#   解析器只在遇到 `blob` 头时按 size 跳过内容 ⇒ 中间那些 commit/tree 对象的**内容**会被当成下一行"头"来解析，
+#   解析流会错位，真实读数不可信（它给出的 396/12 属"看着合理但未证明未错位"）。
+#   现改成：先 `--batch-check` 拿类型，只把 **blob** 喂进 `--batch`，并断言"解出来的只数 == 名单只数"，
+#   对不上就 ABORT（宁可响，不静默给一个假"干净"）。
+import os
+import re
+import subprocess
+import sys
+
+sys.stdout.reconfigure(encoding='utf-8')
+REPO = r'C:/Users/david/Documents/all_projects/自招学习'
+os.chdir(REPO)
+
+secret = re.search(r'#define\s+PROV_PASS\s+"([^"]+)"',
+                   open('hardware/zizhao-esp32s3/main/provision_ap.c', encoding='utf-8').read()).group(1).encode()
+if not secret:
+    print('ABORT: 宏读到了但值为空，闸无法自证扫的是真口令')
+    sys.exit(1)
+
+
+def objs(ref):
+    """ref 可达的全部对象：oid -> 名字（名字取该 ref 下的路径，非机密）。"""
+    out = subprocess.run(['git', 'rev-list', '--objects', ref], capture_output=True).stdout.decode('utf-8')
+    d = {}
+    for ln in out.splitlines():
+        oid, _, name = ln.partition(' ')
+        d[oid] = name or '(no-name)'
+    return d
+
+
+head = objs('HEAD')
+base = objs('origin/main')
+fresh = {oid: name for oid, name in head.items() if oid not in base}
+
+# 先分类型：只扫 blob。
+chk = subprocess.run(['git', 'cat-file', '--batch-check'],
+                     input=b'\n'.join(k.encode() for k in fresh), capture_output=True).stdout.decode()
+kinds = {}
+for ln in chk.splitlines():
+    parts = ln.split(' ')
+    if len(parts) >= 2:
+        kinds[parts[0]] = parts[1]
+blob_oids = [k for k in fresh if kinds.get(k) == 'blob']
+if not blob_oids:
+    print('ABORT: 区间内 blob 只数为 0（候选枚举失败），不许把"0 命中"当"干净"')
+    sys.exit(1)
+
+raw = subprocess.run(['git', 'cat-file', '--batch'],
+                     input=b'\n'.join(k.encode() for k in blob_oids), capture_output=True).stdout
+hits = []
+i = 0
+parsed = 0
+bad = 0
+while parsed < len(blob_oids):
+    j = raw.find(b'\n', i)
+    if j < 0:
+        bad += 1
+        break
+    hdr = raw[i:j].split(b' ')
+    if len(hdr) >= 3 and hdr[1] == b'blob' and hdr[0].decode() == blob_oids[parsed]:
+        size = int(hdr[2])
+        data = raw[j + 1:j + 1 + size]
+        c = data.count(secret)
+        if c:
+            hits.append((hdr[0].decode(), c))
+        i = j + 1 + size + 1
+    else:
+        bad += 1
+        print('ABORT: 第 %d 只解析错位，头 = %r' % (parsed, raw[i:j][:60]))
+        break
+    parsed += 1
+
+print('FRESH_OBJECTS_IN_UNPUSHED_RANGE', len(fresh))
+print('BLOBS_IN_RANGE', len(blob_oids))
+print('BLOBS_PARSED', parsed, 'DESYNC', bad)
+if bad or parsed != len(blob_oids):
+    print('ABORT: 解析只数与名单只数不等 ⇒ 本轮读数作废')
+    sys.exit(1)
+print('BLOBS_WITH_PLAINTEXT', len(hits))
+for oid, c in sorted(hits, key=lambda x: fresh[x[0]]):
+    print('DIRTY %s hits=%d %s' % (oid[:8], c, fresh[oid]))
+# 对照（同一把尺子，两个方向都要响）：阳性 = 上面 DIRTY 名单非空即证它会响；
+# 阴性 = HEAD 那两份文档的**当前** blob 必须 0 命中，否则"树已脱敏"那句不成立。
+for p in ['FreqErr.md', 'hardware/20260919_墨水屏点屏排查记录.md']:
+    oid = subprocess.run(['git', 'rev-parse', 'HEAD:' + p], capture_output=True).stdout.decode().strip()
+    b = subprocess.run(['git', 'cat-file', 'blob', oid], capture_output=True).stdout
+    print('CONTROL_HEAD %s blob=%s hits=%d' % (p.split('/')[-1], oid[:8], b.count(secret)))
+print('COMMIT_WOULD_EXPOSE_PLAINTEXT', 'YES' if hits else 'NO')
+
+===== B. pw_unpushed_attr_r50.py（读数 B 的判据）===============================
+# 把"12 只脏 blob"归到具体提交（09-24 02:2x）。口令只从宏读出，不打印、不进命令行。
+import os
+import re
+import subprocess
+import sys
+
+sys.stdout.reconfigure(encoding='utf-8')
+REPO = r'C:/Users/david/Documents/all_projects/自招学习'
+os.chdir(REPO)
+secret = re.search(r'#define\s+PROV_PASS\s+"([^"]+)"',
+                   open('hardware/zizhao-esp32s3/main/provision_ap.c', encoding='utf-8').read()).group(1).encode()
+PATHS = ['FreqErr.md', 'hardware/20260919_墨水屏点屏排查记录.md',
+         'hardware/zizhao-esp32s3/main/provision_ap.c']
+
+
+def blob_of(ref, path):
+    r = subprocess.run(['git', 'rev-parse', '--verify', '-q', ref + ':' + path], capture_output=True)
+    oid = r.stdout.decode().strip()
+    if not oid:
+        return None, None
+    b = subprocess.run(['git', 'cat-file', 'blob', oid], capture_output=True).stdout
+    return oid, b.count(secret)
+
+
+def added_removed(sha):
+    d = subprocess.run(['git', 'show', '--format=', sha], capture_output=True).stdout
+    add = rem = 0
+    for ln in d.split(b'\n'):
+        if ln.startswith(b'+++'):
+            continue
+        if ln.startswith(b'+'):
+            add += ln.count(secret)
+        elif ln.startswith(b'-'):
+            rem += ln.count(secret)
+    return add, rem
+
+
+revs = subprocess.run(['git', 'rev-list', 'origin/main..HEAD'], capture_output=True).stdout.decode().split()
+print('UNPUSHED_COMMITS', len(revs))
+dirty_commits = []
+for sha in revs:
+    ts = subprocess.run(['git', 'show', '-s', '--format=%ci', sha], capture_output=True).stdout.decode().strip()
+    rows = []
+    tree_hit = 0
+    for p in PATHS:
+        oid, c = blob_of(sha, p)
+        if c:
+            tree_hit += 1
+            rows.append('%s blob=%s hits=%d' % (p.split('/')[-1], oid[:8], c))
+    add, rem = added_removed(sha)
+    flag = 'DIRTY' if (tree_hit or add or rem) else 'clean'
+    if flag == 'DIRTY':
+        dirty_commits.append(sha[:8])
+    print('%s %s %s diff(+%d/-%d) tree_dirty_paths=%d | %s' % (sha[:8], ts, flag, add, rem, tree_hit, '; '.join(rows)))
+print('DIRTY_COMMITS', len(dirty_commits), ' '.join(dirty_commits))
+
+===== 两段副本之外，本文件补的只有列名 =====
+  "读数 B"那张表 = B 的 stdout 原文，前面加了两列（sha 短码、`%ci` 提交时刻）并把 12 行按提交时刻倒序排；
+  数字与判据一个都没改。B 的 `PATHS` 只有三只候选，所以它给的 `tree_dirty_paths` 是**上界口径**：
+  若哪天明文进了第四只文件，B 会漏、**A 不会**（A 扫区间内全部 blob）。⇒ "A=12 / B 树脏 6 只 ×2 路径"这两句必须一起读，
+  单引 B 那列数会低估。
+
+【复算入口】
+  按上面 A / B 两段各自存成 `.py` 后 `python <该文件>`；两条都**只读**对象库（`rev-list` / `cat-file` / `show`），零写盘、零网络。
+    A 期望：`BLOBS_IN_RANGE 396` / `BLOBS_PARSED 396 DESYNC 0` / `BLOBS_WITH_PLAINTEXT 12` / 末两行 `CONTROL_HEAD … hits=0` / `COMMIT_WOULD_EXPOSE_PLAINTEXT YES`
+    B 期望：`UNPUSHED_COMMITS 12` / `DIRTY_COMMITS 7`（6 只树脏 + `592bb43` 是 patch 脏）
+  读数为**现场态**：`ee1b3bb` 之后每追加一只提交，`UNPUSHED_COMMITS` 与 B 的名单都会 +1 ⇒ 复算前先现跑 `git rev-list --count origin/main..HEAD` 对表。
+  任何一条把命中数读成 0 时，先怀疑宏值现读失败（A 在宏缺失/空值时 `ABORT` 退出码 1，B 直接抛异常），**不静默给"干净"**。
+
