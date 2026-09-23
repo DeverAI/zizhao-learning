@@ -1,0 +1,77 @@
+自招学习 -> mindog（8.138.12.209）第一次全量同步取证
+=====================================================
+取证时刻区间：2026-09-24 01:41:30 ~ 01:48:16（三次读数的载体文件 mtime 见下）
+本轮性质：纯盘上/网络侧，零代码进镜像，零串口动作。
+
+【为什么本工程要新写一只包装器，而不是改通用脚本】
+  C:\Users\david\.ssh\sync_project_to_mindog.py 的 LOCAL_ROOT 钉在 `战术模拟`，
+  直接跑它 = 拿别的工程的树当基准（`reference-mindog-sync` 已把这点写成硬口径）。
+  照 battlian 先例新建专用对：
+    C:\Users\david\.ssh\sync_zizhao_to_mindog.py       同步器（增量、只建不删）
+    C:\Users\david\.ssh\verify_zizhao_mindog_sync.py   独立第二套枚举（本地走闸名单、远端走 SFTP 递归）
+    C:\Users\david\.ssh\probe_zizhao_mindog_no_plaintext.py  无过滤远端探针（本轮新增，理由见③）
+
+【① 同步器读数（01:46:57，载体 %TEMP%\mindog_sync_r50.log，1,115 B，rc=0）】
+  CRED_GATE scanned=542 plaintext_excluded=11
+  LOCAL_ROOT  C:\Users\david\Documents\all_projects\自招学习
+  REMOTE_ROOT C:/all_projects/自招学习
+  scanned=530 uploaded=530 skipped_same_size=0 failed=0 shots_included=False force=False dry=False
+  等式：542（闸扫到的候选）- 11（带明文）- 1（一只 R22 残骸，见④）= 530（载荷）= uploaded。
+  前置：跑过一次 `--dry`（01:43:22，载体 mindog_dry1.log，49,642 B）⇒ 远端此前无本工程副本，
+  所有 531 只都报 `-> new`（531 = 530 + 那只残骸，残骸是在正式跑之前才排掉的）。
+
+【② 核对件读数（01:47:18，载体 mindog_verify_r50.log，1,000 B，rc=0）】
+  local_count=530 remote_count=530
+  missing_on_remote=0 extra_on_remote=0 size_mismatch=0
+  口径边界（必须连读数一起读）：这只核对件**两侧都套了同一道凭据闸**，
+  所以它证明的是"过滤后的集合全等"，**不证明**"远端没有那 11 只"。
+
+【③ 无过滤远端探针（01:48:16，载体 mindog_probe_r50.log，1,132 B，rc=0）】
+  GATE_LIST_SIZE 11
+  REMOTE_FILES_WALKED_NO_FILTER 530
+  CONTROL('dev_log/20260923.md')_MATCHED=True
+  PLAINTEXT_PRESENT_ON_REMOTE 0
+  VERDICT=REMOTE_CLEAN_OF_PLAINTEXT
+  为什么要有这一只：②的 extra_on_remote=0 是"闸后集合"的读数，一只真存在于远端的明文文件会被
+  过滤规则从分母里摘掉 ⇒ 命中 0 与"量具看不见"逐字同形（`feedback-verifiable-acceptance` 第 13 条）。
+  因此本探针**不套闸**地走完整棵远端树，并带一条**阳性对照**：一只一定在远端、且与闸名单同形同规则的
+  路径必须匹配得上；对照不成立则 VERDICT=INCONCLUSIVE 且 rc=1（不是"干净"）。
+  两条独立量具互核：无过滤走到 530 == ②的 remote_count=530 ⇒ 远端确实只有闸后那 530 只。
+
+【④ 顺带抓到的一只脏文件（登记，不删）】
+  hardware/zizhao-esp32s3/C<U+F03A>espbuild_r22.log（198 B，mtime 2026-09-20 20:48:47）
+  = R22 期一次 `powershell -File C:espbuild.ps1` 打错参留下的 PowerShell 报错文本，
+  NTFS 把非法的冒号替换成私有区字符 U+F03A。
+  它为什么现在才现形：通用同步器的 stdout 是 GBK，`DRY` 行打印这只时抛 UnicodeEncodeError，
+  而那句 print 在同步器 per-file try 里 ⇒ 被吞成一次 `failed=1` 的读数。
+  **那次 `failed=1` 只在第一遍 `--dry` 的控制台上出现过、没有落盘**（第一遍我用 `| tail -30` 读，
+  而管道末位的退出码是 `tail` 的，不是同步器的）⇒ 它本身不可复算；可复算的是第二遍
+  （PYTHONIOENCODING=utf-8，01:43:22）的 `failed=0` + 531 行 `DRY … -> new`。
+  结论不变但归因要留痕：**那次 failed 是量具的编码缺陷，不是传输失败**，两件事分开归因。
+  处置：在包装器里按相对路径排除、不上服务器，本地原件保留待裁决（未删）。
+
+【⑤ 6 只 vs 11 只：两把尺量的不是同一个集合（登记过"全树 6 只"的地方不必改，但要指这里）】
+  旧数 6 只 = 扫描时把**任意深度**名叫 `backups` 的目录整棵排掉（`--exclude-dir=backups` 口径）。
+  本闸的 11 只 = 用**同步器自己的**排除口径扫，而 `should_skip_dir` 只看 `rel.split('/')[0]`
+  ⇒ 只排**顶层**同名目录 ⇒ `hardware/zizhao-esp32s3/backups/`（r37/r40/r42/r43 四只 `.bin`
+  + `r43…/main/provision_ap.c` 一只副本）进得了载荷。11 - 6 = 这 5 只，逐项对得上。
+  两条后果：①**归档 `.bin` 里也带明文**（固件把口令编成字符串常量，`grep` 在二进制里命中），
+  以前只在文档里说"源码那一只带明文"是不够的；②凡是拿"6"当"全部"的说法，主语都得写成
+  "排掉嵌套 backups 后的 6 只"，否则就是口径越界。
+  为什么 ht305 那侧只数到 1 只：它的载荷来自 `git ls-files`，而 `.gitignore:19 backups/` 与 `:20 *.log`
+  两条模式**在任意深度都生效**（现跑 `git check-ignore -v` 两条都命中嵌套路径）⇒ 那 10 只根本进不了 ht305 清单。
+  mindog 这侧的载荷来自**文件系统 walk**，排除表 `EXCLUDE_DIRS` 又只在顶层比名字 ⇒ 同一棵树、两套口径、
+  明文只数 1 vs 11。**"树里有几处明文"与"载荷里有几处明文"是两个问题**，本轮之前只有前者在册。
+
+【与 ht305 侧的边界差（别拿一边结论说另一边）】
+  ht305（用户点名"及时同步"的那台）走的是**工作树 git 清单**，载荷**含** `main/provision_ap.c`
+  ⇒ 服务器那份副本带 `PROV_PASS` 明文，已用往返逐字节取证坐实（排查记录 §38.2）。
+  mindog 这台的载荷**不含**那 11 只（含 `provision_ap.c` 与 4 只 raw `.log`、1 只 dev_log、5 只归档 .bin/源副本），
+  并由③按名字证明远端确实没有它们 ⇒ **两台服务器的明文状态相反，任何一侧的结论不得复用到另一侧。**
+
+【复算入口】
+  python C:\Users\david\.ssh\sync_zizhao_to_mindog.py --dry      # 只看会传什么，不写远端
+  python C:\Users\david\.ssh\sync_zizhao_to_mindog.py            # 增量真传（只建不删）
+  python C:\Users\david\.ssh\verify_zizhao_mindog_sync.py         # 两套独立枚举
+  python C:\Users\david\.ssh\probe_zizhao_mindog_no_plaintext.py  # 无过滤 + 阳性对照
+  三条都须 rc=0 且 VERDICT 行在场；mindog 侧**从不删远端** ⇒ 它不能当回滚源，回滚源只有 backups/。
