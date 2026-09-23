@@ -1,0 +1,19 @@
+本文件 = 第六次提交轮差集脚本 **首跑失败**的现场（崩溃那一遍的原文如下，逐字抄自 03:55:50 那次调用的 stdout/stderr；失败件按 (81) 入库，只留成功件就等于抹掉这条形状）
+脚本 = %TEMP%\index_vs_list_r50f.py（派生自上一代 r50e2，未入库 ⇒ 复算须按本文件口径自己重写）
+命令 = python -W error::SyntaxWarning index_vs_list_r50f.py <清单> pass1 ""
+结果 = rc=1，且**未写出任何 evidence 文件**（断言在写盘之前）
+
+Traceback (most recent call last):
+  File "C:\Users\david\AppData\Local\Temp\index_vs_list_r50f.py", line 30, in <module>
+    assert m, 'ABORT: 清单头部没有 MOD/UNTRACKED/DROP/KEEP 汇总行'
+           ^
+AssertionError: ABORT: 清单头部没有 MOD/UNTRACKED/DROP/KEEP 汇总行
+
+归因（现读清单本体，非猜测）：`make_staged_list.py` 写进清单的头部三行长这样 ——
+  1) `生成时刻 ...；口径：git diff --name-only(7) + git ls-files --others --exclude-standard(10)`
+  2) `排除并点名（…）：5 只`
+  3) `进清单 12 只：`
+⇒ 那只 `MOD=7 UNTRACKED=10 DROP=5 KEEP=12` 汇总行只在**控制台**印过一次，**不在清单文件里**。
+我在脚本头部注释里写"改从清单头部 KEEP= 解析"，实际用的却是控制台那一行的格式 ⇒ 又一次"引用不存在的形状"（(81) 同族）。
+修法（03:56:xx 已改并复跑）：按清单**真实**头部三行解析三个数，并新增两条互核（ADD 行数 == 进清单只数、DROP 行数 == 排除只数）⇒ 派生件不再硬编码只数，也不再依赖一份不存在的汇总行。
+副作用核查：这一遍在写盘前就停住 ⇒ evidence/ 里没有半只残件（现跑 `ls evidence | grep index_vs_list` 只有 035633 / 035919 两只，均为修好后所写）。

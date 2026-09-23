@@ -1,0 +1,12 @@
+提交前索引门的阳性对照（现跑于 2026-09-24 03:27:46）
+GATE_CARRIER=staged_cred_gate_032242.txt（本脚本与它互核，扫的是同一批已 stage blob）
+SECRET_LEN_BYTES PROV=10 SSH=10 (只报长度，不报内容)
+SHOULD_FIRE PROV hardware/zizhao-esp32s3/main/provision_ap.c hits=1
+SHOULD_FIRE PROV dev_log/20260919.md hits=1
+SHOULD_FIRE SSH in-memory/bare hits=1
+SHOULD_FIRE SSH in-memory/wrapped hits=1
+SHOULD_FIRE SSH in-memory/twice hits=2
+INDEX_SCANNED=15 INDEX_TOTAL_HITS=0 []
+CROSS_CHECK gate FILES=15 PROV=0 SSH=0 HITS=0 VERDICT=CLEAN | self PROV=0 SSH=0 HITS=0 | equal=True
+ARMS_FIRED=2/2 ['PROV_worktree', 'SSH_inmemory_synth']
+VERDICT=POSITIVE_CONTROL_FIRES_AND_INDEX_CLEAN

@@ -1,0 +1,20 @@
+生成时刻 2026-09-24 03:54:20；口径：git diff --name-only(7) + git ls-files --others --exclude-standard(10)
+排除并点名（每条附理由，现跑明文扫描 HITS=0 才进清单）：5 只
+  DROP  hardware/zizhao-esp32s3/main/provision_ap.c  <- 带 PROV_PASS 明文（门会 rc=1） [not-scanned]
+  DROP  .workbuddy/memory/2026-09-16.md  <- 第三方工具状态目录 [not-scanned]
+  DROP  .workbuddy/r31_record_update.py  <- 第三方工具状态目录 [not-scanned]
+  DROP  Agent_readme.txt  <- 外部项目发来的回信，非本仓库产出，等裁决 [not-scanned]
+  DROP  dev_log/20260919.md  <- 带 PROV_PASS 明文，实测 HITS=1 [not-scanned]
+进清单 12 只：
+  ADD   FreqErr.md
+  ADD   dev_log/20260924.md
+  ADD   done.md
+  ADD   hardware/20260919_墨水屏点屏排查记录.md
+  ADD   todo.md
+  ADD   updates/20260924_墨水屏R50第8代同步与gen12冻结.md
+  ADD   hardware/20260924_ps1编码吞行实验.txt
+  ADD   hardware/ht305_sync/evidence/head_tree_9a8ac16_032957.txt
+  ADD   hardware/ht305_sync/evidence/index_vs_list_032233.txt
+  ADD   hardware/ht305_sync/evidence/staged_cred_gate_032242.txt
+  ADD   hardware/ht305_sync/evidence/staged_cred_gate_032242_pos.txt
+  ADD   hardware/ht305_sync/evidence/staged_cred_gate_032242_ps.txt

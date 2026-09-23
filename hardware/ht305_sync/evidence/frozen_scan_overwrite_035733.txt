@@ -1,0 +1,15 @@
+事件：按 (86) 那条"守卫必须对新写的每一只 .ps1 真跑一次"去跑 `scripts/ps1_bom_scan.py`（03:56:49，rc=0，`RISKY_PS1=0`）⇒ **它把一只已冻结的归档件覆写了**：`evidence/ps1_bom_scan.txt`。
+那只文件在 `MANIFEST.txt`（gen 12，01:02:07 冻结）里在册：`evidence/ps1_bom_scan.txt  5481  9ecc2f845793fd517157c73949fa6393  False  01:02:06`。
+后果口径：`verify_manifest.py` 会把它报成 **MISMATCH** —— 也就是把可接受的 `UNLISTED` 漂移升级成"改动了已冻结归档件"，正是本仓库明令**绝不允许**的那一格。
+
+实测四步（时刻与读数）：
+  03:56:49 覆写后 worktree md5 = `f9ef56936028b46b95d1449f84dd43ba` / 5481 B（新读数本身有效：`RISKY_PS1=0`）
+  先把新读数**改名另存**为 `evidence/ps1_bom_scan_035649.txt`（md5 现核 = `f9ef5693…` / 5481 B，与那一遍的输出逐字节等）
+  第一次复原用错手段：`git checkout HEAD -- <path>` ⇒ worktree md5 = `a73fa12cdc5f82712bc33a05bb55a83c` / **5559 B**（`core.autocrlf=true` 把 78 行 LF 换成 CRLF ⇒ 比冻结字节多 78 B；"用 git 复原"不等于"复原成那把尺子所量的字节"，(59) 同族）
+  第二次改用 `git cat-file blob HEAD:<path>` **按字节**写回 ⇒ md5 = `9ecc2f845793fd517157c73949fa6393` / 5481 B == 清单在册那一行
+  03:57:51 现跑 `verify_manifest.py` ⇒ `ROWS=180 / MISMATCH=0 / MISSING=0 / UNLISTED=22 / VERDICT=MANIFEST_STALE`（`UNLISTED=22` = 上一节登记的 19 只 + 本轮新长 3 只：`index_vs_list_035633.txt`、`ps1_bom_scan_035649.txt`、`index_vs_list_035919.txt`；那只复现脚本另计）⇒ **冻结件字节已复原，漂移仍在可接受通道内**
+
+结论两条：
+  ① **`ps1_bom_scan.py` 的写盘目标是硬编码的 `evidence/ps1_bom_scan.txt`** ⇒ "跑守卫"这个动作本身会破坏归档不变量。这是一只**此前从未点名的守卫副作用**：其余门/清单脚本要么只读、要么写带时刻的新文件名，只有它会覆写在册件。
+  ② 处置口径沿用 (82)：**修工具与保留已入册凭证冲突时先保凭证** ⇒ 本轮**不改** `ps1_bom_scan.py`（它在 gen 12 清单里，改它 = 造出 `MISMATCH`），修复登记为 **gen 13 义务**：写盘目标改为带时刻的新文件名（或先查 `MANIFEST.txt`：在册且 md5 将变 ⇒ ABORT）。
+本事件全程零网络、零串口、未 push；git 侧只做了"按字节取回 HEAD blob"这一件只读事。
