@@ -1,0 +1,4 @@
+DRIVER_PS_COPY 2026-09-24 05:55:36
+LABEL=index-82-pass2
+OUT=staged_cred_gate_055523.txt
+PY_EXIT=0

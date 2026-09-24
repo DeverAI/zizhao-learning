@@ -1,0 +1,48 @@
+# 失败载体（本代首跑的那把错尺，按 gen 9 的 *_try1_* 口径整只留档、不删不改）：
+# 它的分类规则"mtime ∈ 区间 且 birth == mtime ⇒ 新入档"对 `shutil.copy2` 落地的凭证恒不成立
+# （copy2 保留源 mtime、birth = 落地时刻）⇒ 11 只新入档的 r53 凭证被错分成"覆写在册件"。
+# 正确尺子 = scripts/gen_delta_git.py（上一代名册直接从 git 里那一代提交过的 MANIFEST.txt 取，做双向差集）。
+# 本文件唯一仍然可信的部分 = 它点名的那些文件名本身；任何"新入档 vs 覆写"的判定请读 git 版输出。
+清单世代逐名差集（本脚本现跑于 2026-09-24 09:02:25）
+界点取自 manifest_gen_log.txt：上一代 = 09-24 05:42:29（TOTAL 270 / BYTES 829336 / BOM 50），本代 = 09-24 08:48:25（TOTAL 301 / BYTES 954639 / BOM 56）
+口径：mtime ∈ (上一代清单时刻, 本代清单时刻] 且 birth == mtime ⇒ 新入档；birth 早于区间起点 ⇒ 覆写在册件
+TOUCHED=32 FRESH=19 OVERWRITTEN=13 SELF_EXCLUDED=0
+本代清单 TOTAL=%s ⇒ 与 FRESH+OVERWRITTEN 的核对见下（清单不含自身与代次日志，故 TOTAL 只与 FRESH 相关）
+
+--- FRESH（新入档，逐名）---
+FRESH	evidence/cred_gate_recheck_084801.txt	860 B	birth=09-24 08:48:01 mtime=09-24 08:48:01
+FRESH	evidence/head_tree_692c35b_055753.txt	731 B	birth=09-24 05:58:43 mtime=09-24 05:58:43
+FRESH	evidence/index_vs_list_055442.txt	736 B	birth=09-24 05:54:42 mtime=09-24 05:54:42
+FRESH	evidence/index_vs_list_055607.txt	741 B	birth=09-24 05:56:07 mtime=09-24 05:56:07
+FRESH	evidence/r53_land_log.txt	592 B	birth=09-24 08:47:24 mtime=09-24 08:47:24
+FRESH	evidence/staged_cred_gate_055142.txt	513 B	birth=09-24 05:51:52 mtime=09-24 05:51:52
+FRESH	evidence/staged_cred_gate_055142_pos.txt	736 B	birth=09-24 05:53:39 mtime=09-24 05:53:39
+FRESH	evidence/staged_cred_gate_055142_ps.txt	100 B	birth=09-24 05:51:53 mtime=09-24 05:51:53
+FRESH	evidence/staged_cred_gate_055523.txt	515 B	birth=09-24 05:55:36 mtime=09-24 05:55:36
+FRESH	evidence/staged_cred_gate_055523_pos.txt	736 B	birth=09-24 05:55:58 mtime=09-24 05:55:58
+FRESH	evidence/staged_cred_gate_055523_ps.txt	102 B	birth=09-24 05:55:36 mtime=09-24 05:55:36
+FRESH	evidence/staged_list_055043.txt	5154 B	birth=09-24 05:50:44 mtime=09-24 05:50:44
+FRESH	scripts/chk_r53.ps1	1213 B	birth=09-24 08:45:20 mtime=09-24 08:45:20
+FRESH	scripts/land_r53_evidence.py	3675 B	birth=09-24 08:45:20 mtime=09-24 08:45:20
+FRESH	scripts/r53_cutoff_delta.py	1780 B	birth=09-24 08:45:20 mtime=09-24 08:45:20
+FRESH	scripts/r53_listdiff.py	3454 B	birth=09-24 08:45:20 mtime=09-24 08:45:20
+FRESH	scripts/r53_roundtrip.py	3198 B	birth=09-24 08:45:20 mtime=09-24 08:45:20
+FRESH	scripts/r53_upload.ps1	5527 B	birth=09-24 08:45:20 mtime=09-24 08:45:20
+FRESH	scripts/sync_r53.py	4203 B	birth=09-24 08:45:20 mtime=09-24 08:45:20
+
+--- OVERWRITTEN（在册件被覆写，逐名）---
+OVERWRITTEN	README.md	70397 B	birth=09-24 04:32:33 mtime=09-24 05:49:21
+OVERWRITTEN	evidence/cred_three_rulers_692c35b_060011.txt	5706 B	birth=09-24 06:00:11 mtime=09-24 06:00:23
+OVERWRITTEN	evidence/r53_cutoff_delta.txt	181 B	birth=09-24 08:47:24 mtime=09-24 08:46:27
+OVERWRITTEN	evidence/r53_listdiff.txt	785 B	birth=09-24 08:47:24 mtime=09-24 08:46:27
+OVERWRITTEN	evidence/r53_local.txt	594 B	birth=09-24 08:47:24 mtime=09-24 08:45:42
+OVERWRITTEN	evidence/r53_local_names.txt	21479 B	birth=09-24 08:47:24 mtime=09-24 08:45:42
+OVERWRITTEN	evidence/r53_parse_check.txt	116 B	birth=09-24 08:47:24 mtime=09-24 08:47:08
+OVERWRITTEN	evidence/r53_probe.txt	2176 B	birth=09-24 08:47:24 mtime=09-24 08:46:04
+OVERWRITTEN	evidence/r53_remote_names.txt	21009 B	birth=09-24 08:47:24 mtime=09-24 08:46:26
+OVERWRITTEN	evidence/r53_roundtrip.txt	549 B	birth=09-24 09:00:18 mtime=09-24 08:46:35
+OVERWRITTEN	evidence/r53_run_log.txt	2300 B	birth=09-24 08:47:24 mtime=09-24 08:46:11
+OVERWRITTEN	evidence/r53_scp_err.txt	679 B	birth=09-24 08:47:24 mtime=09-24 08:46:06
+OVERWRITTEN	evidence/r53_verify.txt	22529 B	birth=09-24 08:47:24 mtime=09-24 08:46:11
+
+--- SELF_EXCLUDED（按设计不入清单）---

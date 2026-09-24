@@ -26,6 +26,7 @@
 #include "offline_store.h"
 #include "provision_ap.h"
 #include "buttons.h"
+#include "axp_panel_power.h"
 #include "clock_sync.h"
 #include "ota_bg.h"
 #include "eink_display.h"
@@ -229,6 +230,11 @@ void app_main(void)
     /* 每轮点屏探测都会 gpio_config 一次 41/42 与 GPIO1，GPIO 驱动把这 6 个焊盘的
      * 完整状态打成 INFO，5s 一轮会把真正的诊断行（axp/epd）冲掉。压到 WARN。 */
     esp_log_level_set("gpio", ESP_LOG_WARN);
+    /* R53：第一件事就把 PMIC 的开机自锁脚按住（输入+内部上拉），等价于官方 08 的
+     * `PCF85063_init() → esp_gpio_Init()`，而官方那一步也排在它的 `axp_init()` 之前。
+     * 放在 NVS/WiFi/配网闸门之前，是为了让它跟所有分支一起生效：配网门户超时那条路直接进深睡、
+     * 永远不跑点屏代码，那正是这根脚最没人管的一段时间。 */
+    axp_pwr_hold_begin();
     /* NVS 撑满/版本变更时 IDF 不自动擦，直接 panic 会让屏/闸门全跑不起来=无条件变砖。
      * 先擦 nvs 分区（不碰 ota）重试；仍失败也不 panic，后面 ready_for_sta 为假自然进配网闸门。 */
     esp_err_t nvs_e = nvs_flash_init();

@@ -1,0 +1,41 @@
+﻿START 2026-09-24 08:46:02
+08:46:02	TOP=zizhao_20260924_r53final
+08:46:02	LOCAL_SIZE=1861210
+08:46:04	PROBE_OK
+08:46:06	SCP_EXIT=0
+08:46:06	---- remote command (for the record) ----
+08:46:06	$ProgressPreference="SilentlyContinue";
+$z="C:\Users\Administrator\Desktop\zizhao_20260924_r53final.zip";
+$root="C:\Users\Administrator\AppData\Local\Temp\zsynctest13";
+$d="C:\Users\Administrator\AppData\Local\Temp\zsynctest13\zizhao_20260924_r53final";
+Write-Output ("REMOTE_AT="+(Get-Date -Format 'yyyy-MM-dd HH:mm:ss'));
+if (Test-Path -LiteralPath $root) { Write-Output "ABORT: 解包根已存在，不删不改"; exit 1 }
+if (Test-Path -LiteralPath $d) { Write-Output "ABORT: 解包目录已存在，不删不改"; exit 1 }
+New-Item -ItemType Directory -Force -Path $root | Out-Null;
+$i=Get-Item -LiteralPath $z;
+Write-Output ("REMOTE_ZIP_SIZE="+$i.Length);
+Write-Output ("REMOTE_ZIP_MD5="+((Get-FileHash -LiteralPath $z -Algorithm MD5).Hash.ToLower()));
+Expand-Archive -LiteralPath $z -DestinationPath $root;
+Write-Output ("EXTRACT_OK="+$?);
+$digs=@(); $bytes=0; $bad=@(); $names=@();
+foreach ($f in (Get-ChildItem -LiteralPath $d -Recurse -File)) {
+  $rel=$f.FullName.Substring($d.Length+1).Replace("\","/");
+  if ($rel -eq "SYNC_MANIFEST.txt") { continue }
+  $bytes+=$f.Length;
+  $names+=$rel;
+  if ($rel -match "\.log$|\.bin$|\.elf$|\.map$|nvs\.csv$|^backups/") { $bad+=$rel }
+  $ms=New-Object IO.MemoryStream;
+  $pb=[Text.Encoding]::UTF8.GetBytes($rel); $ms.Write($pb,0,$pb.Length);
+  $fs=[IO.File]::OpenRead($f.FullName); $fs.CopyTo($ms); $fs.Close(); $ms.Position=0;
+  $digs+=(Get-FileHash -InputStream $ms -Algorithm SHA256).Hash.ToLower(); $ms.Dispose()
+}
+$sorted=$digs | Sort-Object;
+$agg=(Get-FileHash -InputStream (New-Object IO.MemoryStream(,[Text.Encoding]::UTF8.GetBytes(($sorted -join "`n")))) -Algorithm SHA256).Hash.ToLower();
+Write-Output ("REMOTE_FILES="+$digs.Count);
+Write-Output ("REMOTE_BYTES="+$bytes);
+Write-Output ("REMOTE_FORBIDDEN="+$bad.Count);
+Write-Output ("REMOTE_AGGREGATE="+$agg);
+Write-Output ("REMOTE_DONE_AT="+(Get-Date -Format 'yyyy-MM-dd HH:mm:ss'));
+Write-Output "REMOTE_NAMES_BEGIN"; ($names | Sort-Object) | ForEach-Object { Write-Output $_ }; Write-Output "REMOTE_NAMES_END"
+08:46:06	-----------------------------------------
+08:46:11	VERIFY_FLUSHED

@@ -1,0 +1,45 @@
+清单世代逐名差集（git 版，本脚本现跑于 2026-09-24 09:06:23）
+上一代名册来源 = `git show 692c35b:hardware/ht305_sync/MANIFEST.txt`（现跑首行时刻 09-24 05:42:29，TOTAL 270 / BYTES 829336 / BOM 50）
+本代名册来源 = 工作树 `MANIFEST.txt`（现跑首行时刻 09-24 08:48:25，TOTAL 301 / BYTES 954639 / BOM 56）
+前置钉：两代名单行数已各自等于其 TOTAL 行（270/270、301/301）⇒ 解析无漏
+互核：TOTAL 差 = 301 - 270 = 31；本脚本 NEW=31 GONE=0 ⇒ NEW-GONE=31 MATCH
+
+--- NEW（本代有、上一代清单没有，逐名）---
+NEW	evidence/cred_gate_recheck_084801.txt	860 B	birth=09-24 08:48:01 mtime=09-24 08:48:01	birth≈mtime
+NEW	evidence/cred_three_rulers_692c35b_060011.txt	5706 B	birth=09-24 06:00:11 mtime=09-24 06:00:23	birth≈mtime
+NEW	evidence/head_tree_692c35b_055753.txt	731 B	birth=09-24 05:58:43 mtime=09-24 05:58:43	birth≈mtime
+NEW	evidence/index_vs_list_055442.txt	736 B	birth=09-24 05:54:42 mtime=09-24 05:54:42	birth≈mtime
+NEW	evidence/index_vs_list_055607.txt	741 B	birth=09-24 05:56:07 mtime=09-24 05:56:07	birth≈mtime
+NEW	evidence/r53_cutoff_delta.txt	181 B	birth=09-24 08:47:24 mtime=09-24 08:46:27	COPY2(birth>mtime)
+NEW	evidence/r53_land_log.txt	592 B	birth=09-24 08:47:24 mtime=09-24 08:47:24	birth≈mtime
+NEW	evidence/r53_listdiff.txt	785 B	birth=09-24 08:47:24 mtime=09-24 08:46:27	COPY2(birth>mtime)
+NEW	evidence/r53_local.txt	594 B	birth=09-24 08:47:24 mtime=09-24 08:45:42	COPY2(birth>mtime)
+NEW	evidence/r53_local_names.txt	21479 B	birth=09-24 08:47:24 mtime=09-24 08:45:42	COPY2(birth>mtime)
+NEW	evidence/r53_parse_check.txt	116 B	birth=09-24 08:47:24 mtime=09-24 08:47:08	COPY2(birth>mtime)
+NEW	evidence/r53_probe.txt	2176 B	birth=09-24 08:47:24 mtime=09-24 08:46:04	COPY2(birth>mtime)
+NEW	evidence/r53_remote_names.txt	21009 B	birth=09-24 08:47:24 mtime=09-24 08:46:26	COPY2(birth>mtime)
+NEW	evidence/r53_run_log.txt	2300 B	birth=09-24 08:47:24 mtime=09-24 08:46:11	COPY2(birth>mtime)
+NEW	evidence/r53_scp_err.txt	679 B	birth=09-24 08:47:24 mtime=09-24 08:46:06	COPY2(birth>mtime)
+NEW	evidence/r53_verify.txt	22529 B	birth=09-24 08:47:24 mtime=09-24 08:46:11	COPY2(birth>mtime)
+NEW	evidence/staged_cred_gate_055142.txt	513 B	birth=09-24 05:51:52 mtime=09-24 05:51:52	birth≈mtime
+NEW	evidence/staged_cred_gate_055142_pos.txt	736 B	birth=09-24 05:53:39 mtime=09-24 05:53:39	birth≈mtime
+NEW	evidence/staged_cred_gate_055142_ps.txt	100 B	birth=09-24 05:51:53 mtime=09-24 05:51:53	birth≈mtime
+NEW	evidence/staged_cred_gate_055523.txt	515 B	birth=09-24 05:55:36 mtime=09-24 05:55:36	birth≈mtime
+NEW	evidence/staged_cred_gate_055523_pos.txt	736 B	birth=09-24 05:55:58 mtime=09-24 05:55:58	birth≈mtime
+NEW	evidence/staged_cred_gate_055523_ps.txt	102 B	birth=09-24 05:55:36 mtime=09-24 05:55:36	birth≈mtime
+NEW	evidence/staged_list_055043.txt	5154 B	birth=09-24 05:50:44 mtime=09-24 05:50:44	birth≈mtime
+NEW	scripts/chk_r53.ps1	1213 B	birth=09-24 08:45:20 mtime=09-24 08:45:20	birth≈mtime
+NEW	scripts/derive_r53.py	5184 B	birth=09-24 09:00:02 mtime=09-24 09:00:02	birth≈mtime
+NEW	scripts/land_r53_evidence.py	3675 B	birth=09-24 08:45:20 mtime=09-24 08:45:20	birth≈mtime
+NEW	scripts/r53_cutoff_delta.py	1780 B	birth=09-24 08:45:20 mtime=09-24 08:45:20	birth≈mtime
+NEW	scripts/r53_listdiff.py	3454 B	birth=09-24 08:45:20 mtime=09-24 08:45:20	birth≈mtime
+NEW	scripts/r53_roundtrip.py	3198 B	birth=09-24 08:45:20 mtime=09-24 08:45:20	birth≈mtime
+NEW	scripts/r53_upload.ps1	5527 B	birth=09-24 08:45:20 mtime=09-24 08:45:20	birth≈mtime
+NEW	scripts/sync_r53.py	4203 B	birth=09-24 08:45:20 mtime=09-24 08:45:20	birth≈mtime
+
+--- GONE（上一代有、本代清单没有，逐名）---
+
+--- 在册件被改写的（两代都在、但盘上 md5 与上一代清单那一行不等）---
+REWRITTEN=2
+README.md	md5_prev=d1dd65cc md5_now=359d0843	mtime=09-24 05:49:21
+evidence/ps1_bom_scan.txt	md5_prev=b2dd77d2 md5_now=45f9dd99	mtime=09-24 08:51:20

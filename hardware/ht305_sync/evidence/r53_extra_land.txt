@@ -1,0 +1,21 @@
+CHECKED_AT=2026-09-24 09:00:18
+FILES=1 BYTES=549
+r53_roundtrip.txt	549	md5:8cd155e2
+NOTE=r53_land_log.txt is the 10+1 batch carrier; this file is the tail artifact landed after that batch
+FETCH=r53_remote_provision_ap.c bytes=10199 md5=0419bf1628f399f399ca41daf8ed3494 (留在 %TEMP%，未进仓库)
+BYTE_EQUAL_TO_WORKTREE=True (本脚本当场重算，非抄尾件)
+BYTE_TWINS_IN_REPO=30 SOURCE=hardware/zizhao-esp32s3/main/provision_ap.c BACKUP_COPIES=29 OUTSIDE_BACKUPS=1
+FETCH_NAME_LEAKED_INTO_REPO=0
+EXTRA_LAND_SCRIPT=scripts/extra_land_r53.py (本体入档)
+r53_cutoff_delta.txt	181	hits=0	md5:17b344cf
+r53_land_log.txt	592	hits=0	md5:118eea0a
+r53_listdiff.txt	785	hits=0	md5:613b13e5
+r53_local.txt	594	hits=0	md5:bdc81adf
+r53_local_names.txt	21479	hits=0	md5:dd60c383
+r53_parse_check.txt	116	hits=0	md5:0cb9109d
+r53_probe.txt	2176	hits=0	md5:eb3d2420
+r53_remote_names.txt	21009	hits=0	md5:426dd79e
+r53_roundtrip.txt	549	hits=0	md5:8cd155e2
+r53_run_log.txt	2300	hits=0	md5:c9ede5c6
+r53_scp_err.txt	679	hits=0	md5:bf6a1749
+r53_verify.txt	22529	hits=0	md5:9dc58d2b

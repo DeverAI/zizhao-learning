@@ -719,7 +719,10 @@ static const char *bus_verdict(const bus_stats_t *st)
 /* AXP2101 的 PWR_ON 状态脚：官方 08 demo 里叫 PWR_OUT（pcf85063_bsp.h: PWR_OUT_PIN = 1，
  * 配成输入 + 内部上拉）。它是"系统是否已开机"的硬件判据，不需要 I2C 就能读，
  * 因此能在"没有万用表/示波器"的条件下把责任分清。和总线一样要两路对读：
- *   pu=0            → 被外部强拉到低 = AXP 系统轨没开（没按电源键）→ 0 ACK 是必然，固件改不动它
+ *   pu=0            → 被外部强拉到低 = AXP 系统轨没开（没按电源键）→ 0 ACK 是必然；
+ *                     R53 改口：这一档**不再写"固件改不动它"**——官方 `esp_gpio_Init` 那一档
+ *                     （输入+上拉）从 boot 起就一直在按住这根脚，若那样还被外部拉低，
+ *                     只剩"脚号/极性与官方不同"或线断两种可能，而那两条都不是"改固件无用"能盖的
  *   pu=1 且 pd=1    → 外部把它驱动为高 = 系统轨已开，此时仍 0 ACK 才指向我方 I2C 通路
  *   pu=1 且 pd=0    → 电平只是内部电阻决定的悬空值，说明 AXP 根本没驱动这个脚，不能判"已开机"
  * 这条判据和图纸口径互相矛盾，别当铁证用：图纸说 VCC3V3 = PMIC 的 DCDC1 输出，而 MCU 现在
@@ -728,6 +731,34 @@ static const char *bus_verdict(const bus_stats_t *st)
  * 所以这里仍只把 pu=0 当"确定没开机"，其余一律不定案、让上层继续放行真实判活。
  * （GPIO1 在 S3 上是 XTAL_32K_P；本工程 RTC 用内部 RC，未启用外部 32k 晶振，所以可安全当 GPIO 读。） */
 #define AXP_PWR_OUT_PIN 1
+
+/* 这根脚的**唯一允许的稳定态**：输入 + 内部上拉，也就是官方 `pcf85063_bsp.c:38-47
+ * esp_gpio_Init()` 那一档（本轮现读官方原件：`mode=GPIO_MODE_INPUT`、`pull_up_en=ENABLE`、
+ * `pull_down_en=DISABLE`，掩码是 `RTC_INT_PIN(45) | PWR_OUT_PIN(1)`）。
+ * R53 之前本文件收尾用 `gpio_reset_pin`，那一档是 `GPIO_MODE_DISABLE` + 上拉 + **输入缓冲关**
+ * （`esp-idf/components/driver/gpio/gpio.c:434-447`，本轮现读），方向与官方不同、也读不到脚；
+ * 而更要紧的是"稳定态"这件事本身：如果 PMIC 的开机自锁要靠 ESP 侧把这根脚保持在高，
+ * 那从 boot 到第一次探测之间（≈21s）它是复位默认的悬空，加上对读中途那 5ms 内部下拉，
+ * 我们等于从来没有"按住"过它。 */
+static esp_err_t axp_pwr_out_hold(void)
+{
+    gpio_config_t in = {
+        .intr_type = GPIO_INTR_DISABLE,
+        .mode = GPIO_MODE_INPUT,
+        .pin_bit_mask = 1ULL << AXP_PWR_OUT_PIN,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .pull_up_en = GPIO_PULLUP_ENABLE,
+    };
+    return gpio_config(&in);
+}
+
+bool axp_pwr_hold_begin(void)
+{
+    const esp_err_t e = axp_pwr_out_hold();
+    ESP_LOGI(TAG, "PWR_OUT(GPIO%d) hold = input+pull-up (官方 esp_gpio_Init 同档) err=%s level=%d",
+             AXP_PWR_OUT_PIN, esp_err_to_name(e), gpio_get_level(AXP_PWR_OUT_PIN));
+    return e == ESP_OK;
+}
 
 static void axp_read_pwr_out(int *pu, int *pd)
 {
@@ -738,16 +769,65 @@ static void axp_read_pwr_out(int *pu, int *pd)
     };
     in.pull_up_en = GPIO_PULLUP_ENABLE;      /* 与官方 demo 一致的读法 */
     in.pull_down_en = GPIO_PULLDOWN_DISABLE;
-    if (gpio_config(&in) != ESP_OK) { *pu = -1; *pd = -1; return; }
+    if (gpio_config(&in) != ESP_OK) { *pu = -1; *pd = -1; axp_pwr_out_hold(); return; }
     vTaskDelay(pdMS_TO_TICKS(5));
     *pu = gpio_get_level(AXP_PWR_OUT_PIN);
 
     in.pull_up_en = GPIO_PULLUP_DISABLE;     /* 换成只开下拉：浮空脚会被拉低，真被外电路拉高的脚不会 */
     in.pull_down_en = GPIO_PULLDOWN_ENABLE;
-    if (gpio_config(&in) != ESP_OK) { *pd = -1; gpio_reset_pin(AXP_PWR_OUT_PIN); return; }
+    if (gpio_config(&in) != ESP_OK) { *pd = -1; axp_pwr_out_hold(); return; }
     vTaskDelay(pdMS_TO_TICKS(5));
     *pd = gpio_get_level(AXP_PWR_OUT_PIN);
-    gpio_reset_pin(AXP_PWR_OUT_PIN);
+    axp_pwr_out_hold();                      /* R53：收尾回到"按住"那一档，不停在 reset_pin */
+}
+
+/* R53 一次性"软件开机键"（hold-on 探针）。只在两件事同时成立时做：
+ *   ① 对读实测到这根脚**悬空**（pu=1 且 pd=0）——这说明外部没有任何东西在推挽驱动它，
+ *      我们输出拉高不会和谁对顶；被外部驱动为高（pd=1）或被钳低（pu=0）都不做。
+ *   ② 本上电周期还没做过。
+ * 官方那一档只有 ≈45K 内部上拉（从 boot 起就一直在按住，见 `axp_pwr_hold_begin`），
+ * 这里给它下一档更强的：推挽直接输出高。序列：拉高 → 20ms 稳压 → 读 0x34 chip id
+ * （最多 3 次，每次失败隔 20ms）→ 扫 5 个已知邻居 → 收尾恢复输入+上拉。
+ * 名额只在**真的动过脚**之后才烧（R42 的 `s_pp_done` 教训）：`gpio_config` 失败时把名额放回 false，
+ * 否则"没碰线的一轮"会把这一维永久跳过，而日志还会写着"已经试过"。
+ * 调用点必须在 I2C 驱动还装着的时候（本函数被 `axp_enable_panel_rail` 在 `!acked` 分支里调用）。 */
+static bool s_latch_done;
+
+static bool axp_pwr_latch_once(void)
+{
+    if (s_latch_done) return false;
+    gpio_config_t out = {
+        .intr_type = GPIO_INTR_DISABLE,
+        .mode = GPIO_MODE_OUTPUT,
+        .pin_bit_mask = 1ULL << AXP_PWR_OUT_PIN,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+    };
+    if (gpio_config(&out) != ESP_OK) {
+        axp_pwr_out_hold();
+        ESP_LOGE(TAG, "PWR_OUT hold-on 探针：gpio_config(OUTPUT) 失败 ⇒ 本轮没碰这根脚，名额不烧");
+        return false;
+    }
+    s_latch_done = true;
+    gpio_set_level(AXP_PWR_OUT_PIN, 1);
+    vTaskDelay(pdMS_TO_TICKS(20));
+    bool acked = false;
+    uint8_t id = 0;
+    esp_err_t e = ESP_FAIL;
+    for (int i = 0; i < 3 && !acked; i++) {
+        e = axp_read_reg(AXP_REG_CHIP_ID, &id);
+        acked = (e == ESP_OK);
+        if (!acked) vTaskDelay(pdMS_TO_TICKS(20));
+    }
+    bus_stats_t st = {0, 0, 0, 0, 0};
+    char ack[56] = {0};
+    axp_scan_known(&st, ack, sizeof(ack));
+    axp_pwr_out_hold();
+    ESP_LOGW(TAG, "PWR_OUT hold-on probe (one-shot, OUTPUT high; 45K pull-up 档已在跑): 0x34 %s err=%s id=0x%02X | known ACK=%d NACK=%d TMO=%d other=%d [%s] → %s | 收尾=输入+上拉",
+             acked ? "应答了" : "仍不应答", esp_err_to_name(e), id,
+             st.acks, st.nacks, st.timeouts, st.other,
+             ack[0] ? ack : "none", bus_verdict(&st));
+    return acked;
 }
 
 bool axp_enable_panel_rail(void)
@@ -824,7 +904,7 @@ bool axp_enable_panel_rail(void)
         s_sys_off = (pwr_pu == 0);
         const char *pwr_s =
             pwr_pu < 0 || pwr_pd < 0 ? "PWR_OUT 配置失败，读数无效" :
-            pwr_pu == 0  ? "PWR_OUT 被外部拉低 = PMIC 系统轨没开：按住电源键 2 秒后松开，没反应再按满 4 秒（硬件动作，改固件无用）" :
+            pwr_pu == 0  ? "PWR_OUT 被外部拉低 = PMIC 系统轨没开：按住电源键 2 秒后松开，没反应再按满 4 秒（**我方固件另有 hold-on 探针**：见下面 PWR_OUT hold-on probe 那一行；只有 PMIC 的 PWR_OUT 脚号/极性与官方 demo 不同或这根脚断了，才只剩硬件动作）" :
             pwr_pd == 1  ? "PWR_OUT 被外部驱动为高 = 系统轨已开，0 ACK 指向我方 I2C 通路"
                          : "PWR_OUT 悬空（PMIC 没驱动这个脚，定不了案）";
         ESP_LOGW(TAG, "AXP@0x34 no reply (probe#%u err=%s id=0x%02X) | known 0x18/0x51/0x70/0x6A/0x6B: ACK=%d NACK=%d TMO=%d other=%d [%s] → %s | PWR_OUT pu=%d pd=%d → %s",
@@ -832,6 +912,14 @@ bool axp_enable_panel_rail(void)
                  known.acks, known.nacks, known.timeouts, known.other,
                  known_ack[0] ? known_ack : "none", bus_verdict(&known),
                  pwr_pu, pwr_pd, pwr_s);
+        /* R53：悬空那一档正是"没人按住它"的形状 ⇒ 立刻试一次软件开机键（一个上电周期一次）。
+         * 顺序上必须在 `!acked` 分支里、I2C 驱动还装着的时候做，否则又要重 install 一次端口。 */
+        if (pwr_pu == 1 && pwr_pd == 0 && axp_pwr_latch_once()) {
+            acked = true;
+            s_axp_off = false;
+            s_sys_off = false;
+            ESP_LOGE(TAG, "hold-on 之后 0x34 开始应答 ⇒ 缺的是'ESP 把 PWR_OUT 按住'这一步（软件开机键），不是屏也不是我方 I2C 通路");
+        }
         if (known.acks > 0)
             ESP_LOGE(TAG, "I2C path is ALIVE (%d device(s) ACK on the same bus) → 0x34 silence is the PMIC side, not our SDA/SCL/driver",
                      known.acks);

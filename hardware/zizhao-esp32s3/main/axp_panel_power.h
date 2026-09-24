@@ -25,6 +25,12 @@ bool axp_enable_panel_rail(void);
  * 才升级为主动判活，防止向可能 0V 的面板倒灌（见 epd_driver.c 的 epd_busy_passive_low）。 */
 bool axp_panel_off(void);
 
+/* R53：把 PWR_OUT（GPIO1）在 app_main 最早处按住成"输入 + 内部上拉"，等价于官方
+ * `esp_gpio_Init()`。官方那次调用排在 `axp_init()` 之前 ⇒ 出厂固件在跟 PMIC 说任何话之前，
+ * 先由 ESP 侧给这根开机自锁脚一个确定的高；我们此前从 boot 到第一次探测之间让它是复位默认
+ * （悬空），且探测的读法中途还有一档 5ms 内部下拉。返回值：焊盘 `gpio_config` 是否成功。 */
+bool axp_pwr_hold_begin(void);
+
 /* 是否有"系统轨没开"的铁证（PWR_OUT 被外部拉低，见 axp_panel_power.c 的读法说明）。
  * 与 axp_panel_off() 的区别：后者可能是我方 I2C 通路的问题（悬空/读不回），
  * 只表示"没确认"；本函数为 true 才是"确定没开机"。上层据此决定是否连面板

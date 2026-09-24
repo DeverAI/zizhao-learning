@@ -1,0 +1,93 @@
+SECRET_LEN_BYTES 10
+TREE_FILES_SCANNED 2082
+TREE_HITS 74
+  TREE_PLAINTEXT backups/r16b_20260919_155532/FreqErr.md
+  TREE_PLAINTEXT backups/r16b_20260919_155532/main/provision_ap.c
+  TREE_PLAINTEXT backups/r20_epd_20260920_125045/20260919_墨水屏点屏排查记录.md
+  TREE_PLAINTEXT backups/r20_epd_20260920_125045/FreqErr.md
+  TREE_PLAINTEXT backups/r20_epd_20260920_125045/main/provision_ap.c
+  TREE_PLAINTEXT backups/r21_epd_20260920_135332/20260919_墨水屏点屏排查记录.md
+  TREE_PLAINTEXT backups/r21_epd_20260920_135332/FreqErr.md
+  TREE_PLAINTEXT backups/r21_epd_20260920_135332/main/provision_ap.c
+  TREE_PLAINTEXT backups/r22_epd_20260920_204830/main/provision_ap.c
+  TREE_PLAINTEXT backups/r23_20260920_215341/hardware/zizhao-esp32s3/main/provision_ap.c
+  TREE_PLAINTEXT backups/r24_20260920_225948/main/provision_ap.c
+  TREE_PLAINTEXT backups/r24_20260920_225948/zizhao_esp32s3_r24_0x111d40.bin
+  TREE_PLAINTEXT backups/r25_20260920_233320/main/provision_ap.c
+  TREE_PLAINTEXT backups/r25_20260920_233320/zizhao_esp32s3_r25_0x111fd0.bin
+  TREE_PLAINTEXT backups/r26_20260921_001714/main/provision_ap.c
+  TREE_PLAINTEXT backups/r26_20260921_001714/zizhao_esp32s3.bin
+  TREE_PLAINTEXT backups/r26_20260921_001714/zizhao_esp32s3_stale_onebuild_behind.bin
+  TREE_PLAINTEXT backups/r27_20260921_004318/main/provision_ap.c
+  TREE_PLAINTEXT backups/r27_20260921_004318/zizhao_esp32s3.bin
+  TREE_PLAINTEXT backups/r27b_20260921_005018/main/provision_ap.c
+  TREE_PLAINTEXT backups/r27b_20260921_005018/zizhao_esp32s3.bin
+  TREE_PLAINTEXT backups/r28_20260921_010649/main/provision_ap.c
+  TREE_PLAINTEXT backups/r28_20260921_010649/zizhao_esp32s3.bin
+  TREE_PLAINTEXT backups/r29_20260921_020430/main/provision_ap.c
+  TREE_PLAINTEXT backups/r29_20260921_020430/zizhao_esp32s3.bin
+  TREE_PLAINTEXT backups/r29b_20260921_020818/main/provision_ap.c
+  TREE_PLAINTEXT backups/r29b_20260921_020818/zizhao_esp32s3.bin
+  TREE_PLAINTEXT backups/r30_20260921_025024/provision_ap.c
+  TREE_PLAINTEXT backups/r30_20260921_025024/zizhao_esp32s3.bin
+  TREE_PLAINTEXT backups/r31_20260921_033823/main/provision_ap.c
+  TREE_PLAINTEXT backups/r31_20260921_033823/zizhao_esp32s3.bin
+  TREE_PLAINTEXT backups/r31b_20260921_040018/main/provision_ap.c
+  TREE_PLAINTEXT backups/r31b_20260921_040018/zizhao_esp32s3.bin
+  TREE_PLAINTEXT backups/r32_20260921_043512/main/provision_ap.c
+  TREE_PLAINTEXT backups/r32_20260921_043512/zizhao_esp32s3.bin
+  TREE_PLAINTEXT backups/r32final2_20260921_055048/main/provision_ap.c
+  TREE_PLAINTEXT backups/r32final2_20260921_055048/zizhao_esp32s3.bin
+  TREE_PLAINTEXT backups/r32final3_20260921_060500/main/provision_ap.c
+  TREE_PLAINTEXT backups/r32final3_20260921_060500/zizhao_esp32s3.bin
+  TREE_PLAINTEXT backups/r32final_20260921_053422/main/provision_ap.c
+  TREE_PLAINTEXT backups/r32final_20260921_053422/zizhao_esp32s3.bin
+  TREE_PLAINTEXT backups/r33_20260921_211609/main/provision_ap.c
+  TREE_PLAINTEXT backups/r33_20260921_211609/zizhao_esp32s3.bin
+  TREE_PLAINTEXT backups/r34_20260921_224323/zizhao_esp32s3.bin
+  TREE_PLAINTEXT backups/r35_20260921_225254/zizhao_esp32s3.bin
+  TREE_PLAINTEXT backups/r36_20260921_225756/zizhao_esp32s3.bin
+  TREE_PLAINTEXT backups/r38_20260922_003505/zizhao_esp32s3.bin
+  TREE_PLAINTEXT backups/r38b_20260922_003846/zizhao_esp32s3.bin
+  TREE_PLAINTEXT backups/r38c_20260922_005729/main/provision_ap.c
+  TREE_PLAINTEXT backups/r38c_20260922_005729/zizhao_esp32s3.bin
+  TREE_PLAINTEXT backups/r39_20260922_032453/main/provision_ap.c
+  TREE_PLAINTEXT backups/r39_20260922_032453/zizhao_esp32s3.bin
+  TREE_PLAINTEXT backups/r40_20260922_052906/main/provision_ap.c
+  TREE_PLAINTEXT backups/r40_20260922_052906/zizhao_esp32s3.bin
+  TREE_PLAINTEXT backups/r41_20260922_091459/docs/20260919_墨水屏点屏排查记录.md
+  TREE_PLAINTEXT backups/r41_20260922_091459/docs/FreqErr.md
+  TREE_PLAINTEXT backups/r42_20260922_114342/docs/20260919_墨水屏点屏排查记录.md
+  TREE_PLAINTEXT backups/r42_20260922_114342/docs/FreqErr.md
+  TREE_PLAINTEXT backups/r42_20260922_114342/zizhao_esp32s3.bin
+  TREE_PLAINTEXT backups/r43_20260922_131029/main/provision_ap.c
+  TREE_PLAINTEXT backups/r43_20260922_131029/zizhao_esp32s3.bin
+  TREE_PLAINTEXT backups/r43_20260922_131029/zizhao_esp32s3.elf
+  TREE_PLAINTEXT backups/r44_sourceonly_20260923_084628/main/provision_ap.c
+  TREE_PLAINTEXT dev_log/20260919.md
+  TREE_PLAINTEXT hardware/20260921_R34位碰首烧COM14.log
+  TREE_PLAINTEXT hardware/20260921_R37位碰角色对调COM14_复位起抓40s.log
+  TREE_PLAINTEXT hardware/20260921_R37位碰角色对调COM14_清洗版.log
+  TREE_PLAINTEXT hardware/20260923_重连COM14复位起抓45s.log
+  TREE_PLAINTEXT hardware/zizhao-esp32s3/backups/r37_20260921_230355/zizhao_esp32s3.bin
+  TREE_PLAINTEXT hardware/zizhao-esp32s3/backups/r40_20260922_052906/zizhao_esp32s3.bin
+  TREE_PLAINTEXT hardware/zizhao-esp32s3/backups/r42_20260922_114342/zizhao_esp32s3.bin
+  TREE_PLAINTEXT hardware/zizhao-esp32s3/backups/r43_20260922_131029/main/provision_ap.c
+  TREE_PLAINTEXT hardware/zizhao-esp32s3/backups/r43_20260922_131029/zizhao_esp32s3.bin
+  TREE_PLAINTEXT hardware/zizhao-esp32s3/main/provision_ap.c
+REV HEAD BLOBS 451 / HITS 0
+REV origin/main BLOBS 106 / HITS 0
+BATCH_CROSS_CHECK OK on 2 blobs (含 CRLF 工作树那只的 blob 本体)
+UNPUSHED_COMMITS 16
+UNPUSHED_TREE_DIRTY_COMMITS 6
+UNPUSHED_PATCH_DIRTY_COMMITS 2
+  DIRTY 592bb43 patch 1
+  DIRTY 5905fcd tree 2
+  DIRTY f9cf62b tree 2
+  DIRTY 3c37af3 tree 2
+  DIRTY 489baad tree 2
+  DIRTY 7f3ed56 tree 2
+  DIRTY 73cbbfc tree 2
+  DIRTY 73cbbfc patch 1
+HEAD_TREE_HITS 0 ORIGIN_HITS 0
+VERDICT PUSH_STILL_LEAKS
