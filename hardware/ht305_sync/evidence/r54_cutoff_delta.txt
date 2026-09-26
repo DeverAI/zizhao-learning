@@ -1,0 +1,6 @@
+RAN_AT   = 2026-09-24 10:49:36
+staged   = 509
+identical(内容逐字节等,  sha256) = 508
+changed_since_cutoff = 1 ['hardware/ht305_sync/scripts/r54_listdiff.py']
+deleted_since_cutoff = 0 []
+new_since_cutoff     = 0 []

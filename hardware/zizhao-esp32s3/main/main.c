@@ -21,6 +21,7 @@
 
 #include "nvs_creds.h"
 #include "net_http.h"
+#include "board_profile.h"      /* BOARD_HAS_PANEL_PMIC：1.54 板上没有 PMIC，下面那次自锁要跳过 */
 #include "power_policy.h"
 #include "volume_guard.h"
 #include "offline_store.h"
@@ -175,6 +176,39 @@ static void graceful_shutdown(void)
     esp_deep_sleep_start();
 }
 
+static void refresh_clock_page(void);   /* 定义在下面，ui_browse_next 要先用 */
+
+static int s_browse_stop = 0;   /* 页面环上的位置，见 ui_browse_next */
+
+/* 按键浏览：把屏上能看的页排成一条环，一只键往前走。
+ * 环 = 消息第 1..N 页 → 时钟页 → 状态页 → 回消息第 1 页。
+ * 为什么放在 main 而不是 eink_display：时钟页/状态页"该说什么"是 app 的知识
+ * （eink_show_clock 只收字符串），显示模块只负责一页怎么排版。
+ * 为什么必须有一条环：1.54 板上可当按键用的只有 BOOT=0（18 号电源脚故意不配，
+ * 见 buttons.c 文件头），做不了"上/下"两向，只能往前走。
+ * 消息换了页数时不必重置：total 每次都按当前页数重算，取模后仍落在环内。 */
+void ui_browse_next(void)
+{
+    int pages = eink_msg_pages();
+    int total = pages + 2;   /* + 时钟页 + 状态页 */
+    int next = (s_browse_stop + 1) % total;
+    if (pages > 0 && next < pages) {
+        eink_msg_goto_page(next);
+        s_browse_stop = next;
+        ESP_LOGI(TAG, "browse -> MSG %d/%d (环上第 %d/%d 格)", next + 1, pages, next + 1, total);
+        return;
+    }
+    s_browse_stop = next;
+    if (next == pages) {
+        refresh_clock_page();
+        ESP_LOGI(TAG, "browse -> CLOCK (环上第 %d/%d 格)", next + 1, total);
+    } else {
+        eink_show_status(s_audio_ready ? "音频就绪" : "仅文字",
+                         s_playing ? "播放中" : "已暂停", "BOOT 键=下一页");
+        ESP_LOGI(TAG, "browse -> STATUS (环上第 %d/%d 格)", next + 1, total);
+    }
+}
+
 static void handle_button(btn_event_t ev)
 {
     if (ev == BTN_NONE) return;
@@ -186,14 +220,17 @@ static void handle_button(btn_event_t ev)
         break;
     case BTN_NEXT_SEG:
         s_seg++;
-        eink_show_status("下一段", "", "");
+        ui_browse_next();
         break;
     case BTN_PREV_SEG:
         if (s_seg > 0) s_seg--;
-        eink_show_status("上一段", "", "");
+        ui_browse_next();
         break;
     case BTN_REFRESH_MATERIAL:
-        eink_show_status("换素材…", "", "");
+        /* R61：这一格以前是 eink_show_status("换素材…")—— 按一次键把当前页换成一行
+         * 提示，用户看到的却是"屏被按键弄回另一页且再也翻不回去"。现在 BOOT 键的含义
+         * 就是翻页浏览；换素材那个 POST 仍未实装（下面这条 TODO 保留）。 */
+        ui_browse_next();
         /* TODO: POST /api/material/refresh */
         break;
     case BTN_VOLUME_UP:
@@ -211,6 +248,55 @@ static void handle_button(btn_event_t ev)
         break;
     }
 }
+
+/* ---------------- R61 翻页链路自检（诊断用，出厂置 0） ----------------
+ * 为什么要这只自检：翻页这条链分三段，取证条件各不相同。
+ *   ① 换行/分页算式：已有盘上读数（"msg paging" 的 map），且与主机复算三次逐字同值；
+ *   ② render_msg_page 的**多页**那条腿：配网页现在恰好 pages=1，"页>0 怎么渲染"在真机上
+ *      从未跑过——一个从没执行过的分支不算被验证；
+ *   ③ buttons_poll → handle_button → ui_browse_next 这条环：历次抓日志 "browse ->" 命中 0，
+ *      因为抓日志时没有人手按 BOOT（屏在板上，人在别处）。
+ * ②③ 在没有第二个人的板前取不到证，所以这里从 buttons_inject() 灌键：它接在
+ * buttons_poll() 的**入口**，注入之后走的与实物按键是同一条下游链，只差
+ * pressed()/debounce() 那两级 GPIO 读数——那两级只能由用户真按下 BOOT 补上，
+ * 自检**不得**被当成"按键已验证"。
+ * 文本用纯 ASCII：CJK32 是子集字库（193 只），连"分页"两个字本身都不在里面，
+ * 缺字会画成 33px 空框——自检要看的是几何，不该被字模覆盖度干扰。
+ * 调用点必须在 buttons_init() 之后、配网闸门之前：那时 for(;;) 主循环还没起，
+ * s_inject / s_browse_stop 没有第二个写者。跑完屏上会停在自检页，随后的真实消息
+ * 覆盖它（墨水屏双稳态，最后写入者留下）；出厂宏 0 时这段一个字节都不进镜像。 */
+#define EINK_PAGE_SELFTEST 0
+
+#if EINK_PAGE_SELFTEST
+static void page_chain_selftest(void)
+{
+    /* 141B → 主机复算（y0=6、页底 184、行距 44）：10 视觉行 / 3 页，每页 4 行、末页 2 行。
+     * 这两个数由 hardware/r61_wrap_sim.py 现算，改文本必须同步重算，别照抄。 */
+    static const char T[] =
+        "PAGE SPLIT CHECK 0123456789 PAGE SPLIT CHECK 0123456789 "
+        "PAGE SPLIT CHECK 0123456789 PAGE SPLIT CHECK 0123456789 "
+        "PAGE SPLIT CHECK 0123456789 P";
+    eink_show_message(T);
+    int pages = eink_msg_pages();
+    ESP_LOGI(TAG, "paging selftest: bytes=%d pages=%d (期望 pages>=2 才算跑到多页渲染)",
+             (int)sizeof(T) - 1, pages);
+    if (pages < 2) {
+        ESP_LOGE(TAG, "paging selftest ABORT: pages=%d <2，多页那条腿没被触及", pages);
+        return;
+    }
+    /* 一整圈 = MSG 第 1..pages 页 + 时钟页 + 状态页，走完回到 MSG 第 1 页。 */
+    int steps = pages + 2;
+    for (int i = 0; i < steps; i++) {
+        buttons_inject(BTN_REFRESH_MATERIAL);
+        handle_button(buttons_poll());
+        ESP_LOGI(TAG, "paging selftest step %d/%d: msg_page=%d pages_now=%d",
+                 i + 1, steps, eink_msg_page(), eink_msg_pages());
+    }
+    /* 环闭合的判据：走完一整圈后应当停在 MSG 第 0 页（goto_page(0) 会重刷第 1 页）。 */
+    ESP_LOGI(TAG, "paging selftest VERDICT: %s (末态 msg_page=%d，一圈 %d 步)",
+             eink_msg_page() == 0 ? "RING_CLOSED" : "RING_BROKEN", eink_msg_page(), steps);
+}
+#endif /* EINK_PAGE_SELFTEST */
 
 static void refresh_clock_page(void)
 {
@@ -230,11 +316,16 @@ void app_main(void)
     /* 每轮点屏探测都会 gpio_config 一次 41/42 与 GPIO1，GPIO 驱动把这 6 个焊盘的
      * 完整状态打成 INFO，5s 一轮会把真正的诊断行（axp/epd）冲掉。压到 WARN。 */
     esp_log_level_set("gpio", ESP_LOG_WARN);
+#if BOARD_HAS_PANEL_PMIC
     /* R53：第一件事就把 PMIC 的开机自锁脚按住（输入+内部上拉），等价于官方 08 的
      * `PCF85063_init() → esp_gpio_Init()`，而官方那一步也排在它的 `axp_init()` 之前。
      * 放在 NVS/WiFi/配网闸门之前，是为了让它跟所有分支一起生效：配网门户超时那条路直接进深睡、
-     * 永远不跑点屏代码，那正是这根脚最没人管的一段时间。 */
+     * 永远不跑点屏代码，那正是这根脚最没人管的一段时间。
+     * 【只适用于 3.97】1.54 板上没有 PMIC，也就没有这根自锁脚；R59 实测 0x34 在
+     * 47/48 与 41/42 两条总线上都 probe=ESP_FAIL。那一段"gpio 日志被压到 WARN"的理由
+     * （每轮去碰 41/42 + GPIO1）在本板同样不存在——本板的屏电是 GPIO6，配在驱动里。 */
     axp_pwr_hold_begin();
+#endif
     /* NVS 撑满/版本变更时 IDF 不自动擦，直接 panic 会让屏/闸门全跑不起来=无条件变砖。
      * 先擦 nvs 分区（不碰 ota）重试；仍失败也不 panic，后面 ready_for_sta 为假自然进配网闸门。 */
     esp_err_t nvs_e = nvs_flash_init();
@@ -273,6 +364,12 @@ void app_main(void)
     power_policy_defaults(&s_policy);
     offline_store_init();
     buttons_init();
+
+#if EINK_PAGE_SELFTEST
+    /* 必须排在配网闸门之前：闸门里 provision_ap_wait_done(1800) 一待就是 30 分钟，
+     * 自检若排在它后面，本轮取证永远拿不到。 */
+    page_chain_selftest();
+#endif
 
     /* 现场配网闸门：三种"没有可用 WiFi 凭据"都进门户，绝不能死循环卡在屏前——
      *   ①完全没配过（无 passkey）②只配了 passkey 没配 WiFi/server（半截配置）

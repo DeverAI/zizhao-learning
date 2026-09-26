@@ -1,0 +1,13 @@
+git-listed (dupes)  = 545 / dupes = 0
+selected            = 542 | copy failures = 0 []
+staged files        = 542 | bytes = 5058948
+plaintext in staging= 1 ['hardware/zizhao-esp32s3/main/provision_ap.c']
+any .log/.bin/.elf/.map = []
+any backups/nvs     = False False
+zip entries         = 543 | utf8-flagged = 65
+zip size/md5        = 2055096 aaa21c57a57543864efb60f2264a34b6
+content files/bytes = 542 / 5058948
+LOCAL_AGGREGATE     = 4a81102b6d900e8ad2350abd6efea98bfbec31116cc7819551fe4f82925a2a2e
+CUTOFF_COPY_BEGIN   = 2026-09-24 12:24:56
+CUTOFF_ZIP_MADE     = 2026-09-24 12:25:11
+EVIDENCE_IN_REPO    = r55_local_names.txt（本代起取证直接进仓库，见文件头②）

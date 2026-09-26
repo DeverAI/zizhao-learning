@@ -6,6 +6,7 @@
 #include "esp_vfs_fat.h"
 #include "driver/sdmmc_host.h"
 #include "sdmmc_cmd.h"
+#include "board_profile.h"
 
 static const char *TAG = "offline";
 static bool s_inited = false;
@@ -22,21 +23,37 @@ bool offline_store_init(void)
         .allocation_unit_size = 16 * 1024,
     };
     sdmmc_card_t *card = NULL;
-    /* 本板 Micro SD 是 4 线 SDMMC，不是 SPI。官方 05_SD_Test 引脚：
-     * CLK16 CMD17 D0=15 D1=7 D2=8 D3=18，且例程按 1-bit 模式挂载。
+#if BOARD_EPAPER_1IN54
+    /* 本板（S3_ePaper_1_54）原厂引脚表：SD CLK=39 CMD=41 D0=40，**只有 D0**，
+     * 也就是硬件上就是 1-bit 槽，D1/D2/D3 不给配（保持默认 -1）。
+     * 【未在本板实测】R59 只做了屏与总线的鉴定，没有插卡挂载过；
+     * 而且 41/42 在本板被实测判定**不是一条 I2C 总线**（该总线 112 个地址 0 ACK），
+     * 所以旧那条"41/42 是 AXP2101 的 SDA/SCL、抢它会把屏电弄没"的顾虑在本板不适用。 */
+    sdmmc_host_t host = SDMMC_HOST_DEFAULT();
+    host.flags = SDMMC_HOST_FLAG_1BIT;
+    sdmmc_slot_config_t slot_config = SDMMC_SLOT_CONFIG_DEFAULT();
+    slot_config.clk = BOARD_SD_CLK;   /* 39 */
+    slot_config.cmd = BOARD_SD_CMD;   /* 41 */
+    slot_config.d0  = BOARD_SD_D0;    /* 40 */
+    slot_config.width = 1;
+    slot_config.flags |= SDMMC_SLOT_FLAG_INTERNAL_PULLUP;
+#else
+    /* 3.97 板：Micro SD 是 4 线 SDMMC 槽，官方 05_SD_Test 引脚 CLK16 CMD17 D0=15 D1=7 D2=8 D3=18，
+     * 但例程按 1-bit 模式挂载，这里保持一致。
      * 之前按 SDSPI 用 39/40/41/42 既挂不上（NO_MEM），又把 41/42 抢成 MISO/CS——
      * 而 41/42 是 AXP2101 的 SDA/SCL，墨水屏电轨因此永远开不起来。 */
     sdmmc_host_t host = SDMMC_HOST_DEFAULT();
     host.flags = SDMMC_HOST_FLAG_1BIT;
     sdmmc_slot_config_t slot_config = SDMMC_SLOT_CONFIG_DEFAULT();
-    slot_config.clk = 16;
-    slot_config.cmd = 17;
-    slot_config.d0 = 15;
+    slot_config.clk = BOARD_SD_CLK;   /* 16 */
+    slot_config.cmd = BOARD_SD_CMD;   /* 17 */
+    slot_config.d0  = BOARD_SD_D0;    /* 15 */
     slot_config.d1 = 7;
     slot_config.d2 = 8;
     slot_config.d3 = 18;
     slot_config.width = 1;
     slot_config.flags |= SDMMC_SLOT_FLAG_INTERNAL_PULLUP;
+#endif
     esp_err_t e = esp_vfs_fat_sdmmc_mount(MOUNT, &host, &slot_config, &mount_config, &card);
     if (e != ESP_OK) {
         ESP_LOGW(TAG, "SD mount fail %s — offline text only in NVS/RAM", esp_err_to_name(e));

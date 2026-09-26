@@ -1,0 +1,11 @@
+INDEX_LEN=23785 INDEX_CR=0 INDEX_LF=9 INDEX_MD5=ebba402399458583444cd6e46b196c89
+INDEX_PATH_HITS=1 INDEX_DUP_STOP=0 INDEX_ITEMS=6
+BODY_LEN=154054 BODY_CR=0 BODY_PATH_HITS=1
+REPO_CARRIER_LEN=123 REPO_CARRIER_MD5=021679ba72046b9603bc69e07ea1392f
+CHECK 索引零 CR                                     PASS
+CHECK 索引纯 LF 行数 = 9                              PASS
+CHECK 索引里那句路径逐字命中 1                              PASS
+CHECK 索引无重复句号                                    PASS
+CHECK 正文那句路径逐字命中 1 且零 CR                         PASS
+CHECK 修后 LEN/md5 与 §38.18 ④ 登记逐字一致               PASS
+VERDICT=MEMORY_INDEX_CLEAN

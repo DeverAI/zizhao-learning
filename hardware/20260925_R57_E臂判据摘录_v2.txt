@@ -1,0 +1,21 @@
+R57 E 臂取证器（COM14 回归后首抓）  MODE=ALREADY-COPIED
+本遍现跑于 2026-09-25 13:10:49；载体由脚本自己在同一次运行里落盘，落在 hardware/（ht305_sync 之外）
+COPY 原件 = 临时目录那只（写作 %TEMP%/r57_E臂_新镜像_锂电池在位_复位起抓120s.log，绝对路径含反斜杠 ⇒ 按 §38.18 那一族只引用不整抄）/ 28,756 B / md5 08868a508023b545eb0a49ef3d851fb8 / 原件 mtime 2026-09-25 12:48:09
+COPY 仓库件 = hardware/20260925_R57_E臂新镜像锂电池在位复位起抓120s.log / 28,756 B / md5 08868a508023b545eb0a49ef3d851fb8；两侧逐字相等 = True；本遍执行拷贝动作 = 0 只（1 = 复跑支只核不等写）
+COPY 时刻口径：仓库件 born 2026-09-25 12:53:05 / mtime 2026-09-25 12:53:05 —— 文件名与 mtime 都是拷贝时刻，**不是抓取时刻**；抓取时刻 = 原件 mtime = 2026-09-25 12:48:09（上一句已点名）
+IDENTITY E 臂 boot 行 ELF 指纹 = 19906d9ded1aaf83 == fb32168a 那只 bin 现算 bin[176:184] = 19906d9ded1aaf83 成立 = True；同遍现算 4842a3a0 那只 = 574f6c825049572e（B 臂 boot 指纹与它相等 = True）⇒ 板上现在跑的是 fb32168a…（md5 fb32168a…）
+E 臂读数：28,756 B / 非空 180 行 / ROM banner 1 次 / rst = rst:0x15 (USB_UART_CHIP_RESET),boot:0x8 (SPI_FAST_FLASH_BOOT)
+E 臂计数：uptime 289→115660 ms（窗口 115.371 s）/ probe# 23 次（1~23）/ AXP@0x34 行 23 条，其中应答 0 条 / 每 probe 秒数 = 5.016 s
+E 臂对读：PWR_OUT 组合 [('1', '0')]（只此一种）/ 全部 ACK= 读数 ['0'] / acked 名单 ['none'] / 全总线路扫 [('0', '112')] / panel silent+blanked 0 行 / witness 0 行
+E 臂 hold-on 探针在册 = 1 行；第一行逐字：W (770) axp: PWR_OUT hold-on probe (one-shot, OUTPUT high; 45K pull-up 档已在跑): 0x34 仍不应答 err=ESP_FAIL id=0x00 | known ACK=0 NACK=5 TMO=0 other=0 [none] → 全部 NACK ⇒ 波形发得出去、
+对照臂（同遍现算，不抄上一批的话）：
+  C 新镜像+复位起抓90s（当时只有 USB） = 20260924_R56fb32168a首烧复位起抓90s.log / 25,822 B / md5 54e14b08… / 窗口 89.809 s / probe 18 次 / 0x34 行 18 条（应答 0）/ PWR [('1', '0')] / 每 probe 4.989 s
+  D 新镜像+USB+锂电池+按键（没复位） = 20260924_R56按键窗口150s纯读_新镜像fb32168a.log / 19,809 B / md5 ffc903a7… / 窗口 249.913 s / probe 29 次 / 0x34 行 29 条（应答 0）/ PWR [('1', '0')] / 每 probe 8.618 s
+  B 旧镜像+复位起抓45s（对照） = 20260924_R56外部供电复位起抓45s_板上4842a3a0.log / 20,299 B / md5 7cb3e817… / 窗口 -392.235 s / probe 10 次 / 0x34 行 10 条（应答 0）/ PWR [('1', '0')] / 每 probe -39.224 s
+CMP 同形判据（E vs C 逐格：PWR / ACK 读数 / acked 名单 / 全总线扫）= True；E 与 C 唯一实测差 = 供电档位（C 抓时锂电池未接、E 抓时 USB 与锂电池都在位）与窗口长度
+VERDICT 判读：E 臂复现"全 NACK"——锂电池在位 + 复位起抓这一格加进来之后，0x34 应答计数仍然是 0 条；按 §14.3 的口径**全 NACK 不定案** ⇒ 本批只把"接不接电池都一样"登记成事实，不结案、不改判 PMIC 本体
+DENOM 屏侧分母换代（现算）：hardware/ 单层 *.log = 12 只 / 其中"官方例程"对照 2 只不进分母 / 我方 = 10 只（上一格在册 9 只，本批 +1 = E 臂）
+PLAIN 明文半径（口令只从 hardware/zizhao-esp32s3/main/provision_ap.c 的宏体读出做计数，不打印、不进本载体正文）：20260924_R56fb32168a首烧复位起抓90s.log=2 处 / 20260924_R56外部供电复位起抓45s_板上4842a3a0.log=2 处 / 20260924_R56按键窗口150s纯读_新镜像fb32168a.log=0 处 / 20260925_R57_E臂新镜像锂电池在位复位起抓120s.log=2 处 ⇒ E 臂入库件**自带明文 2 处**，与 R56 的 B/C 两臂同案 ⇒ 每轮提交逐只点名 DROP、绝不 stage、绝不 push
+FIELD 现跑：串口枚举 = COM14, COM3, COM4, COM5, COM6 ⇒ COM14 在位 = True（R53~R56 那些"COM14 缺席"的在册句量的是它们各自那一遍，本遍不推翻也不复用）/ git rev-list origin/main..HEAD = 17（未 push）/ git status --porcelain = 452 行（14 只 M + 438 只 ??）
+SEAL 写盘前 hardware/ht305_sync/ = 388 只 / 1,427,227 B / 聚合 md5 efda29538483bbc73e91941936512a2f（本批未新建清单代次，gen 24 仍是末版）
+NOTDONE 本批没做（点名）：没换电池 / 没万用表 / 没第二块板（§38.23 那两条物理分叉仍在用户侧）/ 没改 main/ 源码、没重建固件（板上那只就是 fb32168a） / 没往 hardware/ht305_sync/ 落一字节 / 没新建备份根 / 没 push、没 amend / 零删除（%TEMP% 原件不搬走） / 屏亮肉眼确认仍 0 次 ⇒ 不播提示音 / docs 第十遍、backups README 第十次读数、todo 第十七遍、提交轮 #9、第 14 代同步都在本件之后

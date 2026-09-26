@@ -1,5 +1,11 @@
 # 微雪 ESP32-S3-ePaper-3.97 硬件落地说明
 
+> 【2026-09-25 R59 改判 ⇒ **本文件不再描述在机的那块板**】R58 烧原厂整片固件读出 `Project name: 02_ePaper_1_54_Test`、
+> R59 鉴定确认在机板是 **Waveshare S3_ePaper_1_54**（200×200，屏电 GPIO6 低有效，**整板没有 AXP2101**）。
+> 当前在机板的档案 = `BOARD_S3_ePaper_1_54.md`；代码里的单一真值 = `zizhao-esp32s3/main/board_profile.h`（`BOARD_EPAPER_1IN54 1`）。
+> 本文件保留的理由：R24~R57 几十轮判据（含那条"屏电必须经 PMIC ALDO3"与"GPIO1 是电源自锁脚"）都是**按这里的前提**做的，
+> 引用它们时必须带上"对象是 3.97、不是本板"这一句；删掉本文件等于把那几十轮的适用范围抹掉。
+
 > 确认选型（2026-09-13）：**Waveshare ESP32-S3-ePaper-3.97**（黑白双色墨水屏）  
 > 固件工程：`hardware/zizhao-esp32s3/`（ESP-IDF 5.x）
 

@@ -1,0 +1,737 @@
+R59 板型鉴定取证（本件由 hardware/r59_evidence.py 生成）
+输入日志在 C:\esp\，全部含明文口令 ⇒ 原始日志永不入库；本件运行时现读口令并逐处替换
+脱敏口径：只替换口令的值本身，其余行按消息形状整类认领，不人工挑行
+
+== r59c_20260925_171315_run.log ｜ 360 组 MAP 矩阵（跑完一整轮） ｜ 原文件 73112 B / 1019 行 ==
+--- PDIAG2-BEGIN（本遍版本自称（gen= 后面那串））认领 1 条 ---
+PDIAG2-BEGIN board-census gen=R59
+--- MAP（矩阵行（en/clk/cs/dc/mosi/rst + tr + 首变毫秒））认领 360 条 ---
+MAP en=1 clk=9 cs=10 dc=11 mosi=12 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=12 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=12 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=12 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=12 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=12 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=13 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=13 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=13 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=13 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=13 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=13 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=14 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=14 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=14 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=14 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=14 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=14 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=16 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=16 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=16 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=16 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=16 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=16 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=17 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=17 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=17 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=17 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=17 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=10 dc=11 mosi=17 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=12 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=12 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=12 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=12 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=12 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=12 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=13 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=13 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=13 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=13 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=13 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=13 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=14 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=14 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=14 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=14 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=14 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=14 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=16 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=16 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=16 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=16 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=16 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=16 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=17 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=17 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=17 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=17 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=17 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=9 cs=11 dc=10 mosi=17 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=9 dc=11 mosi=12 rst=-1 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=12 rst=42 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=12 rst=6 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=12 rst=17 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=12 rst=46 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=12 rst=3 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=13 rst=-1 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=13 rst=42 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=13 rst=6 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=13 rst=17 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=13 rst=46 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=13 rst=3 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=14 rst=-1 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=14 rst=42 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=14 rst=6 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=14 rst=17 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=14 rst=46 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=14 rst=3 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=16 rst=-1 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=16 rst=42 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=16 rst=6 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=16 rst=17 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=16 rst=46 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=16 rst=3 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=17 rst=-1 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=17 rst=42 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=17 rst=6 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=17 rst=17 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=17 rst=46 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=9 dc=11 mosi=17 rst=3 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=10 cs=11 dc=9 mosi=12 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=12 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=12 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=12 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=12 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=12 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=13 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=13 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=13 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=13 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=13 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=13 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=14 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=14 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=14 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=14 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=14 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=14 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=16 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=16 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=16 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=16 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=16 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=16 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=17 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=17 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=17 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=17 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=17 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=10 cs=11 dc=9 mosi=17 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=9 dc=10 mosi=12 rst=-1 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=12 rst=42 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=12 rst=6 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=12 rst=17 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=12 rst=46 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=12 rst=3 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=13 rst=-1 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=13 rst=42 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=13 rst=6 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=13 rst=17 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=13 rst=46 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=13 rst=3 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=14 rst=-1 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=14 rst=42 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=14 rst=6 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=14 rst=17 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=14 rst=46 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=14 rst=3 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=16 rst=-1 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=16 rst=42 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=16 rst=6 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=16 rst=17 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=16 rst=46 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=16 rst=3 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=17 rst=-1 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=17 rst=42 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=17 rst=6 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=17 rst=17 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=17 rst=46 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=9 dc=10 mosi=17 rst=3 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=1 clk=11 cs=10 dc=9 mosi=12 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=12 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=12 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=12 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=12 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=12 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=13 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=13 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=13 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=13 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=13 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=13 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=14 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=14 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=14 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=14 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=14 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=14 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=16 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=16 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=16 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=16 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=16 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=16 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=17 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=17 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=17 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=17 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=17 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=1 clk=11 cs=10 dc=9 mosi=17 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=12 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=12 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=12 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=12 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=12 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=12 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=13 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=13 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=13 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=13 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=13 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=13 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=14 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=14 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=14 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=14 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=14 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=14 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=16 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=16 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=16 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=16 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=16 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=16 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=17 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=17 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=17 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=17 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=17 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=10 dc=11 mosi=17 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=12 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=12 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=12 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=12 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=12 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=12 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=13 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=13 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=13 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=13 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=13 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=13 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=14 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=14 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=14 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=14 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=14 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=14 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=16 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=16 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=16 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=16 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=16 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=16 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=17 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=17 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=17 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=17 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=17 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=9 cs=11 dc=10 mosi=17 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=9 dc=11 mosi=12 rst=-1 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=12 rst=42 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=12 rst=6 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=12 rst=17 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=12 rst=46 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=12 rst=3 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=13 rst=-1 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=13 rst=42 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=13 rst=6 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=13 rst=17 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=13 rst=46 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=13 rst=3 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=14 rst=-1 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=14 rst=42 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=14 rst=6 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=14 rst=17 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=14 rst=46 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=14 rst=3 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=16 rst=-1 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=16 rst=42 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=16 rst=6 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=16 rst=17 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=16 rst=46 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=16 rst=3 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=17 rst=-1 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=17 rst=42 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=17 rst=6 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=17 rst=17 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=17 rst=46 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=9 dc=11 mosi=17 rst=3 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=10 cs=11 dc=9 mosi=12 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=12 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=12 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=12 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=12 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=12 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=13 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=13 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=13 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=13 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=13 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=13 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=14 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=14 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=14 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=14 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=14 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=14 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=16 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=16 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=16 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=16 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=16 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=16 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=17 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=17 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=17 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=17 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=17 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=10 cs=11 dc=9 mosi=17 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=9 dc=10 mosi=12 rst=-1 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=12 rst=42 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=12 rst=6 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=12 rst=17 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=12 rst=46 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=12 rst=3 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=13 rst=-1 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=13 rst=42 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=13 rst=6 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=13 rst=17 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=13 rst=46 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=13 rst=3 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=14 rst=-1 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=14 rst=42 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=14 rst=6 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=14 rst=17 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=14 rst=46 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=14 rst=3 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=16 rst=-1 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=16 rst=42 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=16 rst=6 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=16 rst=17 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=16 rst=46 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=16 rst=3 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=17 rst=-1 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=17 rst=42 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=17 rst=6 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=17 rst=17 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=17 rst=46 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=9 dc=10 mosi=17 rst=3 tr=0/-1 w1=lvl0=0 first_chg_ms=-1 lvl_end=0
+MAP en=0 clk=11 cs=10 dc=9 mosi=12 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=12 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=12 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=12 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=12 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=12 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=13 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=13 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=13 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=13 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=13 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=13 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=14 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=14 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=14 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=14 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=14 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=14 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=16 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=16 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=16 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=16 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=16 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=16 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=17 rst=-1 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=17 rst=42 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=17 rst=6 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=17 rst=17 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=17 rst=46 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+MAP en=0 clk=11 cs=10 dc=9 mosi=17 rst=3 tr=0/-1 w1=lvl0=1 first_chg_ms=-1 lvl_end=1
+--- CID（读寄存器对照（总线对/地址/probe 结果））认领 5 条 ---
+I2CID bus=47/48 addr=18 reg=01 probe=ESP_OK read=ESP_OK val=00 00 00 00
+I2CID bus=47/48 addr=34 reg=03 probe=ESP_FAIL read=ESP_FAIL val=00 00 00 00
+I2CID bus=41/42 addr=34 reg=03 probe=ESP_FAIL read=ESP_FAIL val=00 00 00 00
+I2CID bus=47/48 addr=70 reg=e8 probe=ESP_OK read=ESP_FAIL val=00 00 00 00
+I2CID bus=47/48 addr=51 reg=07 probe=ESP_OK read=ESP_OK val=27 00 00 00
+--- CSCAN（总线扫描（ack/nack_fail/timeout 分类））认领 2 条 ---
+I2CSCAN bus=47/48 sda=47 scl=48 ack=4 nack_fail=108 timeout=0 release=0 ACKED: 18 38 51 70
+I2CSCAN bus=41/42 sda=41 scl=42 ack=0 nack_fail=112 timeout=0 release=0 ACKED: <none>
+--- PAD（对上/对下拉读脚）认领 29 条 ---
+PAD 00 pu=1 pd=1 DRIVEN-HIGH
+PAD 01 pu=1 pd=0 floating
+PAD 02 pu=1 pd=0 floating
+PAD 03 pu=1 pd=0 floating
+PAD 04 pu=1 pd=1 DRIVEN-HIGH
+PAD 05 pu=1 pd=0 floating
+PAD 06 pu=1 pd=0 floating
+PAD 07 pu=1 pd=0 floating
+PAD 08 pu=1 pd=1 DRIVEN-HIGH
+PAD 09 pu=1 pd=0 floating
+PAD 10 pu=1 pd=0 floating
+PAD 11 pu=1 pd=0 floating
+PAD 12 pu=1 pd=0 floating
+PAD 13 pu=1 pd=0 floating
+PAD 14 pu=1 pd=0 floating
+PAD 15 pu=1 pd=0 floating
+PAD 16 pu=0 pd=0 DRIVEN-LOW
+PAD 17 pu=0 pd=0 DRIVEN-LOW
+PAD 18 pu=1 pd=0 floating
+PAD 21 pu=1 pd=1 DRIVEN-HIGH
+PAD 38 pu=1 pd=0 floating
+PAD 39 pu=1 pd=1 DRIVEN-HIGH
+PAD 40 pu=1 pd=1 DRIVEN-HIGH
+PAD 41 pu=1 pd=1 DRIVEN-HIGH
+PAD 42 pu=1 pd=0 floating
+PAD 45 pu=1 pd=0 floating
+PAD 46 pu=0 pd=0 DRIVEN-LOW
+PAD 47 pu=1 pd=1 DRIVEN-HIGH
+PAD 48 pu=1 pd=1 DRIVEN-HIGH
+--- 运行期判据行（init/全刷/blanked/boot 指纹）认领 2 条 ---
+I (198) cpu_start: Project name:     pdiag
+I (213) cpu_start: ELF file SHA256:  1e5e28b7b803768a...
+--- 未认领的其余非空行 467 条，形状直方图（前 12 类，丢弃的是这些）---
+   51  E (#) task_wdt:  - IDLE# (CPU #)
+   51  E (#) task_wdt: Tasks currently running:
+   51  E (#) task_wdt: CPU #: main
+   51  E (#) task_wdt: CPU #: IDLE#
+   51  E (#) task_wdt: Print CPU # (current core) backtrace
+   51  Backtrace: #DB#E:#FC# #DFB#:#FC# #E#
+   33  I (#) gpio: GPIO[#]| InputEn: #| OutputEn: #| OpenDrain: #| P
+   32  E (#) task_wdt: Task watchdog got triggered. The following 
+   18  E (#) task_wdt: Task watchdog got triggered. The following t
+   10  I (#) gpio: GPIO[#]| InputEn: #| OutputEn: #| OpenDrain: #| Pu
+    4  load:#,len:#
+    2  I (#) app_start: Starting scheduler on CPU#
+
+== r59d_20260925_173434_run.log ｜ 断电/供电对照臂第一版（OFF-CTRL 门 + OFF-STEP） ｜ 原文件 11635 B / 171 行 ==
+--- PDIAG2-BEGIN（本遍版本自称（gen= 后面那串））认领 1 条 ---
+PDIAG2-BEGIN board-census gen=R59v4
+--- MAP（矩阵行（en/clk/cs/dc/mosi/rst + tr + 首变毫秒））认领 1 条 ---
+OFF-MAP pwr=6 audio=42 vbat=17 rst=9 dc=10 cs=11 sck=12 mosi=13 busy=8 spi=SPI2_HOST@40000000 w=200 h=200 buflen=5000 lutlen=159
+--- OFF-STEP（对照臂的每一步（busy_start/busy_end/fall/ms））认领 14 条 ---
+OFF-STEP n=1 name=pre-swreset busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=2 name=swreset busy_start=1 busy_end=0 fall=1 ms=1 idle
+OFF-STEP n=3 name=post-cursor busy_start=1 busy_end=0 fall=1 ms=4 idle
+OFF-STEP n=4 name=lut-153 busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=5 name=lut-tail busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=6 name=ram busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=7 name=white busy_start=1 busy_end=0 fall=1 ms=1761 idle
+OFF-STEP n=8 name=ram busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=9 name=black busy_start=1 busy_end=0 fall=1 ms=1761 idle
+OFF-STEP n=10 name=pre-plut busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=11 name=lut-153 busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=12 name=lut-tail busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=13 name=part-init busy_start=1 busy_end=0 fall=1 ms=91 idle
+OFF-STEP n=14 name=part-display busy_start=1 busy_end=0 fall=1 ms=574 idle
+--- OFF-WATCH（对照臂窗口（arm-A 断电 / arm-B 供电，读数 tr））认领 2 条 ---
+OFF-WATCH name=ctrl-power-off lvl_start=0 lvl_end=0 tr=0 window_ms=1000
+OFF-WATCH name=ctrl-power-on lvl_start=0 lvl_end=0 tr=0 window_ms=1000
+--- OFF-CTRL（对照臂门（off_arm_tr / on_arm_tr 判读句））认领 1 条 ---
+OFF-CTRL off_arm_tr=0 on_arm_tr=0  判读：off 臂预期 0；两臂同形则 BUSY 读数不能算控制器应答
+--- CID（读寄存器对照（总线对/地址/probe 结果））认领 5 条 ---
+I2CID bus=47/48 addr=18 reg=01 probe=ESP_OK read=ESP_OK val=00 00 00 00
+I2CID bus=47/48 addr=34 reg=03 probe=ESP_FAIL read=ESP_FAIL val=00 00 00 00
+I2CID bus=41/42 addr=34 reg=03 probe=ESP_FAIL read=ESP_FAIL val=00 00 00 00
+I2CID bus=47/48 addr=70 reg=e8 probe=ESP_OK read=ESP_FAIL val=00 00 00 00
+I2CID bus=47/48 addr=51 reg=07 probe=ESP_OK read=ESP_OK val=27 00 00 00
+--- CSCAN（总线扫描（ack/nack_fail/timeout 分类））认领 2 条 ---
+I2CSCAN bus=47/48 sda=47 scl=48 ack=4 nack_fail=108 timeout=0 release=0 ACKED: 18 38 51 70
+I2CSCAN bus=41/42 sda=41 scl=42 ack=0 nack_fail=112 timeout=0 release=0 ACKED: <none>
+--- PAD（对上/对下拉读脚）认领 29 条 ---
+PAD 00 pu=1 pd=1 DRIVEN-HIGH
+PAD 01 pu=1 pd=0 floating
+PAD 02 pu=1 pd=0 floating
+PAD 03 pu=1 pd=0 floating
+PAD 04 pu=1 pd=1 DRIVEN-HIGH
+PAD 05 pu=1 pd=0 floating
+PAD 06 pu=1 pd=0 floating
+PAD 07 pu=1 pd=0 floating
+PAD 08 pu=1 pd=1 DRIVEN-HIGH
+PAD 09 pu=1 pd=0 floating
+PAD 10 pu=1 pd=0 floating
+PAD 11 pu=1 pd=0 floating
+PAD 12 pu=1 pd=0 floating
+PAD 13 pu=1 pd=0 floating
+PAD 14 pu=1 pd=0 floating
+PAD 15 pu=1 pd=0 floating
+PAD 16 pu=0 pd=0 DRIVEN-LOW
+PAD 17 pu=0 pd=0 DRIVEN-LOW
+PAD 18 pu=1 pd=0 floating
+PAD 21 pu=1 pd=1 DRIVEN-HIGH
+PAD 38 pu=1 pd=0 floating
+PAD 39 pu=1 pd=1 DRIVEN-HIGH
+PAD 40 pu=1 pd=1 DRIVEN-HIGH
+PAD 41 pu=1 pd=1 DRIVEN-HIGH
+PAD 42 pu=1 pd=0 floating
+PAD 45 pu=1 pd=0 floating
+PAD 46 pu=0 pd=0 DRIVEN-LOW
+PAD 47 pu=1 pd=1 DRIVEN-HIGH
+PAD 48 pu=1 pd=1 DRIVEN-HIGH
+--- 运行期判据行（init/全刷/blanked/boot 指纹）认领 2 条 ---
+I (201) cpu_start: Project name:     pdiag
+I (216) cpu_start: ELF file SHA256:  b0b1eaf752a627bc...
+--- 未认领的其余非空行 114 条，形状直方图（前 12 类，丢弃的是这些）---
+   33  I (#) gpio: GPIO[#]| InputEn: #| OutputEn: #| OpenDrain: #| P
+   10  I (#) gpio: GPIO[#]| InputEn: #| OutputEn: #| OpenDrain: #| Pu
+    4  load:#,len:#
+    2  I (#) esp_image: segment #: paddr=# vaddr=# size
+    2  I (#) app_start: Starting scheduler on CPU#
+    2  I (#) gpio: GPIO[#]| InputEn: #| OutputEn: #| OpenDrain: #| 
+    1  I (#)ESP-ROM:esp#s#-#
+    1  Build:Mar # #
+    1  rst:# (USB_UART_CHIP_RESET),boot:# (SPI_FAST_FLASH_BOOT)
+    1  Saved PC:#
+    1  SPIWP:#
+    1  mode:DIO, clock div:#
+
+== r59e_20260925_173940_run.log ｜ 对照臂第二版（OFF-WATCH 双臂窗口） ｜ 原文件 12545 B / 182 行 ==
+--- PDIAG2-BEGIN（本遍版本自称（gen= 后面那串））认领 1 条 ---
+PDIAG2-BEGIN board-census gen=R59v5
+--- MAP（矩阵行（en/clk/cs/dc/mosi/rst + tr + 首变毫秒））认领 1 条 ---
+OFF-MAP pwr=6 audio=42 vbat=17 rst=9 dc=10 cs=11 sck=12 mosi=13 busy=8 spi=SPI2_HOST@40000000 w=200 h=200 buflen=5000 lutlen=159
+--- OFF-STEP（对照臂的每一步（busy_start/busy_end/fall/ms））认领 23 条 ---
+OFF-STEP n=1 name=pre-swreset busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=2 name=swreset busy_start=1 busy_end=0 fall=1 ms=1 idle
+OFF-STEP n=3 name=post-cursor busy_start=1 busy_end=0 fall=1 ms=4 idle
+OFF-STEP n=4 name=lut-153 busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=5 name=lut-tail busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=6 name=ram busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=7 name=white busy_start=1 busy_end=0 fall=1 ms=1761 idle
+OFF-STEP n=8 name=ram busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=9 name=black busy_start=1 busy_end=0 fall=1 ms=1762 idle
+OFF-STEP n=10 name=pre-plut busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=11 name=lut-153 busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=12 name=lut-tail busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=13 name=part-init busy_start=1 busy_end=0 fall=1 ms=91 idle
+OFF-STEP n=14 name=part-display busy_start=1 busy_end=0 fall=1 ms=574 idle
+OFF-STEP n=15 name=arm-B-power-on busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=16 name=arm-C-power-off busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=17 name=pre-swreset busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=18 name=swreset busy_start=1 busy_end=0 fall=1 ms=1 idle
+OFF-STEP n=19 name=post-cursor busy_start=1 busy_end=0 fall=1 ms=4 idle
+OFF-STEP n=20 name=lut-153 busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=21 name=lut-tail busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=22 name=ram busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=23 name=last-black busy_start=1 busy_end=0 fall=1 ms=1762 idle
+--- OFF-WATCH（对照臂窗口（arm-A 断电 / arm-B 供电，读数 tr））认领 1 条 ---
+OFF-WATCH name=arm-A-idle lvl_start=0 lvl_end=0 tr=0 window_ms=1000
+--- OFF-CTRL（对照臂门（off_arm_tr / on_arm_tr 判读句））认领 1 条 ---
+OFF-CTRL armA_idle_tr=0 armB_on_fall=0(timeout=0) armC_off_fall=0(timeout=0)  判读：B>0 且 C==0 且 A==0 ⇒ BUSY 是控制器驱动的那一根线
+--- CID（读寄存器对照（总线对/地址/probe 结果））认领 5 条 ---
+I2CID bus=47/48 addr=18 reg=01 probe=ESP_OK read=ESP_OK val=00 00 00 00
+I2CID bus=47/48 addr=34 reg=03 probe=ESP_FAIL read=ESP_FAIL val=00 00 00 00
+I2CID bus=41/42 addr=34 reg=03 probe=ESP_FAIL read=ESP_FAIL val=00 00 00 00
+I2CID bus=47/48 addr=70 reg=e8 probe=ESP_OK read=ESP_FAIL val=00 00 00 00
+I2CID bus=47/48 addr=51 reg=07 probe=ESP_OK read=ESP_OK val=27 00 00 00
+--- CSCAN（总线扫描（ack/nack_fail/timeout 分类））认领 2 条 ---
+I2CSCAN bus=47/48 sda=47 scl=48 ack=4 nack_fail=108 timeout=0 release=0 ACKED: 18 38 51 70
+I2CSCAN bus=41/42 sda=41 scl=42 ack=0 nack_fail=112 timeout=0 release=0 ACKED: <none>
+--- PAD（对上/对下拉读脚）认领 29 条 ---
+PAD 00 pu=1 pd=1 DRIVEN-HIGH
+PAD 01 pu=1 pd=0 floating
+PAD 02 pu=1 pd=0 floating
+PAD 03 pu=1 pd=0 floating
+PAD 04 pu=1 pd=1 DRIVEN-HIGH
+PAD 05 pu=1 pd=0 floating
+PAD 06 pu=1 pd=0 floating
+PAD 07 pu=1 pd=0 floating
+PAD 08 pu=1 pd=1 DRIVEN-HIGH
+PAD 09 pu=1 pd=0 floating
+PAD 10 pu=1 pd=0 floating
+PAD 11 pu=1 pd=0 floating
+PAD 12 pu=1 pd=0 floating
+PAD 13 pu=1 pd=0 floating
+PAD 14 pu=1 pd=0 floating
+PAD 15 pu=1 pd=0 floating
+PAD 16 pu=0 pd=0 DRIVEN-LOW
+PAD 17 pu=0 pd=0 DRIVEN-LOW
+PAD 18 pu=1 pd=0 floating
+PAD 21 pu=1 pd=1 DRIVEN-HIGH
+PAD 38 pu=1 pd=0 floating
+PAD 39 pu=1 pd=1 DRIVEN-HIGH
+PAD 40 pu=1 pd=1 DRIVEN-HIGH
+PAD 41 pu=1 pd=1 DRIVEN-HIGH
+PAD 42 pu=1 pd=0 floating
+PAD 45 pu=1 pd=0 floating
+PAD 46 pu=0 pd=0 DRIVEN-LOW
+PAD 47 pu=1 pd=1 DRIVEN-HIGH
+PAD 48 pu=1 pd=1 DRIVEN-HIGH
+--- 运行期判据行（init/全刷/blanked/boot 指纹）认领 2 条 ---
+I (201) cpu_start: Project name:     pdiag
+I (216) cpu_start: ELF file SHA256:  1b2b33933e6a4f0f...
+--- 未认领的其余非空行 117 条，形状直方图（前 12 类，丢弃的是这些）---
+   33  I (#) gpio: GPIO[#]| InputEn: #| OutputEn: #| OpenDrain: #| P
+   10  I (#) gpio: GPIO[#]| InputEn: #| OutputEn: #| OpenDrain: #| Pu
+    4  load:#,len:#
+    2  I (#) app_start: Starting scheduler on CPU#
+    2  I (#) gpio: GPIO[#]| InputEn: #| OutputEn: #| OpenDrain: #| 
+    1  I (#) esp_image: segment #: paddr=#d#b# vaddr=#fc#ESP-ROM
+    1  Build:Mar # #
+    1  rst:# (USB_UART_CHIP_RESET),boot:# (SPI_FAST_FLASH_BOOT)
+    1  Saved PC:#
+    1  SPIWP:#
+    1  mode:DIO, clock div:#
+    1  entry #
+
+== r59f_20260925_174338_run.log ｜ 对照臂第三版（arm-B-power-on 那一格 tr=1 在这里） ｜ 原文件 12460 B / 182 行 ==
+--- PDIAG2-BEGIN（本遍版本自称（gen= 后面那串））认领 1 条 ---
+PDIAG2-BEGIN board-census gen=R59v6
+--- MAP（矩阵行（en/clk/cs/dc/mosi/rst + tr + 首变毫秒））认领 1 条 ---
+OFF-MAP pwr=6 audio=42 vbat=17 rst=9 dc=10 cs=11 sck=12 mosi=13 busy=8 spi=SPI2_HOST@40000000 w=200 h=200 buflen=5000 lutlen=159
+--- OFF-STEP（对照臂的每一步（busy_start/busy_end/fall/ms））认领 21 条 ---
+OFF-STEP n=1 name=pre-swreset busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=2 name=swreset busy_start=1 busy_end=0 fall=1 ms=1 idle
+OFF-STEP n=3 name=post-cursor busy_start=1 busy_end=0 fall=1 ms=4 idle
+OFF-STEP n=4 name=lut-153 busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=5 name=lut-tail busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=6 name=ram busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=7 name=white busy_start=1 busy_end=0 fall=1 ms=1761 idle
+OFF-STEP n=8 name=ram busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=9 name=black busy_start=1 busy_end=0 fall=1 ms=1761 idle
+OFF-STEP n=10 name=pre-plut busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=11 name=lut-153 busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=12 name=lut-tail busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=13 name=part-init busy_start=1 busy_end=0 fall=1 ms=91 idle
+OFF-STEP n=14 name=part-display busy_start=1 busy_end=0 fall=1 ms=574 idle
+OFF-STEP n=15 name=pre-swreset busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=16 name=swreset busy_start=1 busy_end=0 fall=1 ms=1 idle
+OFF-STEP n=17 name=post-cursor busy_start=1 busy_end=0 fall=1 ms=4 idle
+OFF-STEP n=18 name=lut-153 busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=19 name=lut-tail busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=20 name=ram busy_start=0 busy_end=0 fall=0 ms=0 idle
+OFF-STEP n=21 name=last-black busy_start=1 busy_end=0 fall=1 ms=1762 idle
+--- OFF-WATCH（对照臂窗口（arm-A 断电 / arm-B 供电，读数 tr））认领 3 条 ---
+OFF-WATCH name=arm-A-idle lvl_start=0 lvl_end=0 tr=0 window_ms=2000
+OFF-WATCH name=arm-B-power-on lvl_start=1 lvl_end=0 tr=1 window_ms=2500
+OFF-WATCH name=arm-C-power-off lvl_start=1 lvl_end=0 tr=1 window_ms=2500
+--- OFF-CTRL（对照臂门（off_arm_tr / on_arm_tr 判读句））认领 1 条 ---
+OFF-CTRL armA_idle_tr=0 armB_on_tr=1 armC_off_tr=1  判读：B>=2 且 C==0 且 A==0 ⇒ BUSY 是控制器驱动的那一根线
+--- CID（读寄存器对照（总线对/地址/probe 结果））认领 5 条 ---
+I2CID bus=47/48 addr=18 reg=01 probe=ESP_OK read=ESP_OK val=00 00 00 00
+I2CID bus=47/48 addr=34 reg=03 probe=ESP_FAIL read=ESP_FAIL val=00 00 00 00
+I2CID bus=41/42 addr=34 reg=03 probe=ESP_FAIL read=ESP_FAIL val=00 00 00 00
+I2CID bus=47/48 addr=70 reg=e8 probe=ESP_OK read=ESP_FAIL val=00 00 00 00
+I2CID bus=47/48 addr=51 reg=07 probe=ESP_OK read=ESP_OK val=27 00 00 00
+--- CSCAN（总线扫描（ack/nack_fail/timeout 分类））认领 2 条 ---
+I2CSCAN bus=47/48 sda=47 scl=48 ack=4 nack_fail=108 timeout=0 release=0 ACKED: 18 38 51 70
+I2CSCAN bus=41/42 sda=41 scl=42 ack=0 nack_fail=112 timeout=0 release=0 ACKED: <none>
+--- PAD（对上/对下拉读脚）认领 29 条 ---
+PAD 00 pu=1 pd=1 DRIVEN-HIGH
+PAD 01 pu=1 pd=0 floating
+PAD 02 pu=1 pd=0 floating
+PAD 03 pu=1 pd=0 floating
+PAD 04 pu=1 pd=1 DRIVEN-HIGH
+PAD 05 pu=1 pd=0 floating
+PAD 06 pu=1 pd=0 floating
+PAD 07 pu=1 pd=0 floating
+PAD 08 pu=1 pd=1 DRIVEN-HIGH
+PAD 09 pu=1 pd=0 floating
+PAD 10 pu=1 pd=0 floating
+PAD 11 pu=1 pd=0 floating
+PAD 12 pu=1 pd=0 floating
+PAD 13 pu=1 pd=0 floating
+PAD 14 pu=1 pd=0 floating
+PAD 15 pu=1 pd=0 floating
+PAD 16 pu=0 pd=0 DRIVEN-LOW
+PAD 17 pu=0 pd=0 DRIVEN-LOW
+PAD 18 pu=1 pd=0 floating
+PAD 21 pu=1 pd=1 DRIVEN-HIGH
+PAD 38 pu=1 pd=0 floating
+PAD 39 pu=1 pd=1 DRIVEN-HIGH
+PAD 40 pu=1 pd=1 DRIVEN-HIGH
+PAD 41 pu=1 pd=1 DRIVEN-HIGH
+PAD 42 pu=1 pd=0 floating
+PAD 45 pu=1 pd=0 floating
+PAD 46 pu=0 pd=0 DRIVEN-LOW
+PAD 47 pu=1 pd=1 DRIVEN-HIGH
+PAD 48 pu=1 pd=1 DRIVEN-HIGH
+--- 运行期判据行（init/全刷/blanked/boot 指纹）认领 2 条 ---
+I (201) cpu_start: Project name:     pdiag
+I (216) cpu_start: ELF file SHA256:  cbdbd1fa580fb479...
+--- 未认领的其余非空行 117 条，形状直方图（前 12 类，丢弃的是这些）---
+   33  I (#) gpio: GPIO[#]| InputEn: #| OutputEn: #| OpenDrain: #| P
+   10  I (#) gpio: GPIO[#]| InputEn: #| OutputEn: #| OpenDrain: #| Pu
+    4  load:#,len:#
+    2  I (#) esp_image: segment #: paddr=# vaddr=# size
+    2  I (#) app_start: Starting scheduler on CPU#
+    2  I (#) gpio: GPIO[#]| InputEn: #| OutputEn: #| OpenDrain: #|
+    1  ESP-ROM:esp#s#-#
+    1  Build:Mar # #
+    1  rst:# (USB_UART_CHIP_RESET),boot:# (SPI_FAST_FLASH_BOOT)
+    1  Saved PC:#
+    1  SPIWP:#
+    1  mode:DIO, clock div:#
+
+== r59z_20260925_183248_run.log ｜ 移植后首刷（epd154 init done + 全刷 + panel blanked） ｜ 原文件 6894 B / 112 行 ==
+--- 运行期判据行（init/全刷/blanked/boot 指纹）认领 7 条 ---
+I (373) cpu_start: Project name:     zizhao_esp32s3
+I (389) cpu_start: ELF file SHA256:  cb960bf791a82825...
+I (769) epd154: epd154 init done (PWR6 RST9 DC10 CS11 SCLK12 MOSI13 BUSY8, 200x200 stride=25 fb=5000 B)
+I (2813) epd154: full update done in 1800 ms (实测 1761~1762 ms)
+I (2813) eink: panel blanked (200x200), free int DMA heap=273604
+I (4921) epd154: full update done in 1800 ms (实测 1761~1762 ms)
+I (7647) epd154: full update done in 1800 ms (实测 1761~1762 ms)
+--- 未认领的其余非空行 105 条，形状直方图（前 12 类，丢弃的是这些）---
+    4  load:#,len:#
+    2  I (#) boot:  # ota_#            OTA app          # # #
+    2  I (#) app_start: Starting scheduler on CPU#
+    2  I (#) wifi:Init max length of beacon: #/#
+    1  ESP-ROM:esp#s#-#
+    1  Build:Mar # #
+    1  rst:# (USB_UART_CHIP_RESET),boot:# (SPI_FAST_FLASH_BOOT)
+    1  Saved PC:#
+    1  SPIWP:#
+    1  mode:DIO, clock div:#
+    1  entry #
+    1  I (#) boot: ESP-IDF v#.#.# #nd stage bootloader
+
+== r59z_20260925_184018_run.log ｜ 移植后第二刷（同一只镜像） ｜ 原文件 7059 B / 110 行 ==
+--- 运行期判据行（init/全刷/blanked/boot 指纹）认领 7 条 ---
+I (375) cpu_start: Project name:     zizhao_esp32s3
+I (391) cpu_start: ELF file SHA256:  590a84b641334b79...
+I (778) epd154: epd154 init done (PWR6 RST9 DC10 CS11 SCLK12 MOSI13 BUSY8, 200x200 stride=25 fb=5000 B)
+I (2822) epd154: full update done in 1800 ms (读数按 20ms 轮询量化，只报 20 的整数倍；R59 pdiag 那把细粒度尺量到的是 1761~1762ms，两者不是同一把尺，别互相对账)
+I (2829) eink: panel blanked (200x200), free int DMA heap=273604
+I (4942) epd154: full update done in 1800 ms (读数按 20ms 轮询量化，只报 20 的整数倍；R59 pdiag 那把细粒度尺量到的是 1761~1762ms，两者不是同一把尺，别互相对账)
+I (7178) epd154: full update done in 1800 ms (读数按 20ms 轮询量化，只报 20 的整数倍；R59 pdiag 那把细粒度尺量到的是 1761~1762ms，两者不是同一把尺，别互相对账)
+--- 未认领的其余非空行 103 条，形状直方图（前 12 类，丢弃的是这些）---
+    4  load:#,len:#
+    2  I (#) boot:  # ota_#            OTA app          # # #
+    2  I (#) app_start: Starting scheduler on CPU#
+    2  I (#) wifi:Init max length of beacon: #/#
+    1  ESP-ROM:esp#s#-#
+    1  Build:Mar # #
+    1  rst:# (USB_UART_CHIP_RESET),boot:# (SPI_FAST_FLASH_BOOT)
+    1  Saved PC:#
+    1  SPIWP:#
+    1  mode:DIO, clock div:#
+    1  entry #
+    1  I (#) boot: ESP-IDF v#.#.# #nd stage bootloader
+
+== 认领账 ==
+r59c_20260925_171315_run.log: 原 1019 行 / 认领 399 / 非空未认领 467 / 空行 153 / 分区闭合=True（恒等式，只防脚本自己数错，不是判据）
+r59d_20260925_173434_run.log: 原 171 行 / 认领 57 / 非空未认领 114 / 空行 0 / 分区闭合=True（恒等式，只防脚本自己数错，不是判据）
+r59e_20260925_173940_run.log: 原 182 行 / 认领 65 / 非空未认领 117 / 空行 0 / 分区闭合=True（恒等式，只防脚本自己数错，不是判据）
+r59f_20260925_174338_run.log: 原 182 行 / 认领 65 / 非空未认领 117 / 空行 0 / 分区闭合=True（恒等式，只防脚本自己数错，不是判据）
+r59z_20260925_183248_run.log: 原 112 行 / 认领 7 / 非空未认领 105 / 空行 0 / 分区闭合=True（恒等式，只防脚本自己数错，不是判据）
+r59z_20260925_184018_run.log: 原 110 行 / 认领 7 / 非空未认领 103 / 空行 0 / 分区闭合=True（恒等式，只防脚本自己数错，不是判据）
+口令在输入日志里出现 4 次 ⇒ 输出件里 [REDACTED] 出现 0 次；两数不必相等（直方图行会把一次替换算两次），安全判据是「输出件不含明文」那条断言

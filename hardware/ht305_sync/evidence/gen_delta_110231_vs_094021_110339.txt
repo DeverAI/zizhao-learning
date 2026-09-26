@@ -1,0 +1,45 @@
+清单世代逐名差集（git 版，本脚本现跑于 2026-09-24 11:03:39）
+上一代名册来源 = `git show 39d3031:hardware/ht305_sync/MANIFEST.txt`（现跑首行时刻 09-24 09:40:21，TOTAL 311 / BYTES 992838 / BOM 56）
+本代名册来源 = 工作树 `MANIFEST.txt`（现跑首行时刻 09-24 11:02:31，TOTAL 342 / BYTES 1131371 / BOM 62）
+前置钉：两代名单行数已各自等于其 TOTAL 行（311/311、342/342）⇒ 解析无漏
+互核：TOTAL 差 = 342 - 311 = 31；本脚本 NEW=31 GONE=0 ⇒ NEW-GONE=31 MATCH
+
+--- NEW（本代有、上一代清单没有，逐名）---
+NEW	evidence/cred_gate_recheck_110218.txt	860 B	birth=09-24 11:02:18 mtime=09-24 11:02:18	birth≈mtime
+NEW	evidence/r54_cutoff_delta.txt	226 B	birth=09-24 10:53:43 mtime=09-24 10:49:36	COPY2(birth>mtime)
+NEW	evidence/r54_extra_land.txt	1069 B	birth=09-24 10:54:14 mtime=09-24 10:54:14	birth≈mtime
+NEW	evidence/r54_land_log.txt	592 B	birth=09-24 10:53:43 mtime=09-24 10:53:43	birth≈mtime
+NEW	evidence/r54_listdiff.txt	830 B	birth=09-24 10:53:43 mtime=09-24 10:49:36	COPY2(birth>mtime)
+NEW	evidence/r54_local.txt	594 B	birth=09-24 10:53:43 mtime=09-24 10:47:26	COPY2(birth>mtime)
+NEW	evidence/r54_local_names.txt	23489 B	birth=09-24 10:53:43 mtime=09-24 10:47:26	COPY2(birth>mtime)
+NEW	evidence/r54_parse_check.txt	296 B	birth=09-24 10:53:43 mtime=09-24 10:53:35	COPY2(birth>mtime)
+NEW	evidence/r54_probe.txt	2267 B	birth=09-24 10:53:43 mtime=09-24 10:47:37	COPY2(birth>mtime)
+NEW	evidence/r54_remote_names.txt	22980 B	birth=09-24 10:53:43 mtime=09-24 10:49:36	COPY2(birth>mtime)
+NEW	evidence/r54_roundtrip.txt	549 B	birth=09-24 10:54:14 mtime=09-24 10:48:42	COPY2(birth>mtime)
+NEW	evidence/r54_run_log.txt	2300 B	birth=09-24 10:53:43 mtime=09-24 10:47:45	COPY2(birth>mtime)
+NEW	evidence/r54_scp_err.txt	724 B	birth=09-24 10:53:43 mtime=09-24 10:47:39	COPY2(birth>mtime)
+NEW	evidence/r54_verify.txt	24584 B	birth=09-24 10:53:43 mtime=09-24 10:47:45	COPY2(birth>mtime)
+NEW	evidence/staged_cred_gate_102508.txt	513 B	birth=09-24 10:25:10 mtime=09-24 10:25:10	birth≈mtime
+NEW	evidence/staged_cred_gate_102508_pos.txt	736 B	birth=09-24 10:27:22 mtime=09-24 10:27:22	birth≈mtime
+NEW	evidence/staged_cred_gate_102508_ps.txt	100 B	birth=09-24 10:25:10 mtime=09-24 10:25:10	birth≈mtime
+NEW	evidence/staged_list_102216.txt	3609 B	birth=09-24 10:22:16 mtime=09-24 10:22:16	birth≈mtime
+NEW	scripts/chk_r54.ps1	1213 B	birth=09-24 10:46:25 mtime=09-24 10:46:25	birth≈mtime
+NEW	scripts/derive_deriver_r54.py	2904 B	birth=09-24 10:46:17 mtime=09-24 10:46:17	birth≈mtime
+NEW	scripts/derive_pos_control_r53b.py	3267 B	birth=09-24 10:45:17 mtime=09-24 10:45:17	birth≈mtime
+NEW	scripts/derive_r54.py	5184 B	birth=09-24 10:46:25 mtime=09-24 10:46:25	birth≈mtime
+NEW	scripts/extra_land_r54.py	5289 B	birth=09-24 10:46:25 mtime=09-24 10:46:25	birth≈mtime
+NEW	scripts/land_r54_evidence.py	3675 B	birth=09-24 10:46:25 mtime=09-24 10:46:25	birth≈mtime
+NEW	scripts/pw_pos_control_r53b.py	5213 B	birth=09-24 10:45:17 mtime=09-24 10:45:17	birth≈mtime
+NEW	scripts/r54_cutoff_delta.py	1780 B	birth=09-24 10:46:25 mtime=09-24 10:46:25	birth≈mtime
+NEW	scripts/r54_listdiff.py	4206 B	birth=09-24 10:49:23 mtime=09-24 10:49:23	birth≈mtime
+NEW	scripts/r54_roundtrip.py	3198 B	birth=09-24 10:46:25 mtime=09-24 10:46:25	birth≈mtime
+NEW	scripts/r54_upload.ps1	5527 B	birth=09-24 10:46:25 mtime=09-24 10:46:25	birth≈mtime
+NEW	scripts/run_pos_control_r53b.ps1	1218 B	birth=09-24 10:45:17 mtime=09-24 10:45:17	birth≈mtime
+NEW	scripts/sync_r54.py	4203 B	birth=09-24 10:46:25 mtime=09-24 10:46:25	birth≈mtime
+
+--- GONE（上一代有、本代清单没有，逐名）---
+
+--- 在册件被改写的（两代都在、但盘上 md5 与上一代清单那一行不等）---
+REWRITTEN=2
+README.md	md5_prev=07895104 md5_now=96161c78	mtime=09-24 11:00:44
+evidence/ps1_bom_scan.txt	md5_prev=c2abd855 md5_now=e80fab36	mtime=09-24 11:01:23

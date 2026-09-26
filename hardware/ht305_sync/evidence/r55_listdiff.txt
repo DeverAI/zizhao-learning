@@ -1,0 +1,20 @@
+第 13 代同步（r55final）双向差集 + 行尾前置读数，现跑于 2026-09-24 12:27:49
+口径：两侧先剥 \r 再比（(56) 那条），行尾原样登记在下一段，不事后归一。
+EOL  LOCAL bytes=24584 lines=542 CRLF=0 bareLF=542 BOM=False
+EOL  REMOTE(剥后名单) bytes=24584 lines=542 CRLF=0 bareLF=542 BOM=False
+EOL  VERIFY(远端 stdout 落盘原件，差集就是从它切的) bytes=26222 lines=565 CRLF=565 bareLF=0 BOM=True
+LOCAL_LINES=542 REMOTE_LINES=542
+ONLY_IN_LOCAL=0 []
+ONLY_IN_REMOTE=0 []
+
+--- 包 ↔ 工作树差集（r55_cutoff_delta.py 同批现跑）---
+RAN_AT   = 2026-09-24 12:27:49
+staged   = 542
+identical(内容逐字节等,  sha256) = 541
+changed_since_cutoff = 1 ['hardware/ht305_sync/scripts/r55_roundtrip.py']
+deleted_since_cutoff = 0 []
+new_since_cutoff     = 9 ['hardware/ht305_sync/evidence/r55_local.txt', 'hardware/ht305_sync/evidence/r55_local_names.txt', 'hardware/ht305_sync/evidence/r55_probe.txt', 'hardware/ht305_sync/evidence/r55_remote_names.txt', 'hardware/ht305_sync/evidence/r55_roundtrip.txt', 'hardware/ht305_sync/evidence/r55_roundtrip_2.txt', 'hardware/ht305_sync/evidence/r55_run_log.txt', 'hardware/ht305_sync/evidence/r55_scp_err.txt', 'hardware/ht305_sync/evidence/r55_verify.txt']
+SELF_CHECK = 四桶互斥且并集 == 当前候选集(551)：PASS
+EXPLANATION = new_since 是本代**打包截止之后**才进仓库的取证/脚本件（取证直接落 evidence/ 的必然结果），不是包漏了东西；判"包 == 现状"看的是 changed/deleted 两桶。
+
+VERDICT=LISTDIFF_EQUAL

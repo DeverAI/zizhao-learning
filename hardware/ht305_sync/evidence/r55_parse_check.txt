@@ -1,0 +1,10 @@
+﻿CHK_AT=2026-09-24 12:29:14
+SRC=C:\Users\david\Documents\all_projects\自招学习\hardware\ht305_sync\scripts\r55_upload.ps1
+FIRST3=239,187,191
+PARSE_ERRORS=0
+REMOVE_ITEM_HITS=0
+SCRIPT_LINES=105
+SRC_LINES=105
+MD5_BOTH=6B57CBA02A2F65BFC091ECD61073825B
+LINES_MATCH=SRC_EQ_COPY
+NOTE=本代**实际执行的是归档那一只**（12:25:29 直接 `-File` 归档路径），这只脚本的 TEMP 副本只是"逐字节同孪生"的第二把尺 ⇒ md5 两侧同值即证明下面的解析结果描述的就是被执行的那只。

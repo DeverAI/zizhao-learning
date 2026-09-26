@@ -1,0 +1,6 @@
+ht305_sync 归档清单（快照，现跑于 09-24 12:34:41；脚本 = scripts/gen_manifest.py）
+UNLISTED_NAMES shown=0 total=0（下面逐行列全表，不再截断）
+ROWS=378  MISMATCH=0  MISSING=0  UNLISTED(盘上有、清单没记)=0
+GEN_LOG 末行=09-24 12:34:42	378	1352267	69 / 清单汇总应为=09-24 12:34:41	378	1352267	69 ⇒ 不一致（日志与清单不同代或被手改）
+TOTAL 行=TOTAL	378 / TOTAL_BYTES 行=TOTAL_BYTES	1352267 / 逐行求和=1352267 ⇒ OK
+VERDICT=MANIFEST_STALE(下面几只已漂或汇总行不符，重跑 scripts/gen_manifest.py)

@@ -1,5 +1,5 @@
-ht305_sync 归档内脚本编码体检（现跑于 09-24 09:40:01；脚本 = scripts/ps1_bom_scan.py）
-OVERWROTE=7397 B md5:4c49e3db（上一版；本脚本按设计覆写自身输出，清单随后重冻）
+ht305_sync 归档内脚本编码体检（现跑于 09-24 12:53:23；脚本 = scripts/ps1_bom_scan.py）
+OVERWROTE=9423 B md5:64d925c0（上一版；本脚本按设计覆写自身输出，清单随后重冻）
 判据：非 ASCII 字节数 + 是否有 UTF-8 BOM（ef bb bf）。风险定义：`.ps1` 且 非ASCII>0 且 无 BOM
 （这种组合会被 Windows PowerShell 5 按 GBK 解码，中文注释会吞掉紧随其后的整行 ⇒ FreqErr 已登记的那次自伤）。
 
@@ -15,6 +15,8 @@ scripts\chk_r50.ps1	nonascii=120	utf8_bom=True	gbk_risk=False
 scripts\chk_r51.ps1	nonascii=120	utf8_bom=True	gbk_risk=False
 scripts\chk_r52.ps1	nonascii=120	utf8_bom=True	gbk_risk=False
 scripts\chk_r53.ps1	nonascii=120	utf8_bom=True	gbk_risk=False
+scripts\chk_r54.ps1	nonascii=120	utf8_bom=True	gbk_risk=False
+scripts\chk_r55.ps1	nonascii=972	utf8_bom=True	gbk_risk=False
 scripts\ht305_agg.ps1	nonascii=0	utf8_bom=False	gbk_risk=False
 scripts\ht305_extract.ps1	nonascii=0	utf8_bom=False	gbk_risk=False
 scripts\ht305_extract_zip.ps1	nonascii=0	utf8_bom=False	gbk_risk=False
@@ -35,6 +37,9 @@ scripts\r50_upload.ps1	nonascii=249	utf8_bom=True	gbk_risk=False
 scripts\r51_upload.ps1	nonascii=249	utf8_bom=True	gbk_risk=False
 scripts\r52_upload.ps1	nonascii=249	utf8_bom=True	gbk_risk=False
 scripts\r53_upload.ps1	nonascii=249	utf8_bom=True	gbk_risk=False
+scripts\r54_upload.ps1	nonascii=249	utf8_bom=True	gbk_risk=False
+scripts\r55_upload.ps1	nonascii=815	utf8_bom=True	gbk_risk=False
+scripts\run_pos_control_r53b.ps1	nonascii=0	utf8_bom=False	gbk_risk=False
 gate\cred_gate_recheck.py	nonascii=2767	utf8_bom=False	gbk_risk=False
 gate\cred_gate_selftest.py	nonascii=801	utf8_bom=False	gbk_risk=False
 gate\ht305_sync_gate.py	nonascii=783	utf8_bom=False	gbk_risk=False
@@ -42,19 +47,29 @@ gate\staged_cred_gate.py	nonascii=884	utf8_bom=False	gbk_risk=False
 scripts\arch_delta_r47.py	nonascii=195	utf8_bom=False	gbk_risk=False
 scripts\build_sync.py	nonascii=12	utf8_bom=False	gbk_risk=False
 scripts\build_zip.py	nonascii=0	utf8_bom=False	gbk_risk=False
+scripts\chk_memory_c_r55.py	nonascii=652	utf8_bom=False	gbk_risk=False
+scripts\chk_r55b.py	nonascii=981	utf8_bom=False	gbk_risk=False
 scripts\collect_ht305_sync.py	nonascii=735	utf8_bom=False	gbk_risk=False
+scripts\derive_deriver_r54.py	nonascii=579	utf8_bom=False	gbk_risk=False
+scripts\derive_pos_control_r53b.py	nonascii=1026	utf8_bom=False	gbk_risk=False
 scripts\derive_r48.py	nonascii=314	utf8_bom=False	gbk_risk=False
 scripts\derive_r49.py	nonascii=370	utf8_bom=False	gbk_risk=False
 scripts\derive_r50.py	nonascii=628	utf8_bom=False	gbk_risk=False
 scripts\derive_r51.py	nonascii=1171	utf8_bom=False	gbk_risk=False
 scripts\derive_r52.py	nonascii=2527	utf8_bom=False	gbk_risk=False
 scripts\derive_r53.py	nonascii=1533	utf8_bom=False	gbk_risk=False
+scripts\derive_r54.py	nonascii=1533	utf8_bom=False	gbk_risk=False
+scripts\derive_refresh_docs_r54.py	nonascii=1602	utf8_bom=False	gbk_risk=False
 scripts\expected.py	nonascii=0	utf8_bom=False	gbk_risk=False
 scripts\expected2.py	nonascii=0	utf8_bom=False	gbk_risk=False
 scripts\extra_land_r52.py	nonascii=1200	utf8_bom=False	gbk_risk=False
 scripts\extra_land_r53.py	nonascii=1200	utf8_bom=False	gbk_risk=False
+scripts\extra_land_r54.py	nonascii=1200	utf8_bom=False	gbk_risk=False
+scripts\fix_r55_ledger.py	nonascii=1275	utf8_bom=False	gbk_risk=False
 scripts\gen_delta_git.py	nonascii=1617	utf8_bom=False	gbk_risk=False
-scripts\gen_manifest.py	nonascii=3027	utf8_bom=False	gbk_risk=False
+scripts\gen_manifest.py	nonascii=3681	utf8_bom=False	gbk_risk=False
+scripts\land_backups_r54.py	nonascii=3811	utf8_bom=False	gbk_risk=False
+scripts\land_memory_r54.py	nonascii=3406	utf8_bom=False	gbk_risk=False
 scripts\land_r44b_report.py	nonascii=688	utf8_bom=False	gbk_risk=False
 scripts\land_r45_report.py	nonascii=1252	utf8_bom=False	gbk_risk=False
 scripts\land_r49_evidence.py	nonascii=1071	utf8_bom=False	gbk_risk=False
@@ -62,11 +77,17 @@ scripts\land_r50_evidence.py	nonascii=741	utf8_bom=False	gbk_risk=False
 scripts\land_r51_evidence.py	nonascii=741	utf8_bom=False	gbk_risk=False
 scripts\land_r52_evidence.py	nonascii=762	utf8_bom=False	gbk_risk=False
 scripts\land_r53_evidence.py	nonascii=762	utf8_bom=False	gbk_risk=False
+scripts\land_r54_docs.py	nonascii=8496	utf8_bom=False	gbk_risk=False
+scripts\land_r54_evidence.py	nonascii=762	utf8_bom=False	gbk_risk=False
+scripts\land_r55_A.py	nonascii=9440	utf8_bom=False	gbk_risk=False
+scripts\land_r55_readme.py	nonascii=4189	utf8_bom=False	gbk_risk=False
+scripts\land_r55_readme2.py	nonascii=7598	utf8_bom=False	gbk_risk=False
 scripts\make_staged_list.py	nonascii=1146	utf8_bom=False	gbk_risk=False
 scripts\probe_zip_vs_head.py	nonascii=12	utf8_bom=False	gbk_risk=False
 scripts\probe_zip_vs_head2.py	nonascii=12	utf8_bom=False	gbk_risk=False
 scripts\ps1_bom_scan.py	nonascii=1451	utf8_bom=False	gbk_risk=False
 scripts\pw_census.py	nonascii=240	utf8_bom=False	gbk_risk=False
+scripts\pw_pos_control_r53b.py	nonascii=1617	utf8_bom=False	gbk_risk=False
 scripts\pw_staged.py	nonascii=0	utf8_bom=False	gbk_risk=False
 scripts\pw_tree.py	nonascii=0	utf8_bom=False	gbk_risk=False
 scripts\r45_cutoff_delta.py	nonascii=30	utf8_bom=False	gbk_risk=False
@@ -88,6 +109,14 @@ scripts\r52_roundtrip.py	nonascii=780	utf8_bom=False	gbk_risk=False
 scripts\r53_cutoff_delta.py	nonascii=30	utf8_bom=False	gbk_risk=False
 scripts\r53_listdiff.py	nonascii=1059	utf8_bom=False	gbk_risk=False
 scripts\r53_roundtrip.py	nonascii=780	utf8_bom=False	gbk_risk=False
+scripts\r54_cutoff_delta.py	nonascii=30	utf8_bom=False	gbk_risk=False
+scripts\r54_listdiff.py	nonascii=1389	utf8_bom=False	gbk_risk=False
+scripts\r54_roundtrip.py	nonascii=780	utf8_bom=False	gbk_risk=False
+scripts\r55_cred_recount.py	nonascii=2196	utf8_bom=False	gbk_risk=False
+scripts\r55_cutoff_delta.py	nonascii=600	utf8_bom=False	gbk_risk=False
+scripts\r55_listdiff.py	nonascii=1817	utf8_bom=False	gbk_risk=False
+scripts\r55_roundtrip.py	nonascii=1589	utf8_bom=False	gbk_risk=False
+scripts\refresh_docs_snapshot_r54.py	nonascii=3112	utf8_bom=False	gbk_risk=False
 scripts\sync_r44.py	nonascii=26	utf8_bom=False	gbk_risk=False
 scripts\sync_r45.py	nonascii=128	utf8_bom=False	gbk_risk=False
 scripts\sync_r46.py	nonascii=128	utf8_bom=False	gbk_risk=False
@@ -98,7 +127,9 @@ scripts\sync_r50.py	nonascii=128	utf8_bom=False	gbk_risk=False
 scripts\sync_r51.py	nonascii=128	utf8_bom=False	gbk_risk=False
 scripts\sync_r52.py	nonascii=128	utf8_bom=False	gbk_risk=False
 scripts\sync_r53.py	nonascii=128	utf8_bom=False	gbk_risk=False
-scripts\verify_manifest.py	nonascii=1436	utf8_bom=False	gbk_risk=False
+scripts\sync_r54.py	nonascii=128	utf8_bom=False	gbk_risk=False
+scripts\sync_r55.py	nonascii=1081	utf8_bom=False	gbk_risk=False
+scripts\verify_manifest.py	nonascii=3245	utf8_bom=False	gbk_risk=False
 
 RISKY_PS1=0	[]
 ⇒ 对报告「我没能验证 #7」（`r44_upload.ps1` / `r44_verify2.ps1` 是否含中文）的回答：两只均 nonascii=0 ⇒ 无 BOM 不构成风险。

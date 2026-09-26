@@ -1,0 +1,8 @@
+RAN_AT   = 2026-09-24 12:27:49
+staged   = 542
+identical(内容逐字节等,  sha256) = 541
+changed_since_cutoff = 1 ['hardware/ht305_sync/scripts/r55_roundtrip.py']
+deleted_since_cutoff = 0 []
+new_since_cutoff     = 9 ['hardware/ht305_sync/evidence/r55_local.txt', 'hardware/ht305_sync/evidence/r55_local_names.txt', 'hardware/ht305_sync/evidence/r55_probe.txt', 'hardware/ht305_sync/evidence/r55_remote_names.txt', 'hardware/ht305_sync/evidence/r55_roundtrip.txt', 'hardware/ht305_sync/evidence/r55_roundtrip_2.txt', 'hardware/ht305_sync/evidence/r55_run_log.txt', 'hardware/ht305_sync/evidence/r55_scp_err.txt', 'hardware/ht305_sync/evidence/r55_verify.txt']
+SELF_CHECK = 四桶互斥且并集 == 当前候选集(551)：PASS
+EXPLANATION = new_since 是本代**打包截止之后**才进仓库的取证/脚本件（取证直接落 evidence/ 的必然结果），不是包漏了东西；判"包 == 现状"看的是 changed/deleted 两桶。

@@ -25,9 +25,64 @@ static const char *TAG = "eink";
  * "屏上一定出现内容"，而全刷是唯一**逐条对着官方 EPD_Display_Base + EPD_TurnOnDisplay
  * 核过寄存器**的路径；局刷则是我们自己的窗口化实现（官方 Display_Partial 本身有
  * Xend 少 7 列、以及把整幅子数据从缓冲区首开始推的问题，见排查记录），风险更高。
- * 看到全刷内容确认后再置 1 专测局刷与鬼影，出问题时结论也不会和"屏到底有没有电"混在一起。 */
+ * 看到全刷内容确认后再置 1 专测局刷与鬼影，出问题时结论也不会和"屏到底有没有电"混在一起。
+ *
+ * 【R59 换板后的口径订正】上面那句"AXP 至今 0 应答"只属于 3.97 那块板：本板（1.54）没有
+ * AXP，屏电在 GPIO6。置 0 这条**决定不变**，但理由换成两条新的：① 全树屏亮肉眼确认累计仍
+ * 0 次，"要不要开始吃局刷的残影风险"这个问题还没有一条肉眼证据能回答；② R59 在真机上量到
+ * 的局刷是"整幅 5000B 推进去"（91+574 ms），窗口只进日志不进硬件，也就是说这条路径省的是
+ * 命令步数、不是带宽——它省不掉残影，却会引入脏区/并集那一整套新变量。
+ * 【R60 订正】上面理由①那句"肉眼确认累计仍 0 次"已经过期：2026-09-25 第一次肉眼确认到手，
+ * 确认的是**全刷**路径（屏上出现我方绘制的配网提示）。这条订正不推翻"先置 0"的决定——
+ * 局刷路径至今仍是 0 次肉眼验证，而全刷已经能用，风险收益比没有变化。 */
 #define ENABLE_EINK_PARTIAL 0
 #define FULL_EVERY_N_PARTIAL 5
+
+/* ---------------- 版面（每块板一套 y 坐标，都从屏顶数起） ----------------
+ * 3.97 那一列数值是 R19~R57 一直在用的版面，本次换板**没有**改动它们；
+ * 1.54 这一列是按字号高度推的；2026-09-25 有了全项目**第一次**肉眼确认（屏上出现我方绘制的
+ * 配网提示），而那次确认当场暴露的就是本列的行高缺陷 —— 现在的数值按实测字模高重排过一遍。
+ * 用到的字模**实际高度**（逐档核对 ui_font.c 的 uif_glyph_t.h，同档内全部字模等高）：
+ *   CJK32 = 43（ascent 34）/ LATIN32 = 31（ascent 23）/ ASCII16 = 16（ascent 12）/
+ *   DIGIT96 = 128（ascent 102）
+ * ⚠️ 行高用 ascent 是 R59 那版 1.54 列的错处：ascent 只到基线，字模还有下行部分，
+ * 拿 34 当 CJK32 的行高会把每行压掉 9px，肉眼看到的就是两行字叠在一起。
+ * 下面每格的写法一律是"起画 y .. y+字模高-1"，凡跨出 200 的都被 draw_wrapped 截断。
+ * 200x200 上放得下"一只大数字 + 一行全角"，放不下两只大数字加两行全角，
+ * 所以时钟页在本板只留大数字 + 日期，标题走半角小字换行。 */
+#if BOARD_EPAPER_1IN54
+#define LAY_STATUS_L1     8                    /* CJK32: 8..50   */
+#define LAY_STATUS_L2     54                   /* CJK32: 54..96  */
+#define LAY_STATUS_L3     100                  /* ASCII16 换行区: 100/120/140/160/180，末行 180..195 */
+#define LAY_STATUS_L3_W   (EPD_WIDTH - 8)
+#define LAY_STATUS_L3_H   20
+#define LAY_CLOCK_BIG     2                    /* DIGIT96: 2..129 */
+#define LAY_CLOCK_DATE    134                  /* CJK32: 134..176 */
+#define LAY_CLOCK_TITLE   180                  /* ASCII16 单行: 180..195（第二行 y=200 起，被屏底截掉） */
+#define LAY_MSG_Y         6                    /* 起画从 10 降到 6：见 LAY_MSG_PAGE_BOT 那条 */
+#define LAY_MSG_W         (EPD_WIDTH - 12)
+#define LAY_MSG_H         44                   /* 下限，实际由 draw_wrapped 钳到本行字模高 */
+#define LAY_MSG_PAGE_BOT  (EPD_HEIGHT - 16)    /* 页码起画 y=EPD_HEIGHT-16=184、高 16，故正文界取 184。
+                                                * 这里每一像素都是账：配网那条消息 4 视觉行、行距 44。
+                                                * 旧配置 y0=10 ⇒ 行 10/54/98/142，第 4 行 142+44=186 > 182
+                                                * ⇒ 分 2 页，末页只剩 3 字节（URL 被劈断）。
+                                                * 改 y0=6 + 界 184 ⇒ 行 6/50/94/138，138+44=182 <= 184，单页装完。
+                                                * 分页规则是"整行装得下才留本页"、按 pitch(>=字模高) 判定
+                                                * ⇒ 行底边最远 138+43=181，仍不碰页码那 16px。 */
+#else
+#define LAY_STATUS_L1     96
+#define LAY_STATUS_L2     168
+#define LAY_STATUS_L3     248
+#define LAY_STATUS_L3_W   (EPD_WIDTH - 80)
+#define LAY_STATUS_L3_H   20
+#define LAY_CLOCK_BIG     90
+#define LAY_CLOCK_DATE    286
+#define LAY_CLOCK_TITLE   344
+#define LAY_MSG_Y         180
+#define LAY_MSG_W         (EPD_WIDTH - 60)
+#define LAY_MSG_H         46
+#define LAY_MSG_PAGE_BOT  (EPD_HEIGHT - 30)    /* 消息页可用到底边：下面 30px 留给页码 */
+#endif
 
 typedef enum { PAGE_NONE = 0, PAGE_CLOCK, PAGE_STATUS, PAGE_MSG } page_t;
 
@@ -118,6 +173,26 @@ static const uif_font_t *pick_digit(uint32_t cp)
     return &UIF_DIGIT96;
 }
 
+/* 消息页专用：中文仍走 CJK32，但半角走 ASCII16。
+ * 理由不是"好看"，是"装得下"：配网提示那句（热点名+口令+IP）用 pick_body 量出来 942px，
+ * 在 200px 宽的屏上要 6 行 × 43px = 258px，屏只有 200px ⇒ 尾两行必然画到屏外。
+ * 换这一档后同一条消息是 4 行 × 43px，从 y=10 起第 4 行底边 185，仍在屏内。 */
+static const uif_font_t *pick_compact(uint32_t cp)
+{
+    if (cp < 0x80) return &UIF_ASCII16;
+    return &UIF_CJK32;
+}
+
+/* 一档字模的实际行高：同一档内所有字模等高（已逐档核对 ui_font.c：CJK32=43 / LATIN32=31 /
+ * ASCII16=16 / DIGIT96=128），所以取该档第一只字模的高即可，不必逐字查。
+ * 注意这**不是** ascent：ascent 是基线距字模顶部的距离（CJK32 的 ascent 是 34），
+ * 拿它当行高会把每行压掉 9px —— 本轮行间重叠缺陷就是这么来的。 */
+static int font_row_height(const uif_font_t *f)
+{
+    if (!f || f->count <= 0 || !f->glyphs || !f->glyphs[0]) return 0;
+    return (int)f->glyphs[0]->h;
+}
+
 static void draw_glyph(int x, int y, const uif_glyph_t *g)
 {
     int stride = (g->w + 7) / 8;
@@ -198,46 +273,145 @@ static void draw_centered(int y, const char *s, pick_fn pick)
     int w = measure_text(s, pick);
     int x = (EPD_WIDTH - w) / 2;
     if (x < 0) x = 0;
+    /* 200px 宽的屏上"一行放不下的中文标题"是常态，而超出的部分是被 fb_black 的边界
+     * 检查静默吃掉的：不报错、不留痕，肉眼只看到"字少了"。这里补一行 WARN，
+     * 让"截断"这件事在日志里可见（不改行为：仍然居左起画、画不下就丢）。 */
+    if (w > EPD_WIDTH)
+        ESP_LOGW(TAG, "line overflow: \"%s\" 需 %dpx > %dpx，右侧 %dpx 被截断",
+                 s ? s : "", w, EPD_WIDTH, w - EPD_WIDTH);
     draw_text(x, y, s, pick);
 }
 
-/* 贪心换行渲染：按字符断行（CJK 无空格也排得开），限宽 maxw。
- * 两个不变量：①line 每装一个字符立刻补 NUL，否则 measure_text 会把上一行的
- * 残留字节算进宽度；②y 不越过屏底，画不下的截断（宁截断也不把字形写到帧缓冲
- * 外，也不让 y 无限增长把后面的消息全推没）。 */
-static void draw_wrapped(int y0, const char *s, pick_fn pick, int maxw, int line_h)
+/* ---------- 换行引擎（切行只算一次，画与分页共用同一份结果） ----------
+ * 旧版 `draw_wrapped` 把"切行"和"画到屏上"绑在同一个循环里，代价不是难看，是**信息丢失**：
+ * 循环一碰到屏底就 break，上层连"其实还剩 3 行没地方放"这个数都拿不到。墨水屏没有滚动，
+ * 丢了就是设备上永远看不到（R61 用户报"只能看当前页面"，根子里是这一条）。
+ * 所以拆成两步：wrap_lines 只算每行的[字节数, 行距]不动 framebuffer，谁消费谁决定
+ * "取前几行"（draw_wrapped，保持旧的屏底截断语义）还是"取第几页"（消息页分页）。
+ * 行距口径与旧版逐字相同：本行内所有字模实际高的最大值，且不低于调用方给的 line_h。
+ * s_ln_* 是共享暂存：所有调用点都在 s_lock 内，且互不嵌套（分页渲染不调 draw_wrapped）。 */
+#define WRAP_CAP 40                 /* 一次最多记 40 视觉行，多出的只计数不进数组 */
+#define WRAP_LINE_BYTES 256         /* 行缓冲宽度，理由见 wrap_lines 里那段余量账 */
+static int s_ln_len[WRAP_CAP], s_ln_adv[WRAP_CAP], s_ln_pitch[WRAP_CAP];
+
+/* 前 len 字节里最高的字模行高。len 必须是完整 UTF-8 前缀（切点落在字符边界上）。 */
+static int seg_row_height(const char *s, int len, pick_fn pick)
+{
+    int h = 0, i = 0;
+    while (i < len) {
+        uint32_t cp;
+        const char *np = utf8_next(s + i, &cp);
+        int step = (int)(np - (s + i));
+        if (step <= 0) break;
+        int fh = font_row_height(pick(cp));
+        if (fh > h) h = fh;
+        i += step;
+    }
+    return h;
+}
+
+/* 返回写进 s_ln_* 的行数（<=WRAP_CAP）；*total 输出**总行数**（可以比返回值大）。
+ * 每行的起始偏移不用单独记：画出去的字节数记在 s_ln_len，从源里吃掉的字节数记在
+ * s_ln_adv，两者只在"在空格处断行"时不同（差那只空格，见下面 brk 那段）。
+ * 消费方：居中绘制按 s_ln_len 取字，向后走指针按 s_ln_adv。 */
+static int wrap_lines(const char *s, pick_fn pick, int maxw, int line_h, int *total)
 {
     /* 行缓冲要装得下"限宽内最坏的一整行"，否则宽度优先的换行轮不到生效、
      * 退化成每 N 字硬断一行。按字节最省的是 ASCII16 那档：字模 8px + 1px 间距 = 9px/字节，
      * 两个调用点里最宽的限宽是 740px → 740/9 ≈ 82B 一行；32px 全角更宽（33px/字）但
-     * 3B/字，算下来 ≈67B。取 256 是 ≈3 倍余量，代价是这一层多 256B 栈——draw_wrapped
-     * 只跑在 app_main(8192B) 和 httpd(6144B) 上，6144B 的监视任务只做判活+刷白，不走这里。 */
-    char line[256] = {0};
-    int li = 0;
+     * 3B/字，算下来 ≈67B。取 256 是 ≈3 倍余量，代价是这一层多 256B 栈——本函数只跑在
+     * app_main(8192B) 和 httpd(6144B) 上，6144B 的监视任务只做判活+刷白，不走这里。 */
+    char line[WRAP_LINE_BYTES];
+    int li = 0, n = 0;
     const char *p = s;
     uint32_t cp;
-    int y = y0;
-    while (*p && y < EPD_HEIGHT) {
+    line[0] = 0;
+    *total = 0;
+    while (*p) {
         const char *np = utf8_next(p, &cp);
-        int n = (int)(np - p);
-        if (n > (int)sizeof(line) - 1) n = (int)sizeof(line) - 1;
-        bool fits_buf = (li + n < (int)sizeof(line));
+        int nb = (int)(np - p);
+        if (nb > WRAP_LINE_BYTES - 1) nb = WRAP_LINE_BYTES - 1;
+        bool fits_buf = (li + nb < (int)sizeof(line));
         int curw = measure_text(line, pick);
         int gw = fits_buf ? glyph_width(pick, cp) : 0;
         if (li > 0 && (!fits_buf || curw + gw > maxw)) {
-            draw_centered(y, line, pick);
-            y += line_h;
-            li = 0;
-            line[0] = 0;
-            if (y >= EPD_HEIGHT) break;
+            /* 断点优先级（R61，配网页排版的唯一真值）：
+             * ① 正好踩在一只空格上 overflow ⇒ 就在这儿断，空格两头都不给；
+             * ② 行尾已经是空格 ⇒ 从绘制里去掉它，也不让它变成下一行的行首空格；
+             * ③ 否则回退到行内**最后一个**空格，让 SSID / IP 这类整词不被劈开
+             *    （用户是照屏上敲的，劈开比多浪费几个像素糟得多）；
+             * ④ 一行里没有空格才硬切。
+             * 下标 0 的空格一律不回退（回退了这一行就是空的，会原地打转）。 */
+            int k = li, adv = li, drop_cur = 0;
+            if (cp == ' ' && fits_buf) {
+                adv = li;
+                drop_cur = 1;                       /* 这只空格就是断点，不进任何一行 */
+            } else if (li >= 2 && line[li - 1] == ' ') {
+                k = li - 1;
+                adv = li;
+            } else {
+                for (int j = li - 1; j > 0; j--) {
+                    if (line[j] == ' ') { k = j; adv = j + 1; break; }
+                }
+            }
+            if (k < 1) { k = li; adv = li; drop_cur = 0; }   /* 断完就空行了 ⇒ 退回硬切 */
+            if (n < WRAP_CAP) {
+                int h = seg_row_height(line, k, pick);
+                s_ln_len[n] = k;
+                s_ln_adv[n] = adv;
+                s_ln_pitch[n] = (h > line_h) ? h : line_h;
+            }
+            n++;
+            (*total)++;
+            int keep = li - adv;                           /* 空格之后还没画的部分 */
+            if (keep > 0) memmove(line, line + adv, keep);
+            li = keep;
+            line[li] = 0;
+            if (drop_cur) { p = np; continue; }
         }
-        memcpy(line + li, p, n);
-        li += n;
+        memcpy(line + li, p, nb);
+        li += nb;
         line[li] = 0;
         p = np;
     }
-    if (li > 0 && y < EPD_HEIGHT) {
+    if (li > 0) {
+        if (n < WRAP_CAP) {
+            int h = seg_row_height(line, li, pick);
+            s_ln_len[n] = li;
+            s_ln_adv[n] = li;
+            s_ln_pitch[n] = (h > line_h) ? h : line_h;
+        }
+        n++;
+        (*total)++;
+    }
+    return n > WRAP_CAP ? WRAP_CAP : n;
+}
+
+/* 贪心换行渲染：按字符断行（CJK 无空格也排得开），限宽 maxw。
+ * 三个不变量：①line 每装一个字符立刻补 NUL，否则 measure_text 会把上一行的
+ * 残留字节算进宽度；②y 不越过屏底，画不下的截断（宁截断也不把字形写到帧缓冲
+ * 外，也不让 y 无限增长把后面的消息全推没）；③**行距不小于本行真实字模高**，
+ * 参数 line_h 只是下限，版面常数写小了也压不到字（R59 那版就是靠这个洞压出重行的）。 */
+static void draw_wrapped(int y0, const char *s, pick_fn pick, int maxw, int line_h)
+{
+    int total = 0;
+    int nl = wrap_lines(s, pick, maxw, line_h, &total);
+    char line[WRAP_LINE_BYTES];
+    const char *p = s;
+    int y = y0, i;
+    for (i = 0; i < nl && y < EPD_HEIGHT; i++) {
+        memcpy(line, p, s_ln_len[i]);
+        line[s_ln_len[i]] = 0;
         draw_centered(y, line, pick);
+        y += s_ln_pitch[i];
+        p += s_ln_adv[i];
+    }
+    if (i < total) {
+        /* 整行画不完这件事也要可见：只丢字不打日志，肉眼看到的就只是"内容少了"，
+         * 而墨水屏又没有滚动，现场只会得到"这块屏不好用"这一个结论。
+         * 报"还剩几行"而不是"还剩几字节"：行数才是能跟屏上数得上的量。 */
+        ESP_LOGW(TAG, "draw_wrapped 截断：y=%d 已过屏底(EPD_HEIGHT=%d)，%d 行里只画了 %d 行，还剩 %d 行没地方画 → 版面装不下这条消息",
+                 y, EPD_HEIGHT, total, i, total - i);
     }
 }
 
@@ -316,7 +490,8 @@ static void paint_blank_locked(void)
     s_page = PAGE_NONE;
     s_px1 = 0; s_px0 = EPD_WIDTH;
     s_panel_ok = epd_ready();   /* 刷白途中面板掉线就不算点亮，交给监视任务重来 */
-    if (s_panel_ok) ESP_LOGI(TAG, "panel blanked (800x480), free int DMA heap=%u",
+    if (s_panel_ok) ESP_LOGI(TAG, "panel blanked (%dx%d), free int DMA heap=%u",
+                             EPD_WIDTH, EPD_HEIGHT,
                              (unsigned)heap_caps_get_free_size(MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA));
 }
 
@@ -435,7 +610,8 @@ void eink_init(void)
             paint_blank_locked();
             lit = s_panel_ok;
             if (lit)
-                ESP_LOGI(TAG, "eink driver ready (800x480), free int DMA heap=%u",
+                ESP_LOGI(TAG, "eink driver ready (%dx%d), free int DMA heap=%u",
+                         EPD_WIDTH, EPD_HEIGHT,
                          (unsigned)heap_caps_get_free_size(MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA));
         } else {
             ESP_LOGE(TAG, "panel alive but no framebuffer (%d), 交给监视任务重试拿内存", EPD_FB_SIZE);
@@ -455,10 +631,11 @@ void eink_show_status(const char *line1, const char *line2, const char *line3)
     if (!s_panel_ok || !s_lock) return;
     xSemaphoreTake(s_lock, portMAX_DELAY);
     begin_render();
-    draw_centered(96, line1 ? line1 : "", pick_body);
-    draw_centered(168, line2 ? line2 : "", pick_body);
+    draw_centered(LAY_STATUS_L1, line1 ? line1 : "", pick_body);
+    draw_centered(LAY_STATUS_L2, line2 ? line2 : "", pick_body);
     if (line3 && line3[0])
-        draw_wrapped(248, line3, pick_ascii, EPD_WIDTH - 80, 20);  /* 第三行是调试/错误串，用半角小字 */
+        /* 第三行是调试/错误串，用半角小字并允许换行 */
+        draw_wrapped(LAY_STATUS_L3, line3, pick_ascii, LAY_STATUS_L3_W, LAY_STATUS_L3_H);
     present(PAGE_STATUS);
     xSemaphoreGive(s_lock);
 }
@@ -470,11 +647,90 @@ void eink_show_clock(const char *hhmm, const char *date_line, const char *title)
     if (!s_panel_ok || !s_lock) return;
     xSemaphoreTake(s_lock, portMAX_DELAY);
     begin_render();
-    draw_centered(90, hhmm ? hhmm : "--:--", pick_digit);
-    draw_centered(286, date_line ? date_line : "", pick_body);
-    draw_centered(344, title ? title : "", pick_body);
+    draw_centered(LAY_CLOCK_BIG, hhmm ? hhmm : "--:--", pick_digit);
+    draw_centered(LAY_CLOCK_DATE, date_line ? date_line : "", pick_body);
+#if BOARD_EPAPER_1IN54
+    /* 本板放不下"整行全角标题"：标题（素材名，常含英文/数字）走半角换行，画不下的按
+     * `draw_wrapped` 既有规则截断。3.97 那一支保持原来的单行居中不变。 */
+    if (title && title[0])
+        draw_wrapped(LAY_CLOCK_TITLE, title, pick_ascii, LAY_MSG_W, LAY_STATUS_L3_H);
+#else
+    draw_centered(LAY_CLOCK_TITLE, title ? title : "", pick_body);
+#endif
     present(PAGE_CLOCK);
     xSemaphoreGive(s_lock);
+}
+
+/* ---------------- 消息页分页（R61） ----------------
+ * 墨水屏没有滚动，所以"一屏装不下的内容"只有两条出路：要么被丢掉（R60 之前的行为，
+ * 只留一行 WARN），要么分页。用户 2026-09-25 那句「只能看当前页面」要的正是后一条。
+ * 本模块只负责"第 k 页长什么样"和"这条消息共几页"；**按下去往哪走**（页面环）归 app，
+ * 见 main.c 的 ui_browse_next() —— 时钟页/状态页该说什么只有 app 知道。 */
+#define MSG_CAP 256               /* 在册最长一条消息（配网提示）≈47B，余量 ≈5 倍 */
+static char s_msg[MSG_CAP];       /* 最近一次 eink_show_message 的全文，翻页就按它切 */
+static bool s_msg_clipped;        /* 全文超过 MSG_CAP，被就地截短 */
+static int s_msg_page;            /* 当前页，0 起 */
+static int s_msg_pages = 1;       /* 当前 s_msg 的页数；s_msg[0]==0 时无意义 */
+static int s_ln_pg[WRAP_CAP], s_ln_py[WRAP_CAP];   /* 每行落在第几页、页内 y */
+
+/* 画 s_msg 的第 page 页，返回这条消息的总页数（>=1）。
+ * 一页能装几行**不写死**：全角行 43px、半角行 16px，同一屏混排时每页可装行数不同。
+ * 与 draw_wrapped 的区别在钳位口径：这里要求"整行装得下才留在本页"（y+行距<=页底），
+ * 而 draw_wrapped 只看起画点在不在屏内。分页不能把字切一半，所以取严的那条。 */
+static int render_msg_page(int page)
+{
+    int total = 0;
+    int nl = wrap_lines(s_msg, pick_compact, LAY_MSG_W, LAY_MSG_H, &total);
+    int pg = 0, y = LAY_MSG_Y;
+    for (int i = 0; i < nl; i++) {
+        if (i && y + s_ln_pitch[i] > LAY_MSG_PAGE_BOT) { pg++; y = LAY_MSG_Y; }
+        s_ln_pg[i] = pg;
+        s_ln_py[i] = y;
+        y += s_ln_pitch[i];
+    }
+    int pages = (nl > 0) ? pg + 1 : 1;
+    /* total 只可能因为 WRAP_CAP 截表而大于 nl；真到了那一页就明确说，别静默少页。 */
+    if (total > nl)
+        ESP_LOGW(TAG, "分页表只容 %d 行（本条 %d 行）→ 第 %d 页之后的内容这一版不显示", WRAP_CAP, total, pages);
+    /* 分页表自身要有一条盘上读数：否则"这条消息有几页、每行落在第几页"只剩屏上那个
+     * 页码可看，日志侧零证据。这里**只报结构不报内容**——在册消息里带配网口令。
+     * map 每项 "行号:页+页内y/字节数 "；满了就停，不把 off 写出界。 */
+    static char s_pagmap[WRAP_CAP * 16];
+    int off = 0, sum_adv = 0;
+    for (int i = 0; i < nl; i++) {
+        sum_adv += s_ln_adv[i];
+        int r = snprintf(s_pagmap + off, sizeof(s_pagmap) - off, "%d:%d+%d/%dB ",
+                         i, s_ln_pg[i], s_ln_py[i], s_ln_len[i]);
+        if (r < 0 || r >= (int)(sizeof(s_pagmap) - off)) break;
+        off += r;
+    }
+    s_pagmap[off] = 0;
+    int req = page;
+    if (page < 0) page = 0;
+    if (page >= pages) page = pages - 1;
+    /* sum_adv = 分页表从源串里吃掉的总字节数。空格断行会吞掉那只空格，
+     * 所以它和"每行绘制字节之和"通常不等——这个差就是被丢掉的空格数，
+     * 现场用它核"有没有整段没上屏"。 */
+    ESP_LOGI(TAG, "msg paging: bytes=%d sum_adv=%d lines=%d pages=%d clipped=%d req_page=%d shown_page=%d map=[%s]",
+             (int)strlen(s_msg), sum_adv, nl, pages, (int)s_msg_clipped, req, page, s_pagmap);
+    char line[WRAP_LINE_BYTES];
+    const char *p = s_msg;
+    for (int i = 0; i < nl; i++) {
+        int len = s_ln_len[i];
+        if (s_ln_pg[i] == page) {
+            memcpy(line, p, len);
+            line[len] = 0;
+            draw_centered(s_ln_py[i], line, pick_compact);
+        }
+        p += s_ln_adv[i];
+    }
+    /* 页码画在右下角那条预留带里。单页也要画「1/1」：否则用户分得清"这条就一行"和
+     * "翻页坏了"，而后者是本轮要修的缺陷本身的形状。末尾那只 '+' 表示全文被 MSG_CAP 截短。 */
+    char ind[32];   /* gcc 的 format-truncation 只看"%d 最坏 11 位"，不看 pages<=WRAP_CAP；
+                     * 16 会被判成可能截断（实测 -Werror=all 直接失败），按最坏 25B 给足。 */
+    snprintf(ind, sizeof(ind), "%d/%d%c", page + 1, pages, s_msg_clipped ? '+' : ' ');
+    draw_text(EPD_WIDTH - measure_text(ind, pick_ascii) - 2, EPD_HEIGHT - 16, ind, pick_ascii);
+    return pages;
 }
 
 void eink_show_message(const char *msg)
@@ -483,9 +739,46 @@ void eink_show_message(const char *msg)
     if (!s_panel_ok || !s_lock) return;
     xSemaphoreTake(s_lock, portMAX_DELAY);
     begin_render();
-    draw_wrapped(180, msg ? msg : "", pick_body, EPD_WIDTH - 60, 46);
+    s_msg[0] = 0;
+    s_msg_pages = 1;
+    s_msg_page = 0;
+    s_msg_clipped = false;
+    if (msg && msg[0]) {
+        size_t n = strlen(msg);
+        if (n >= MSG_CAP) {
+            n = MSG_CAP - 1;
+            s_msg_clipped = true;
+            ESP_LOGW(TAG, "消息 %uB > MSG_CAP %d，只留前 %uB 分页（后面的内容这版看不到）",
+                     (unsigned)strlen(msg), MSG_CAP, (unsigned)n);
+        }
+        memcpy(s_msg, msg, n);
+        s_msg[n] = 0;
+        s_msg_pages = render_msg_page(0);
+    }
     present(PAGE_MSG);
     xSemaphoreGive(s_lock);
+}
+
+int eink_msg_pages(void)
+{
+    return s_msg[0] ? s_msg_pages : 0;   /* 0 = 屏上没有可翻的消息 */
+}
+
+void eink_msg_goto_page(int page)
+{
+    if (!s_panel_ok || !s_lock) return;
+    xSemaphoreTake(s_lock, portMAX_DELAY);
+    begin_render();
+    int pages = render_msg_page(page);
+    s_msg_page = (page < 0) ? 0 : (page >= pages ? pages - 1 : page);
+    s_msg_pages = pages;
+    present(PAGE_MSG);
+    xSemaphoreGive(s_lock);
+}
+
+int eink_msg_page(void)
+{
+    return s_msg_page;
 }
 
 void eink_sleep(void)

@@ -1,0 +1,17 @@
+R58 正文遍  MODE=FACTORY-SURVEY-LAND  本遍进入时刻 _T0 = 2026-09-25 16:36:17（_T0 取在任何产证动作之前）
+DUMP 原厂整片件：esp32s3_flash_backup_8mb.bin = 8,388,608 B / md5 ff48b175522b9a9ab0c97d2b04187dbc / sha256[:16] bf897a8a37013db2 / 非FF 1,827,641 字节；分区表小件 = 3,072 B / md5 ce84da71239a89d1a530c39589b3aca5 == 整片件 0x8000 处 3,072 B（逐字 assert）
+PT 现读 3 只：nvs@0x9000/0x6000 + phy_init@0xF000/0x1000 + factory@0x10000/0x3F0000；factory 跨度 0x3F0000；对照臂 3.97 原厂件分区合计 0x1000000 > 0x800000 ⇒ 16 MB 目标，刷不进本片
+AXP 两臂同尺：原厂整片件 axp2101=0 / axp192=0 / axp_power=0 / epaper=16；3.97 那只 axp2101=2 / epaper=6（原厂件 axp* 全 0、3.97 那只 >0 ⇒ 两臂不同值，对照有效）
+LOG 120s：9,604 B / md5 b78f262b5e8519db768a65379b037039 / 非空行 172；引文逐字现读并 assert 唯一命中 10 只（Project name / i2c / shtc3 / in_out / cal MAC / SPI Flash Size / flash warn / Returned from app_main / LVGL tick / sdmmc）
+GPIO 普查现读 18 行 / 15 只：0/3/6/8/9/10/11/17/18/21/39/40/41/42/46；输出组 3/6/9/10/11/17/42/46；输入组 0/8/18/21；SPI 组 9/10/11（我方在册 SCLK/MOSI/CS/DC/RST/BUSY = 11/12/10/9/46/3）
+SOURCE 我方六根的来源链：3.97 官方 epaper_port.h 现读 EPD_*_PIN 六只 = 11/12/10/9/46/3（与我方 epd_driver.c:16-21 逐只相同；本遍第一版把出处写成 epaper_port.c，被这道门当场点红）⇒ 移植是忠实的，错在板型不是移植
+FLASH 引文（从会话记录现 grep 并 assert 存在）：cmd 含 "--chip esp32s3 -p COM14 -b 921600 --before default_reset --after no_reset write_flash 0x0"；"Wrote 8388608 bytes (1090314 compressed) at 0x00000000 in 30.6 seconds (effective 2195.5 kbit/s)..."；"Hash of data verified"
+ROLLBACK 三件套：快照 %TEMP%\r58_preflash_8mb.bin = 8,388,608 B / md5 709babfedbd88ea372bee96429064cb8 / 非FF 2,023,818（其 0x8000 处分区表 == 我方构建目录那只，assert 过）；我方待烧 fb32168af14d715b354e691edfa39fcd（r53 那根备份现读逐字相同 = fb32168af14d715b354e691edfa39fcd）；上一代在板归档件 4842a3a0c5f41ce2e60e3ceb122e9901
+GATE 明文闸：PROV_PASS 长度现读 10 字符（值不落纸）；120s 日志 HITS=0；阳性对照只在内存（45 B 一只脏样本）命中 1 ⇒ 0 命中才复制，本遍已复制进 20260925_R58_原厂1_54固件启动120s.log（回读逐字等 + 再验 HITS=0）
+SEAL 写盘前 FOLD-A=388 只 / 1,427,227 B / efda29538483bbc73e91941936512a2f / FOLD-B=388 只 / 1,427,227 B / 2af6003bcc5d728911becee15e0ace69；写盘后复跑公共量等式 assert 通过（未动归档目录）；阳性对照 PROBE=evidence/SEAL_VIOLATION_PROBE14.txt 两尺异值 FIRED=2
+INNER 内层复核器 rc=0 载体 hardware/vm_run_20260925_163619.txt：INNER_ROWS=ROWS=386  MISMATCH=0  MISSING=0  UNLISTED(盘上有、清单没记)=0
+FREQ 写前 223 条 / 2168 行 -> 本批 +4 条 / +18 正文行 + glue + 台账 -> 写后现数 **227 条 / 2188 行**
+DOC 写前 3788 行 -> §38.29 追加 14 行 + glue -> 写后现数 3803 行；§38.29 标题现读 1 只
+GUIDE 写前 809 行 -> 〇-补4 插入 17 行（在 ## 一、 之前）-> 写后现数 826 行；纯 LF 复验 CR=0
+现场态：rev-list=17 / HEAD=39d3031 / status --porcelain = 14 M + 470 ?? = 484 行；板上那只 = 原厂 ff48b175…，待烧 = 我方 fb32168a… ⇒ "待烧 = 板上"本遍第二次断裂（方向相反）
+NOTDONE 没换电池 / 没万用表 / 没第二块板 / 未改 main/ 一字节 / 未重建我方固件 / 未做 47-48 全地址扫描 / 未判 EPD 引脚 / 屏亮肉眼确认 0 次 ⇒ 不播提示音 / 未新建备份根 / 未新建清单代次 / 未 push / 未 amend / 两只原厂 .bin 与含凭据镜像永不 stage / %TEMP% 快照与原件不搬走不删 / 零删除

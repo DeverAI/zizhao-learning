@@ -1,0 +1,23 @@
+R61 分页链路取证（本件由 hardware/r61_evidence.py 生成）
+原始日志: r61z_20260926_111313_run.log
+脱敏: 口令宏的值运行时从 provision_ap.c 现读并逐处替换，本件不含明文
+
+== 镜像身份链 ==
+I (390) cpu_start: ELF file SHA256:  a23c5df6b46f8293...
+
+== 配网页（真机消息，脱敏后） ==
+MSG 热点: Zizhao-Setup-758D 密码: [REDACTED] 打开 192.168.4.1
+bytes=63 sum_adv=62 lines=4 pages=1 clipped=0 req_page=0 shown_page=0 map=[0:0+6/7B 1:0+50/17B 2:0+94/18B 3:0+138/18B ]
+PREDICT bytes/sum_adv/lines/pages = ('63', '62', '4', '1') map=4 项
+MATCH = True（1 条真机行全部命中预测）
+
+== 多页自检页（纯 ASCII 诊断文本，无口令） ==
+PREDICT bytes/sum_adv/lines/pages = ('141', '141', '10', '3') map=10 项
+MATCH = False（0 条真机行全部命中预测）
+req_page 取值 = []
+shown_page 取值 = []
+
+== 页面环（buttons_inject 驱动，非实物按键） ==
+BROWSE_HITS = 0
+
+== 自检步与判决 ==

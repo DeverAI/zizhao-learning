@@ -1,0 +1,10 @@
+FREQERR2_AT=2026-09-24 13:08:06
+DOC_BEFORE_BYTES=328030 DOC_AFTER_BYTES=341717 APPENDED=13687
+KIND_COUNT=181->187（本批新增 6 条）
+WC_L=1827->1873
+CRLF_PURE=CRLF==LF(1873)
+PURE_APPEND=正文以旧字节整体开头（独立回读另一次调用比对）
+DOC_MD5=e8f179e2d1b581fe272c15337e1152d6
+ENTRIES=1 同一次运行两只 now() 跨秒假红 / 2 跑绿了却没载体(gen 23) / 3 静默排除=造隐形尺 / 4 打印已 assert 过的等式=半绿 / 5 同代第二次踩 b-中文 / 6 末版封界(冻结后写进归档=亲手降级)
+NOTE=台账行自身的两条"之后"数在**将被写出的完整字节串**上现算，回填后复数两把尺均不变；本载体与 §38.19 落地器、终态复核载体同批落在 hardware/（归档目录之外）。
+VERDICT=LANDED_FREQERR2

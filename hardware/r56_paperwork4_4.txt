@@ -1,0 +1,22 @@
+R56 第四批 paperwork 落地器  MODE=REWROTE_CARRIER_ONLY
+本遍现跑于 2026-09-24 22:32:13（台账行标题时刻 = 2026-09-24 22:32:08；载体由脚本自己落盘，在归档目录之外）
+FIX 复跑支修复的现场三格（本遍从 r56_paperwork2.py 源码现读）：等式含 `int(_m.group(4)) + len(_tail_f)` = True / 含被剔除的 `GLUE_F + len(_tail_f)` = False / 含 `assert GLUE_F == 1` = True；同族第三处 = r56_paperwork3.py 的 `kinds(freq_final) - K0 == N_ENTRY` 已改成 tail-scoped 两分支（本遍现读含 else 分支 = True）
+FIX 第一次 POSCTL rc=1 的那一遍**没有出错工具自己的载体**（崩在写载体之前）⇒ 该次崩溃是叙述级证据；本遍能落的是"修复后源码三格现读 + 复跑 rc=0"，两者合起来只证明**现在的复跑支是对的**，不证明它曾经对过
+RULER 混尺订正（两只载体逐字现读）：`hardware/r56_paperwork3.txt` 第 20 行 = 改前 630,514 B（LF 串长度）-> 终态 639,106 B（盘上 CRLF）⇒ 箭头 8,592 B；`hardware/r56_paperwork3_3.txt` 同一格 = 改前 634,224 B（同尺）-> 终态 639,106 B ⇒ 真追加 4,882 B；夸大约 1.76 倍
+RULER 换算式（本遍现算）：(639,106 - 630,514) - (639,106 - 634,224) = 3710 = 改前那 3,710 行每行 1 只 CR ⇒ 成立 = True；反查 `crlf(盘上现读串) 长度 == 盘上大小` = True（649,663 B）
+HIST 同族横向扫描（本遍从 hardware/ 目录现扫，不是点名我记得的那几只）：含 `DOC 改前` 且含 `getsize(DOC)` 的工具 = 5 只 = r56_paperwork1.py + r56_paperwork2.py + r56_paperwork3.py + r56_paperwork4.py + r56_paperwork5.py；其中"改前"仍按 LF 串长度算 = r56_paperwork1.py ⇒ 只点名不追改
+MIXED-SAME 两只对照物的身份：md5(r56_paperwork3.txt)=5484d95b / md5(r56_paperwork3_3.txt)=6e3264ce；两者"终态"两格逐字相等 = True
+LEDGER 新口径首跑（承 §38.24 那格换代：命令原文 + 本次输出同落纸）：`grep -cF -- '- [ ]' todo.md` 输出 = 17（本遍现跑；本遍同样没动它们）
+SEAL 清单在册=386 行 / 目录全量=388 只 / 1,427,227 B / 差集逐只点名=MANIFEST.txt + evidence/manifest_gen_log.txt / mtime 秒数全部 <= 末版那一秒 2026-09-24 12:53:39
+GATE ARMS_FIRED=1/1（假名 evidence/SEAL_VIOLATION_PROBE4.txt 只在内存；盘上反查不存在 = True）
+GEN 末版=代次日志末行 09-24 12:53:39 / 386 / 1392176 / 69（本批未新建代次）
+VM 本遍真跑 rc=0 / VM_RC=0 / ROWS=386  MISMATCH=0  MISSING=0  UNLISTED(盘上有、清单没记)=0 / VERDICT=MANIFEST_STILL_TRUE / SLOT=INNER-SLOT-EXHAUSTED / INNER_RC=2 / VM_CARRIER=hardware/vm_run_20260924_223208_2.txt
+FIELD rev-list=17 / comports=COM6, COM4, COM3, COM5 / COM14 缺席 / 本遍零串口动作 / 屏亮肉眼确认 0 次 / 未播提示音
+FREQ 改前 200 条 / 1997 行 -> 本批在册终态 202 条 / 2015 行
+DOC 改前 3722 行 / 639,106 B -> 本批在册终态 3733 行 / 643,340 B（两格同尺 = 行尾 CRLF 的落盘字节数；反查 终态 643,340 B + 尾段 15 行 == 盘上现读 649,663 B = True）
+RULER-SELF 终态那把尺扣尾段（承第三批那一格的第 5 次命中，本遍起两批工具同尺）：本批窗口右界剥掉了下一批（若已落）插进来的空行 glue ⇒ 终态 = 盘上 3748 行 − 尾段 15 行 = 3733 行；FreqErr 同理 202 条 / 2015 行；窗口等式 改前 3722 + 上方空行 1 + 本批节 10 = 终态 = True
+WINDOW 前缀等式（"只追加、正文一字未改"）：FreqErr 1997 行是盘上 2040 行的逐字前缀 = True / 排查记录 3722 -> 3748 行 = True；本批窗口 = FreqErr 17 行 + §38.25 10 行
+POSCTL 复跑第三批落地器 rc=0 / MODE=REWROTE_CARRIER_ONLY LEDGER: 只数 在册17/现跑17 重合位=0 / 名单换过=True | FREQ 改前 198 条 / 1977 行 -> 205 条 / 2040 行 | VERDICT=OK CARRIER=r56_paperwork3_12.txt
+WITNESS FREQ md5=2ed371f1 / DOC md5=12199857（本遍结束时现算）
+NOTDONE 本遍（2026-09-24 22:32:13）没做：串口 / 烧录 / 换电池 / 万用表 / 第二块板 / 改 main 源码 / 重建固件 / 勾或改那 17 只未选项 / 新建备份根 / 新建清单代次 / push / amend / 删除 —— 屏亮 0 次肉眼确认 ⇒ 未播提示音；todo 第十七遍、docs 第十遍、backups README 第十次读数、提交轮#9、第 14 代同步在本节之后 ⇒ 本遍不预写它们的数
+VERDICT=OK-CARRIER-ONLY（两只 CRLF 目标里本遍写盘 0 只 + 载体 1 只）

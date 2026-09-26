@@ -1,0 +1,36 @@
+CRED_RECOUNT_AT=2026-09-24 12:40:15
+PRIOR_ATTEMPT=evidence/r55_cred_recount.txt（那一遍口径写错：把"声明该名的脚本自己"静默排除，等于造一把看不见的尺；首跑读数留在盘上不覆盖）
+PRIOR_VERDICT=DIRTY（FETCH_NAME_LEAKED_INTO_REPO=1，那 1 只就在同步目录内）
+SCOPE=evidence/r55_*.txt 16 只 + scripts/ 本代新写 7 只 = 23 只，逐只点名（不截断）
+--- evidence/ ---
+r55_cred_recount.txt	1436	md5:7c8004b2	hits=0
+r55_cutoff_delta.txt	949	md5:e4a67866	hits=0
+r55_land_A.txt	885	md5:19834139	hits=0
+r55_land_readme.txt	272	md5:ab2d1c49	hits=0
+r55_listdiff.txt	1579	md5:9cbc1899	hits=0
+r55_local.txt	678	md5:a693d603	hits=0
+r55_local_names.txt	24584	md5:44e4382f	hits=0
+r55_parse_check.txt	537	md5:bbc5f1ac	hits=0
+r55_probe.txt	2313	md5:69ad08e2	hits=0
+r55_remote_names.txt	24584	md5:5863db89	hits=0
+r55_roundtrip.txt	222	md5:d233e69e	hits=0
+r55_roundtrip_2.txt	1022	md5:35c6eed6	hits=0
+r55_run_log.txt	2317	md5:b5984755	hits=0
+r55_scp_err.txt	724	md5:c63b618d	hits=0
+r55_verify.txt	26222	md5:507f2b35	hits=0
+r55_verify_manifest_gen22_stale.txt	581	md5:24d46003	hits=0
+--- scripts/ ---
+land_r55_readme.py	10105	md5:eed3fcb8	hits=0
+r55_cred_recount.py	6104	md5:6264f777	hits=0
+r55_cutoff_delta.py	3092	md5:7fcd00ce	hits=0
+r55_listdiff.py	5017	md5:316cc9a8	hits=0
+r55_roundtrip.py	5229	md5:6c5ab442	hits=0
+r55_upload.ps1	6393	md5:6b57cba0	hits=0
+sync_r55.py	5898	md5:0495b230	hits=0
+TOTAL_HITS=0
+POSITIVE_CONTROL_IN_MEMORY_HITS=1（应 1：证明这把尺真的含该串就会响，样本不落盘）
+FETCH=r55_remote_provision_ap.c 在 %TEMP% 字节数=10199（只数不读）
+FETCH_NAME_IN_REPO_INSIDE_SYNC_SCOPE=3（按构造合法：声明它的脚本 + 打印它的取证载体）
+FETCH_NAME_LEAKED_OUTSIDE_SYNC_SCOPE=0 []
+NAMES_SCANNED=565（git ls-files -c --others --exclude-standard，排除 .workbuddy/）
+VERDICT=CLEAN

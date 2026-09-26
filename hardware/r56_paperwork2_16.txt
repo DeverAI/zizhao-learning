@@ -1,0 +1,22 @@
+R56 真机首烧批 paperwork 落地器  MODE=REWROTE_CARRIER_ONLY
+本遍现跑于 2026-09-24 22:02:21（台账行标题时刻 = 2026-09-24 20:17:41；载体由脚本自己落盘，在归档目录之外）
+EV 取证载体=20260924_R56真机首烧fb32168a判据摘录_v2.txt / 9171 B / md5=f262b8d4c9323e5920796ebdba05bc4c（**md5**，32 位 hex）/ 生成时刻 2026-09-24 19:59:57 / 裁决 VERDICT=FOUR-ARMS-ALL-NACK R53-ROOT-CAUSE-REFUTED PHYSICAL-KEY-ARM-FIRST-SAMPLE
+EV 四臂解析（逐字取自那只载体，并回核盘上 md5 相等）=A=9 条/5,639 B/md5=d3a03766… ; B=10 条/20,299 B/md5=7cb3e817… ; C=18 条/25,822 B/md5=54e14b08… ; D=29 条/19,809 B/md5=ffc903a7…
+EV 合计=66 条 0x34 行 / 应答 0 条 / 复位起抓（ROM banner 命中）2 臂 / D 窗口=19:26:24 至 19:28:50（现算自 TEMP 原件 ctime→mtime）
+CITE 两把量具独立现查（本遍 vs 取证载体在册）：PWRON 行 316/316、PWR_OUT 行 104/104、分流节 §14.3(第 380 行)/§14.3(第 380 行)；锚点一律查在**改前正文**上（本批正文自己会引用这些串，拿全文件查就自指）；同一遍反查 v1 那句 `§13-2` 在改前排查记录里命中 0 处 ⇒ 假指针成立 = 本批 FreqErr 第 3 条
+IDENTITY 三格等式：待烧(构建目录)md5=fb32168af14d715b354e691edfa39fcd / 归档 r53 md5=fb32168af14d715b354e691edfa39fcd / 板上 boot 指纹=19906d9ded1aaf83 且它出现在 ['19906d9ded1aaf83', '574f6c825049572e'] 里 ⇒ (92) 收口成立 = True；旧镜像 r43 md5=4842a3a0c5f41ce2e60e3ceb122e9901 降级为历史（A/B 两臂的图）
+DENOM 新口径现算：hardware/ 单层 *.log=11 只 / 其中"官方例程"对照 2 只不进分母 / 我方=9 只 / 本批新增 4 只 / 本批之前 5 只里 ROM banner 命中 4 只；上一格在册 "8 只 / 6 次上电" 本遍复算不出构成 ⇒ 就地降级为不可复算的旧快照（禁止在它上面做加法）
+SEAL 清单在册=386 行 / 目录全量=388 只 / 1,427,227 B / 差集逐只点名=MANIFEST.txt + evidence/manifest_gen_log.txt / 两只 mtime 秒数 == 末版那一秒 2026-09-24 12:53:39
+GATE ARMS_FIRED=1/1（假名 evidence/SEAL_VIOLATION_PROBE2.txt 只在内存；盘上反查不存在 = True）
+VM 本遍真跑（内层 verify_manifest 的 gen 24 槽位已用满 ⇒ 由 hardware/vm_run.py 逐字代落载体）rc=0 / ROWS=386  MISMATCH=0  MISSING=0  UNLISTED(盘上有、清单没记)=0 / VERDICT=MANIFEST_STILL_TRUE / VM_CARRIER=hardware/vm_run_20260924_220219.txt
+POOL 槽位池容量逐只现读（本遍从每只工具源码正则读出，非抄上一遍的话）：达本批容量 59 只的 9 只 = r55_fix_paperwork3.py + r55_paperwork3.py + r55_paperwork4.py + r55_paperwork4_fix.py + r56_paperwork1.py + r56_paperwork2.py + r56_paperwork3.py + r56_paperwork4.py + r56_paperwork5.py / 未达 = r55_freqerr2.py(9) + r55_sec38_19_check.py(9)；命中池定义的落地器共 11 只（少于 5 只即 ABORT）
+FIELD rev-list=17 / comports=COM6, COM4, COM3, COM5（COM14 缺席）/ docs 快照=2026-09-24 13:33:42（表格 38 行）/ 屏亮肉眼确认 0 次 / §38.22→取证 间隔 110 分钟
+FREQ 改前 193 条 / 1940 行 -> 盘上在册终态 205 条 / 2040 行
+DOC 改前 3689 行 / 624,208 B -> 盘上在册终态 3747 行 / 648,637 B（两格同尺 = 行尾 CRLF 的落盘字节数；反查 crlf(终态串) 长度 == 盘上现读大小 = True）
+复跑差额账目（"口径 = 本批窗口内、不含后续批次"的可复算证明）：FreqErr 本批台账行之下另有 63 行 / 7 条（本批标题上方空行现读 1 只，它已在册于本批 AFTER 行数之内 ⇒ 不进这条等式）；排查记录 §38.23 标题上方空行 1 只、本节之后 36 行 ⇒ 盘上行数 = 改前 3689 + 上方空行 1 + 本批节 21 行 + 之后 36 行
+WINDOW 前缀等式（"只追加、正文一字未改"的可复算证明）：FreqErr 改前 1940 行是盘上 2040 行的逐字前缀 = True / 排查记录 3689 -> 3747 行 = True；本批窗口 = FreqErr 36 行 + §38.23 21 行
+POSCTL 复跑第一批落地器 rc=0 / MODE=REWROTE_CARRIER_ONLY SEAL: rows=386 disk=388 delta=['MANIFEST.txt', 'evidence/manifest_gen_log.txt'] | FREQ 192 条 / 1926 行 -> 205 条 / 2040 行 | VERDICT=OK CARRIER=r56_paperwork1_21.txt
+SELF-SCOPE-NOTE 本行的"零串口动作"只描述本遍（paperwork，2026-09-24 22:02:21）。同批真机首烧的四臂抓取确实发生过（在册 = `20260924_R56真机首烧fb32168a判据摘录_v2.txt`，生成时刻 2026-09-24 19:59:57，间隔 §38.22 落地 110 分钟）⇒ 不许把本行读成"R56 没烧录"。"本遍没开口"这一格拿不出外部证据（comports 只读列口 = 自述），按本批 FreqErr 第 2 条在此点名"无法证明"。
+WITNESS FREQ md5=2ed371f1 / DOC md5=d7ef42a1（本遍结束时现算）
+NOTDONE 本遍（2026-09-24 22:02:21）没做：串口 / 烧录 / 换电池 / 万用表 / 第二块板 / 改 main 源码 / 重建固件 / 新建备份根 / 新建清单代次 / push / amend / 删除 —— 屏亮 0 次肉眼确认 ⇒ 未播提示音；提交轮#9、docs 第十遍、backups README 第十次读数、第 14 代同步在本节之后 ⇒ 本遍不预写它们的数
+VERDICT=OK-CARRIER-ONLY（两只 CRLF 目标里本遍写盘 0 只 + 载体 1 只）

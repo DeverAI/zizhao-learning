@@ -1,4 +1,11 @@
 #include "epd_driver.h"
+#include "board_profile.h"
+
+/* 本文件是 **3.97 那一套脚号**（SCLK11/MOSI12/CS10/DC9/RST46/BUSY3）+ AXP 屏电。
+ * 与 `epd_panel_1in54.c` 顶部那条 `#if BOARD_EPAPER_1IN54` 成对：开关只有一处真值
+ * （`board_profile.h`），两只驱动都常驻 SRCS，没被选中的那只被预处理器整只抹空，
+ * 所以既不会重复定义那 8 个 `epd_*` 入口，也不会"看起来编过了、脚全是错的"。 */
+#if !BOARD_EPAPER_1IN54
 
 #include <stdatomic.h>
 #include <stdio.h>
@@ -1393,3 +1400,5 @@ void epd_sleep(void)
     s_ready = false;   /* 深度睡眠后寄存器全丢，下次必须先重新判活+初始化 */
     ESP_LOGI(TAG, "panel deep sleep");
 }
+
+#endif /* !BOARD_EPAPER_1IN54 —— 本文件整只在 1.54 板上被抹空 */

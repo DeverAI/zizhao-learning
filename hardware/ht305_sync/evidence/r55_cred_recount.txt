@@ -1,0 +1,31 @@
+CRED_RECOUNT_AT=2026-09-24 12:33:01
+SCOPE=evidence/r55_*.txt 14 只 + scripts/ 本代新写 7 只 = 21 只，逐只点名（不截断）
+--- evidence/ ---
+r55_cutoff_delta.txt	949	md5:e4a67866	hits=0
+r55_land_A.txt	885	md5:19834139	hits=0
+r55_land_readme.txt	272	md5:ab2d1c49	hits=0
+r55_listdiff.txt	1579	md5:9cbc1899	hits=0
+r55_local.txt	678	md5:a693d603	hits=0
+r55_local_names.txt	24584	md5:44e4382f	hits=0
+r55_parse_check.txt	537	md5:bbc5f1ac	hits=0
+r55_probe.txt	2313	md5:69ad08e2	hits=0
+r55_remote_names.txt	24584	md5:5863db89	hits=0
+r55_roundtrip.txt	222	md5:d233e69e	hits=0
+r55_roundtrip_2.txt	1022	md5:35c6eed6	hits=0
+r55_run_log.txt	2317	md5:b5984755	hits=0
+r55_scp_err.txt	724	md5:c63b618d	hits=0
+r55_verify.txt	26222	md5:507f2b35	hits=0
+--- scripts/ ---
+land_r55_readme.py	10105	md5:eed3fcb8	hits=0
+r55_cred_recount.py	5244	md5:f565325d	hits=0
+r55_cutoff_delta.py	3092	md5:7fcd00ce	hits=0
+r55_listdiff.py	5017	md5:316cc9a8	hits=0
+r55_roundtrip.py	5229	md5:6c5ab442	hits=0
+r55_upload.ps1	6393	md5:6b57cba0	hits=0
+sync_r55.py	5898	md5:0495b230	hits=0
+TOTAL_HITS=0
+POSITIVE_CONTROL_IN_MEMORY_HITS=1（应 1：证明这把尺真的含该串就会响，样本不落盘）
+FETCH=r55_remote_provision_ap.c 在 %TEMP% 字节数=10199（只数不读）
+FETCH_NAME_LEAKED_INTO_REPO=1 ['hardware/ht305_sync/scripts/r55_roundtrip.py']
+NAMES_SCANNED=561（git ls-files -c --others --exclude-standard，排除 .workbuddy/）
+VERDICT=DIRTY

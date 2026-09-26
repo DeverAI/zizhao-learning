@@ -14,8 +14,10 @@ for _s in (sys.stdout, sys.stderr):
 DST = r'C:/Users/david/Documents/all_projects/自招学习/hardware/ht305_sync'
 LOGREL = 'evidence/manifest_gen_log.txt'
 LOG = os.path.join(DST, 'evidence', 'manifest_gen_log.txt')
-now = datetime.datetime.now().strftime('%H:%M:%S')
 now_full = datetime.datetime.now().strftime('%m-%d %H:%M:%S')
+# 09-24 12:4x 复核：这里原有**两只** `datetime.now()`（`now` 与 `now_full` 各取一次），而 `now` 进的是头部那句
+# "本清单只对生成时刻 H:M:S 之前的字节负责" ⇒ 跨秒时头部两行的时刻自相矛盾。同源修法：只取一次、由它派生。
+now = now_full.split(' ')[1]
 
 # 门输出自 09-23 12:0x 起带时刻（不再原地覆写上一代）⇒ 这里取**最新**那只，并把它的路径写进头部。
 gates = [os.path.join(DST, 'evidence', f) for f in os.listdir(os.path.join(DST, 'evidence'))
@@ -56,8 +58,12 @@ if not os.path.isfile(LOG):
         '# 不列本文件、也不列 MANIFEST.txt：本行写在清单之前 ⇒ 列它必然立刻过期（同"清单不含自身"）。\n'
         '# 起点 = 09-23 gen 9。gen 1~8 的只数**不回填**：回填等于拿"从 README 叙述里 recovered 的数"冒充"当时现算"。\n')
 with open(LOG, 'a', encoding='utf-8', newline='') as f:
-    f.write('%s\t%d\t%d\t%d\n' % (datetime.datetime.now().strftime('%m-%d %H:%M:%S'),
-                                  total_rows, total_bytes, bom_files))
+    # 09-24 12:34:41/12:34:42 实测：这里原是一只**新的** `datetime.now()`，而清单头部用的是 20 行那只 `now_full`
+    # ⇒ 一次运行里两次取时刻，中间隔着 378 只文件的哈希遍历，跨秒即发生 ⇒ 日志末行与清单头部差 1 秒，
+    #    `verify_manifest.py` 的 `log_line == exp_log` 判 MANIFEST_STALE / rc=1，而 MISMATCH/MISSING/UNLISTED 全 0、
+    #    汇总三字段逐项 OK —— 一次**假红**，且红的是"清单不是脚本跑出来的"这句最重的话。
+    #    修法是在源头只取一次时刻（不是去 verifier 里放宽容差）：头部与日志同源 ⇒ 相等由构造成立。
+    f.write('%s\t%d\t%d\t%d\n' % (now_full, total_rows, total_bytes, bom_files))
 
 gate_txt = open(GATE, encoding='utf-8').read().splitlines()[0]
 gm = os.path.getmtime(GATE)

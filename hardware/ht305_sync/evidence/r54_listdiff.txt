@@ -1,0 +1,16 @@
+第 12 代同步（r54final）双向差集 + 行尾前置读数，现跑于 2026-09-24 10:49:36
+口径：两侧先剥 \r 再比（(56) 那条），行尾原样登记在下一段，不事后归一。
+EOL  LOCAL bytes=23489 lines=509 CRLF=509 bareLF=0 BOM=False
+EOL  REMOTE(剥后名单) bytes=22980 lines=509 CRLF=0 bareLF=509 BOM=False
+EOL  VERIFY(远端 stdout 落盘原件，差集就是从它切的) bytes=24584 lines=532 CRLF=532 bareLF=0 BOM=True
+LOCAL_LINES=509 REMOTE_LINES=509
+ONLY_IN_LOCAL=0 []
+ONLY_IN_REMOTE=0 []
+
+--- 包 ↔ 工作树差集（r54_cutoff_delta.py 同批现跑）---
+RAN_AT   = 2026-09-24 10:49:36
+staged   = 509
+identical(内容逐字节等,  sha256) = 508
+changed_since_cutoff = 1 ['hardware/ht305_sync/scripts/r54_listdiff.py']
+deleted_since_cutoff = 0 []
+new_since_cutoff     = 0 []

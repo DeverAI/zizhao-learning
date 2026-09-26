@@ -1,0 +1,16 @@
+R56 第一批 paperwork 落地器  MODE=REWROTE_CARRIER_ONLY
+本遍现跑于 2026-09-24 18:12:24（订正行/台账行标题时刻 = 2026-09-24 18:09:31；载体由脚本自己落盘，在归档目录之外）
+SEAL 清单在册=386 行 / 目录全量=388 只 / 1,427,227 B / 逐名差集=MANIFEST.txt + evidence/manifest_gen_log.txt / 差集字节=35,051 B / 反向差集=0
+SEAL 差集逐只点名：MANIFEST.txt（33871 B） + evidence/manifest_gen_log.txt（1180 B）；两只 mtime 秒数 == 末版那一秒 2026-09-24 12:53:39
+SEAL 排除口径原件=verify_manifest.py 第 63 行 `unlisted = sorted(set(disk) - set(r[0] for r in rows) - {'MANIFEST.txt', LOGREL})`（运行时现读，非转抄）
+GATE ARMS_FIRED=1/1（假名 evidence/SEAL_VIOLATION_PROBE.txt 只在内存；本遍反查盘上不存在 = True）
+GEN 末版=代次日志末行 09-24 12:53:39 / 386 / 1392176 / 69（本批未新建代次）
+VM 本遍真跑 rc=0 / ROWS=386  MISMATCH=0  MISSING=0  UNLISTED(盘上有、清单没记)=0 / VERDICT=MANIFEST_STILL_TRUE / VERIFY_CARRIER=hardware/verify_manifest_0924125339_8.txt（在归档目录之外 ⇒ 不参与本清单的 UNLISTED 口径）
+FREQ 改前(反推) 192 条 / 1926 行 -> 盘上在册终态 193 条 / 1939 行
+DOC 改前(反推) 3677 行 / 616,251 B -> 盘上在册终态 3688 行 / 624,206 B
+FIELD rev-list=17 / comports=COM6, COM4, COM3, COM5 / bin md5=fb32168af14d715b354e691edfa39fcd / docs 快照=2026-09-24 13:33:42（表格 38 行）
+POSCTL 复跑第四批订正遍 rc=1 / 无读数行 / STDERR 尾 = 'last):\n  File "C:\\Users\\david\\Documents\\all_projects\\自招学习\\hardware\\r55_paperwork4_fix.py", line 196, in <module>\n    assert freq_old.endswith(_tf) and doc_old.endswith(_td), \\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: ABORT: 盘上那两段订正正文不在各自文件末尾 ⇒ 别处又追加过东西，反推出来的改前串不可信\n'
+MODE-NOTE 落地那遍 = 2026-09-24 18:09:31（= 本批台账行与 §38.22 标题在册的那个时刻）：它写完两只 CRLF 文件之后**崩在本脚本自己的"反斜杠闸"上** ——那道闸当时判的是整只文件而不是本批追加段，而 FreqErr 与排查记录历史上本来就有反斜杠 ⇒ 落地遍没有自己的 stdout 载体。本载体由紧接的复跑遍（2026-09-24 18:12:24，MODE=REWROTE_CARRIER_ONLY）写下：改前两把尺 = 从盘上剥掉本批尾段后重算，终态两把尺 = 盘上现算，两对数都逐字回到台账行在册值才算过。§38.22 里"取证载体 = 本遍写的那一只"这一句按此读作"本批那一只"（已落盘的正文一个字都不改，只在这里点名）。
+WITNESS FREQ md5=66963532 / DOC md5=cc43077b（本遍结束时现算）
+NOTDONE 没烧录 / 没碰串口 / 没 push / 没 amend / 零删除 / 没新建备份根 / 没往归档目录写一字节 / 没新建清单代次 / 提交轮#9 与 docs 第十遍在本节之后
+VERDICT=OK-CARRIER-ONLY（三只 CRLF/LF 目标里本遍写盘 0 只 + 载体 1 只）

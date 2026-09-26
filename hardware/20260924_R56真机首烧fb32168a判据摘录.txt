@@ -1,0 +1,69 @@
+R56 真机首烧 fb32168a 判据摘录（四臂，全部由 hardware/r56_flash1.py 运行时现算，无手抄）
+生成时刻 2026-09-24 19:32:55；本文件纯 LF；不含 SoftAP 口令明文（生成器只从 axp / epd / eink 三类行里取数）
+
+== 抓取手段（四臂同一台 COM14、同一台主机、波特率 115200）==
+A：脚本先开串口再拉住 RTS 0.3 秒后松开 —— 实测这一遍**没有复位**（无 ROM banner、uptime 连续），
+   所以 A 的标题按实改成"连续读"，不叫复位起抓（原判据把一次失败的复位当成了复位）。
+B/C：C:/esp/cap_serial_reset.py（dtr=False + rts 拉 0.15 秒再松）—— 两遍都拿到 ROM banner 与 rst:0x15 USB_UART_CHIP_RESET。
+D：纯读 150 秒、不碰复位线，窗口 19:26:24 至 19:28:55；期间用户按了电源键 2 秒与 4 秒各一次（用户口述"按了，但板上没有任何反应"）。
+   D 窗口的第一行是被剪断的半行（uptime 289 的 esp_image 片段直接粘在 uptime 105339 那条 axp 行前面），
+   ⇒ 说明本窗口开始前板子已经重启过一次（约 19:24:39），重启原因**未定性**（不记成按键的后果，只记同时刻发生过一次重启）。
+
+== 镜像身份（开机指纹由 bin 现算，不是转抄）==
+4842a3a0 那只：md5=4842a3a0c5f41ce2e60e3ceb122e9901 / 1139872 B / bin[176:184]=574f6c825049572e（boot 行 ELF file SHA256 前 16 位应等于它）/ 文件=hardware/zizhao-esp32s3/backups/r43_20260922_131029/zizhao_esp32s3.bin
+fb32168a 那只：md5=fb32168af14d715b354e691edfa39fcd / 1141232 B / bin[176:184]=19906d9ded1aaf83（boot 行 ELF file SHA256 前 16 位应等于它）/ 文件=hardware/zizhao-esp32s3/backups/r53_20260924_083929/zizhao_esp32s3.bin
+
+== 四臂读数（每臂一行，全部现算）==
+A 旧镜像+外部供电连续读（未复位）
+   载体=hardware/20260924_R56外部供电连续读45s_未复位_板上4842a3a0.log / 5639 B / 非空行 25 / 图=4842a3a0 / ROM banner 0 次
+   uptime 389227 至 430501 ms / probe#76 至 probe#84 共 9 条 0x34 行：no reply=9 应答=0
+   ACK= 读数集合=['0'] / acked 名单集合=[] / 全扫行=本臂无 112 地址全扫行
+   PWR_OUT 对读组合=[('1', '0')]（1/0 = 悬空）/ hold-on 探针行 0 条 / PP-SCL 实跑 0 跳过 0 / BUSY stayed HIGH 1 条
+
+B 旧镜像复位起抓 45s
+   载体=hardware/20260924_R56外部供电复位起抓45s_板上4842a3a0.log / 20299 B / 非空行 149 / 图=4842a3a0 / ROM banner 1 次 / rst:0x15 (USB_UART_CHIP_RESET),boot:0x8 (SPI_FAST_FLASH_BOOT
+   uptime 435629 至 43394 ms / probe#85 至 probe#9 共 10 条 0x34 行：no reply=10 应答=0
+   ACK= 读数集合=['0'] / acked 名单集合=['none'] / 全扫行=[('0', '112')]
+   PWR_OUT 对读组合=[('1', '0')]（1/0 = 悬空）/ hold-on 探针行 0 条 / PP-SCL 实跑 13 跳过 2 / BUSY stayed HIGH 0 条
+   boot ELF 指纹=574f6c825049572e == bin[176:184]=574f6c825049572e 成立
+
+C 新镜像 fb32168a 复位起抓 90s
+   载体=hardware/20260924_R56fb32168a首烧复位起抓90s.log / 25822 B / 非空行 169 / 图=fb32168a / ROM banner 1 次 / rst:0x15 (USB_UART_CHIP_RESET),boot:0x8 (SPI_FAST_FLASH_BOOT
+   uptime 99 至 89908 ms / probe#1 至 probe#18 共 18 条 0x34 行：no reply=18 应答=0
+   ACK= 读数集合=['0'] / acked 名单集合=['none'] / 全扫行=[('0', '112')]
+   PWR_OUT 对读组合=[('1', '0')]（1/0 = 悬空）/ hold-on 探针行 1 条 / PP-SCL 实跑 13 跳过 2 / BUSY stayed HIGH 1 条
+   boot ELF 指纹=19906d9ded1aaf83 == bin[176:184]=19906d9ded1aaf83 成立
+
+D 新镜像 + USB 和锂电池都在 + 按键真按过（150s 纯读）
+   载体=../../../AppData/Local/Temp/r56_btn4.log / 19809 B / 非空行 70 / 图=fb32168a / ROM banner 0 次
+   uptime 289 至 250202 ms / probe#21 至 probe#49 共 29 条 0x34 行：no reply=29 应答=0
+   ACK= 读数集合=['0'] / acked 名单集合=['none'] / 全扫行=[('0', '112')]
+   PWR_OUT 对读组合=[('1', '0')]（1/0 = 悬空）/ hold-on 探针行 0 条 / PP-SCL 实跑 4 跳过 1 / BUSY stayed HIGH 3 条
+
+== 判读（只写这几臂能支撑的话）==
+1）C 臂证明 R53 那一步"补官方 esp_gpio_Init 同档的 GPIO1 拉住"**确实进了镜像并且在跑**：
+   boot 指纹对得上 + 开机 467 ms 有 PWR_OUT(GPIO1) hold = input+pull-up 这一行 + 770 ms 有一次 hold-on 探针。
+2）同一个 C 臂把 R53 的**根因判定否证**了：hold-on 探针把 GPIO1 从"输入+上拉"升成"推挽输出高"之后，
+   0x34 仍不应答、5 个已知邻居 ACK=0 NACK=5、随后整条总线 112 个地址仍 0 应答。
+   ⇒ "GPIO1 没被拉住所以 PMIC 没上电所以全 NACK"这一条因果链，在**外部 5V 已接**的前提下不成立。
+3）排查记录第 316 行本来就有图纸口径：电源键走 Key1 经 R26 510R 到 PWRON(30) 脚，**不接任何 GPIO**；
+   第 104 行：官方 pcf85063_bsp.h 里 PWR_OUT_PIN = GPIO1 是 AXP2101 的**开机状态输出**（输入+内部上拉读它）。
+   ⇒ GPIO1 是"PMIC 说它开没开"的脚，不是"固件叫 PMIC 开机"的脚。R53 把方向读反了；
+   C 臂那一步等价于官方同档（输入+上拉），**无害**，但它不可能改变 PMIC 的开机状态，所以 D 臂改用物理按键。
+4）D 臂是**第一个真样本**（USB + 锂电池都在位、按键确认真按过）：29 条 0x34 行仍全 no reply，
+   全程 PWR_OUT 对读只有一种组合 pu=1 pd=0 = 这根脚始终悬空 = PMIC 从头到尾没有宣布自己开机。
+   按排查记录 §13-2 的分流口径：**全 NACK 不定案**，所以这里只能说"按键没有把 PMIC 带进开机态（就本次这次按下而言）"，
+   不能定案是"PMIC 坏"，因为还有三条没分开：电池电压/座子接触、Key1 到 PWRON 那段网络（含 510R 虚焊）、PWR_OUT 脚号登记是否对。
+5）"按了但板上没有任何反应"这句是用户口述，本文件把它当**输入前提**登记（D 臂靠它才成立），不当取证读数；
+   我方固件按图纸读不到按键（PWRON 不接 GPIO），所以没有任何独立手段能证明这次按下的时长与落点。
+
+== 本轮余下唯一便宜的物理分叉（按代价从小到大）==
+a）换一块同型号板复跑同一条 C 臂判据（同 bin 比 pull compare 与 ACK 计数）—— 一次烧录，不用仪器；
+b）万用表两档：电池座两端电压（判"有没有电进去"）、PWRON(30) 脚在按下时的电平（判"按键网络通不通"）；
+c）若 a 与 b 都指回这块板，才是"PMIC/主板级"结论。
+
+== 没做什么（点名，不省略）==
+没换电池 / 没用万用表 / 没接第二块板 / 没改任何 main/ 源码 / 没重建固件（板上现在就是 fb32168a，
+   待烧与板上自本批起**重新相等**，(92) 那条分裂就地收口）/ 没有 push / 没有 amend / 零删除 /
+   没有往 hardware/ht305_sync/ 写一字节（gen 24 末版封界不动）/ 屏亮仍 0 次肉眼确认 / 未播提示音。
+VERDICT=FOUR-ARMS-ALL-NACK R53-ROOT-CAUSE-REFUTED PHYSICAL-KEY-ARM-FIRST-SAMPLE

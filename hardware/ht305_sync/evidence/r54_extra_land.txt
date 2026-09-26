@@ -1,0 +1,21 @@
+CHECKED_AT=2026-09-24 10:54:14
+FILES=1 BYTES=549
+r54_roundtrip.txt	549	md5:2ff90d00
+NOTE=r54_land_log.txt is the 10+1 batch carrier; this file is the tail artifact landed after that batch
+FETCH=r54_remote_provision_ap.c bytes=10199 md5=0419bf1628f399f399ca41daf8ed3494 (留在 %TEMP%，未进仓库)
+BYTE_EQUAL_TO_WORKTREE=True (本脚本当场重算，非抄尾件)
+BYTE_TWINS_IN_REPO=30 SOURCE=hardware/zizhao-esp32s3/main/provision_ap.c BACKUP_COPIES=29 OUTSIDE_BACKUPS=1
+FETCH_NAME_LEAKED_INTO_REPO=0
+EXTRA_LAND_SCRIPT=scripts/extra_land_r54.py (本体入档)
+r54_cutoff_delta.txt	226	hits=0	md5:c17fbf9c
+r54_land_log.txt	592	hits=0	md5:4cd6bae3
+r54_listdiff.txt	830	hits=0	md5:08bf95a3
+r54_local.txt	594	hits=0	md5:83be71f8
+r54_local_names.txt	23489	hits=0	md5:3033389e
+r54_parse_check.txt	296	hits=0	md5:be993afb
+r54_probe.txt	2267	hits=0	md5:d15a37ed
+r54_remote_names.txt	22980	hits=0	md5:935dd89b
+r54_roundtrip.txt	549	hits=0	md5:2ff90d00
+r54_run_log.txt	2300	hits=0	md5:e3f1c911
+r54_scp_err.txt	724	hits=0	md5:9b210c9a
+r54_verify.txt	24584	hits=0	md5:fd0c5b89

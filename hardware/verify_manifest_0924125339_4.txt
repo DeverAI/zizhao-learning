@@ -1,0 +1,13 @@
+verify_manifest.py 对本代清单的终态裁决（载体由脚本自己落盘，09-24 12:4x 起）
+CLEAN_UP_TO=09-24 18:09:06（本行是写载体的时刻，与被复核那代的时刻不同源）
+VERIFIED_MANIFEST=ht305_sync 归档清单（快照，现跑于 09-24 12:53:39；脚本 = scripts/gen_manifest.py）
+NOTE=本载体记录的是"写它那一刻"盘上现状 vs 该代清单的比对；若被复核那代之后盘上又动过，这里给 STALE 是**快照过期**、不是清单造假（清单头部那句"只对生成时刻之前的字节负责"就是为它留的界）。
+CARRIED_OUTPUT_START
+ht305_sync 归档清单（快照，现跑于 09-24 12:53:39；脚本 = scripts/gen_manifest.py）
+UNLISTED_NAMES shown=0 total=0（下面逐行列全表，不再截断）
+ROWS=386  MISMATCH=0  MISSING=0  UNLISTED(盘上有、清单没记)=0
+GEN_LOG 末行=09-24 12:53:39	386	1392176	69 / 清单汇总应为=09-24 12:53:39	386	1392176	69 ⇒ 数字三字段OK（时刻 09-24 12:53:39 vs 09-24 12:53:39，只并列不参与判决）
+TOTAL 行=TOTAL	386 / TOTAL_BYTES 行=TOTAL_BYTES	1392176 / 逐行求和=1392176 ⇒ OK
+VERDICT=MANIFEST_STILL_TRUE
+CARRIED_OUTPUT_END
+VERIFY_RC=0

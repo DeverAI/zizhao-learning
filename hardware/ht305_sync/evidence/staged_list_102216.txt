@@ -1,0 +1,61 @@
+生成时刻 2026-09-24 10:22:16；口径：git diff --name-only(14) + git ls-files --others --exclude-standard(44)
+排除并点名（每条附理由，现跑明文扫描 HITS=0 才进清单）：5 只
+  DROP  hardware/zizhao-esp32s3/main/provision_ap.c  <- 带 PROV_PASS 明文（门会 rc=1） [not-scanned]
+  DROP  .workbuddy/memory/2026-09-16.md  <- 第三方工具状态目录 [not-scanned]
+  DROP  .workbuddy/r31_record_update.py  <- 第三方工具状态目录 [not-scanned]
+  DROP  Agent_readme.txt  <- 外部项目发来的回信，非本仓库产出，等裁决 [not-scanned]
+  DROP  dev_log/20260919.md  <- 带 PROV_PASS 明文，实测 HITS=1 [not-scanned]
+进清单 53 只：
+  ADD   FreqErr.md
+  ADD   dev_log/20260924.md
+  ADD   done.md
+  ADD   hardware/20260919_墨水屏点屏排查记录.md
+  ADD   hardware/ht305_sync/MANIFEST.txt
+  ADD   hardware/ht305_sync/README.md
+  ADD   hardware/ht305_sync/evidence/manifest_gen_log.txt
+  ADD   hardware/ht305_sync/evidence/ps1_bom_scan.txt
+  ADD   hardware/zizhao-esp32s3/main/axp_panel_power.c
+  ADD   hardware/zizhao-esp32s3/main/axp_panel_power.h
+  ADD   hardware/zizhao-esp32s3/main/main.c
+  ADD   hardware/烧录须知.md
+  ADD   todo.md
+  ADD   hardware/ht305_sync/evidence/cred_gate_recheck_084801.txt
+  ADD   hardware/ht305_sync/evidence/cred_gate_recheck_091214.txt
+  ADD   hardware/ht305_sync/evidence/cred_gate_recheck_093133.txt
+  ADD   hardware/ht305_sync/evidence/cred_gate_recheck_093718.txt
+  ADD   hardware/ht305_sync/evidence/cred_gate_recheck_094011.txt
+  ADD   hardware/ht305_sync/evidence/cred_three_rulers_692c35b_060011.txt
+  ADD   hardware/ht305_sync/evidence/gen_delta_084825_vs_054229_090623.txt
+  ADD   hardware/ht305_sync/evidence/gen_delta_try1_birth_eq_mtime_wrong_ruler_090225.txt
+  ADD   hardware/ht305_sync/evidence/head_tree_692c35b_055753.txt
+  ADD   hardware/ht305_sync/evidence/index_vs_list_055607.txt
+  ADD   hardware/ht305_sync/evidence/r53_cutoff_delta.txt
+  ADD   hardware/ht305_sync/evidence/r53_extra_land.txt
+  ADD   hardware/ht305_sync/evidence/r53_land_log.txt
+  ADD   hardware/ht305_sync/evidence/r53_listdiff.txt
+  ADD   hardware/ht305_sync/evidence/r53_local.txt
+  ADD   hardware/ht305_sync/evidence/r53_local_names.txt
+  ADD   hardware/ht305_sync/evidence/r53_parse_check.txt
+  ADD   hardware/ht305_sync/evidence/r53_probe.txt
+  ADD   hardware/ht305_sync/evidence/r53_remote_names.txt
+  ADD   hardware/ht305_sync/evidence/r53_roundtrip.txt
+  ADD   hardware/ht305_sync/evidence/r53_run_log.txt
+  ADD   hardware/ht305_sync/evidence/r53_scp_err.txt
+  ADD   hardware/ht305_sync/evidence/r53_verify.txt
+  ADD   hardware/ht305_sync/evidence/staged_cred_gate_055142.txt
+  ADD   hardware/ht305_sync/evidence/staged_cred_gate_055142_pos.txt
+  ADD   hardware/ht305_sync/evidence/staged_cred_gate_055142_ps.txt
+  ADD   hardware/ht305_sync/evidence/staged_cred_gate_055523.txt
+  ADD   hardware/ht305_sync/evidence/staged_cred_gate_055523_pos.txt
+  ADD   hardware/ht305_sync/evidence/staged_cred_gate_055523_ps.txt
+  ADD   hardware/ht305_sync/scripts/chk_r53.ps1
+  ADD   hardware/ht305_sync/scripts/derive_r53.py
+  ADD   hardware/ht305_sync/scripts/extra_land_r53.py
+  ADD   hardware/ht305_sync/scripts/gen_delta_git.py
+  ADD   hardware/ht305_sync/scripts/land_r53_evidence.py
+  ADD   hardware/ht305_sync/scripts/r53_cutoff_delta.py
+  ADD   hardware/ht305_sync/scripts/r53_listdiff.py
+  ADD   hardware/ht305_sync/scripts/r53_roundtrip.py
+  ADD   hardware/ht305_sync/scripts/r53_upload.ps1
+  ADD   hardware/ht305_sync/scripts/sync_r53.py
+  ADD   updates/20260924_墨水屏R53_GPIO1按住落地与两处自查.md

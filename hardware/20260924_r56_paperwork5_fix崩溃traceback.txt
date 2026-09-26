@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r56_paperwork5_fix.py", line 122, in <module>
+    assert _r.returncode == 0 and _pos, 'ABORT: 复跑 paperwork5 rc=%d ⇒ 本遍追加把它弄红了，别把这条当收口：\n%s' % (
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ABORT: 复跑 paperwork5 rc=1 ⇒ 本遍追加把它弄红了，别把这条当收口：
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r56_paperwork5.py", line 576, in <module>
+    assert SNAP_ROWS == (len(WIN_D) - N_CORR + GLUE_D, len(WIN_F) + GLUE_D), \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ABORT: 追加段行数 (15, 25) != 预期（§38.26 14 行 − 订正遍 1 行 + glue 1 / FreqErr 本批节含台账行 24 行 + glue 1）⇒ 崩的那一遍落的不是本遍算的这一份
+

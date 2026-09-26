@@ -1,0 +1,15 @@
+R55 落地后自查订正 + 另立 (103)-(104)；订正那三行落盘于 2026-09-24 14:23:46；本遍现跑于 2026-09-24 14:32:38，MODE=REWROTE_CARRIER_ONLY
+LANDING_SEQUENCE 第一次跑到本文件的"落点计数"那条断言时崩了：期望值 (104)=3 是我猜的常数、实为 4，而崩溃点在 write_lf **之后** ⇒ 换字与三行追加已落盘、载体没写。本遍只复算 + 补载体，两只记忆文件未再写盘（幂等闸：正文里被冒充那格已换成真值 ⇒ 判为 REWROTE_CARRIER_ONLY）
+SRC evidence/r55_roundtrip_2.txt 第 4 行 PRIOR_VERDICT=VERDICT=SCP_FAILED ; 第 18 行 VERDICT=REMOTE_CARRIES_PLAINTEXT ; RAN_END_AT=2026-09-24 12:27:39
+NAIVE_PARSER_REPRO 裸 re.search 取到 VERDICT=SCP_FAILED == PRIOR 那行的值 ⇒ 缺陷当场复现，不是事后叙述
+TIME 第九次读数真值 2026-09-24 13:43:38（hardware/r55_backups_readme9.txt 第 1 行）vs 冒充值 2026-09-24 14:07:20，分位差 24 分钟
+PMEM_BODY LF 409 -> 412 (+3) bytes 160145 -> 164275 (+4130 = 裁决 +14 x1 + 三行追加 4116) md5 NOT_RECORDED -> 8dd82cf4
+PMEM_INDEX LF 9 -> 9 (0) bytes 24678 -> 24692 (+14 = 裁决 +14 x1) md5 NOT_RECORDED -> 6186bd6a
+MD5_BEFORE=不复算：崩溃那遍没落载体 ⇒ 改前 md5 无凭证，按"读数不落盘等于没跑"不编造；改前基线的字节/行数两项从订正段自述等式现读并与盘上现状闭合（160145+4130=164275、409+3=412）
+PMEM_COUNTS 全文 (103)=2 (104)=4 = 订正段自身 2/3 + 段标题 1 处（判据由订正段推出，不用猜的常数）
+DOC 未动 = 603,376 B / 3620 行 / CR 3620 / md5 483b1f6f（末版封界未破）
+MANIFEST 末版 TOTAL=386 / 1,392,176 B / BOM 69（本遍只读）
+FIELD git status --porcelain = 109 行（本遍现跑，含订正批自己的新文件）
+SUPERSEDED hardware/r55_land_memory_r55.txt 第 4 行那句假裁决**保留原样**、以本遍为准；该载体第 1 行 MODE=REWROTE_CARRIER_ONLY 仍成立
+BACKSLASH_IN_APPENDED_TEXT=0（由末尾断言兑现）
+VERDICT=MEMORY_CORRECTED

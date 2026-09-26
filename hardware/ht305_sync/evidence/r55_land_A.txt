@@ -1,0 +1,9 @@
+R55 第一遍落地器 stdout 载体（由 land_r55_A.py 直接写进仓库内 evidence/，不经 %TEMP%）
+ENTER_AT 2026-09-24 12:14:51
+EXIT_AT  2026-09-24 12:14:52
+COMPORTS COM6,COM4,COM3,COM5
+REC_BEFORE lines=3588 bytes=590271  REC_AFTER lines=3607 bytes=596164  pure_CRLF=True  新增节 38.18=1
+FREQ_BEFORE ets=179 lines=1811  DISK_ERRTYPES=181 DISK_LINES=1825  登记 after_ets=181 after_lines=1824  match=False
+MEMORY_LEN=23785 CR=0 LF=9 md5=ebba4023 grep_refresh=1
+LANDED_6 land_r54_docs.py:dabdf8bc derive_refresh_docs_r54.py:84b1fe5b refresh_docs_snapshot_r54.py:45813ba4 land_backups_r54.py:017670d3 land_memory_r54.py:eee2f56d refresh_docs_r54.txt:021679ba
+NOT_DONE 没烧录/没碰串口/未 push/零删除；gen 22 冻结、第 13 代同步、提交轮 #9、docs 第九遍、done/todo/dev_log/updates/backups/项目记忆 未跑（读数落 §38.18 第二遍）

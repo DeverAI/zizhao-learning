@@ -1,0 +1,8 @@
+CHKB_AT=2026-09-24 12:47:07
+SCOPE=本代冻结后被改写的工具 3 只（ast.parse，不 import、不 py_compile）
+PRIOR=evidence/r55_parse_check.txt（第一遍只覆盖 scripts/r55_upload.ps1 一只）
+TARGET=scripts/verify_manifest.py bytes=8237 lines=137 md5=4fea7e7e verdict=AST_OK
+TARGET=scripts/gen_manifest.py bytes=7820 lines=101 md5=349dc4af verdict=AST_OK
+TARGET=scripts/r55_cred_recount.py bytes=6104 lines=102 md5=6264f777 verdict=AST_OK
+POSITIVE_CONTROL=OK（同尺在已知坏字符串上抛了 SyntaxError）
+VERDICT=TOOLS_PARSE_CLEAN

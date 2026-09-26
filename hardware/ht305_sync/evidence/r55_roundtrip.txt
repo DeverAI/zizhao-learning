@@ -1,0 +1,5 @@
+R55_ROUNDTRIP_AT=2026-09-24 12:26:11
+REMOTE=ht305:C:/Users/Administrator/AppData/Local/Temp/zsynctest15/zizhao_20260924_r55final/hardware/zizhao-esp32s3/main/provision_ap.c
+SCP_RC=255
+SCP_STDERR_LINES=2
+VERDICT=SCP_FAILED

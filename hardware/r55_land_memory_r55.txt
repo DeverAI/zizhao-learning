@@ -1,0 +1,19 @@
+R55 项目记忆 (101)-(102) + 现场态换代 + 用户记忆第七类，本遍现跑于 2026-09-24 14:10:20；MODE=REWROTE_CARRIER_ONLY（正文里那些时刻 = 2026-09-24 14:07:20）
+FIELD rev-list=17 porcelain=108(M14+??94) ports=COM6, COM4, COM3, COM5
+DOC heads=226（其中二/三级 225） 缺空行=0 节号 38.18=3591 38.19=3610 bytes=603,376 lines=3620 md5=483b1f6f
+SYNC 13 代 542 只 / 5058948 B / 包 2055096 B md5 aaa21c57a57543864efb60f2264a34b6 / 聚合 4a81102b6d900e8ad2350abd6efea98bfbec31116cc7819551fe4f82925a2a2e… / 重跑 VERDICT=SCP_FAILED @2026-09-24 12:27:39
+GEN24 TOTAL=386 / 1,392,176 B / BOM 69 ; VERIFY2 rc=0 ROWS=386 UNLISTED=0 MANIFEST_STILL_TRUE
+DOCS 39 只（38 源 + NOTE）@2026-09-24 13:33:42 闸 OF 38 HITS 0 ; pyc/pycache=0
+CROSSCHECK DOC_AFTER(上一遍载体) 603376/483b1f6f/3620 标题=226 vs 现跑 603376/483b1f6f/3620 标题=226 ; 缺空行 载体=0 现跑=0
+README 105343 B md5 06e3a0a57f03b6dc08027cc23f7b837b ; BIN build md5=fb32168af14d715b354e691edfa39fcd / 1141232 B != 板上归档 md5=4842a3a0c5f41ce2e60e3ceb122e9901 / 1139872 B
+BACKSLASH_IN_APPENDED_TEXT=0（§38.18 CR 事故的直接防线，由末尾断言兑现）
+LANDING_SEQUENCE 第一次跑到这一步（同一脚本、正文已落盘）在写本载体的 CROSSCHECK 那一行崩在 TypeError: %d 遇到 str⇒ 载体当场没写；本遍 MODE=REWROTE_CARRIER_ONLY 用幂等闸跳过四只文件的写盘、只复算并复核后补写本载体
+FILE hardware-epaper397-power.md
+  now   LF=409 bytes=160145 md5=39d5b53e（本遍未写盘，落地由 @2026-09-24 14:07:20 那一遍完成）
+FILE projects/MEMORY.md
+  now   LF=9 bytes=24678 md5=bb63e75e（本遍未写盘，落地由 @2026-09-24 14:07:20 那一遍完成）
+FILE reference-qoder-tool-mapping.md
+  now   LF=46 bytes=13370 md5=b6fd8ecb（本遍未写盘，落地由 @2026-09-24 14:07:20 那一遍完成）
+FILE david/MEMORY.md
+  now   LF=14 bytes=3317 md5=1171ee95（本遍未写盘，落地由 @2026-09-24 14:07:20 那一遍完成）
+VERDICT=MEMORY_VERIFIED_CARRIER_WRITTEN

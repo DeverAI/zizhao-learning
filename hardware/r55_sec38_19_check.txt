@@ -1,0 +1,29 @@
+SEC3819_CHECK_AT=2026-09-24 13:11:54
+DOC=20260919_墨水屏点屏排查记录.md bytes=603372 md5=ff01acdb127e6bced10097a6866bb833 wc_l=3618（纯 CRLF：True）
+SECTION_LINES=3608..3618（标题 1 + 要点 9 行，含"本节没做"1 行；下一节边界由正则现找）
+CHECKS=20（下面逐条点名，不截断；每条同时问"正文写没写"与"载体是多少"）
+OK   正文='ROWS=378' 现读自=evidence/r55_verify_manifest_gen22_stale.txt
+OK   正文='FILES_SCANNED=381' 现读自=evidence/cred_gate_recheck_123653.txt
+OK   正文='FILES_SCANNED=387' 现读自=evidence/cred_gate_recheck_125333.txt
+OK   正文='TOTAL=380' 现读自=evidence/manifest_gen_log.txt（gen 23）
+OK   正文='TOTAL=386' 现读自=MANIFEST.txt 末三行（gen 24）
+OK   正文='TOTAL_BYTES=1,392,176' 现读自=MANIFEST.txt 末三行
+OK   正文='BOM=69' 现读自=MANIFEST.txt 末三行
+OK   正文='1,542 B' 现读自=hardware/verify_manifest_0924123702.txt
+OK   正文='1,186 B' 现读自=hardware/verify_manifest_0924125339.txt
+OK   正文='2026-09-24 12:40:15' 现读自=evidence/r55_cred_recount_2.txt
+OK   正文='TOTAL_HITS=0' 现读自=evidence/r55_cred_recount_2.txt
+OK   正文='23 只逐只点名' 现读自=evidence/r55_cred_recount_2.txt
+OK   正文='TOOLS_PARSE_CLEAN' 现读自=evidence/r55_parse_check_2.txt
+OK   正文='3 只' 现读自=evidence/r55_parse_check_2.txt
+OK   正文='105,343 B' 现读自=MANIFEST.txt 里 README.md 那一行
+OK   正文='md5 `06e3a0a5' 现读自=MANIFEST.txt 里 README.md 那一行
+OK   正文='12:52:16' 现读自=evidence/r55_land_readme_2.txt
+OK   正文='381 − 1 = 380' 现读自=两遍门输出 + 两代清单（式子两边都是现读）
+OK   正文='387 − 1 = 386' 现读自=两遍门输出 + 两代清单（式子两边都是现读）
+OK   正文='= 17**（这是' 现读自=git rev-list --count origin/main..HEAD（本器现跑）
+RELATION_TOTAL_EQ_GATE_MINUS_1=gen22/23/24 三遍逐一带入 assert 并全过（379-1=378, 381-1=380, 387-1=386）
+REV_LIST_NOW=17（正文那句"现跑"与本器现跑同值 ⇒ 现场态没有过期）
+PLAINTEXT_HITS_IN_SECTION=0 POSITIVE_CONTROL_IN_MEMORY=1（PROV_PASS 只数不打印）
+NOTE=本节"跑绿了却没载体"这件事本身已由 FreqErr 本批第 2 条登记；本载体是**事后补的第二把尺**，不是旧落地器的重跑（它拒绝覆写、不可重跑）。
+VERDICT=SEC38_19_TRUE

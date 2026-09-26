@@ -1,0 +1,21 @@
+vm_run.py 代内层复核器落盘（外层 rc=0 见末行 VERDICT）
+RUN_AT=2026-09-24 22:32:11
+INNER_SCRIPT=hardware/ht305_sync/scripts/verify_manifest.py（本遍未改写它一字节）
+INNER_RC=2
+INNER_STDOUT_BYTES=600 / INNER_STDERR_BYTES=0
+SLOT=INNER-SLOT-EXHAUSTED（gen 0924125339 的 9 只内层槽位盘上现有 9 只）
+EXPLANATION=内层裁决为真但拒绝落第 10 只载体 ⇒ 由本件代落
+INNER_ROWS=ROWS=386  MISMATCH=0  MISSING=0  UNLISTED(盘上有、清单没记)=0
+INNER_VERDICT=VERDICT=MANIFEST_STILL_TRUE
+INNER_VERIFY_CARRIER=（内层未落载体）
+CARRIED_INNER_STDOUT_START
+ht305_sync 归档清单（快照，现跑于 09-24 12:53:39；脚本 = scripts/gen_manifest.py）
+UNLISTED_NAMES shown=0 total=0（下面逐行列全表，不再截断）
+ROWS=386  MISMATCH=0  MISSING=0  UNLISTED(盘上有、清单没记)=0
+GEN_LOG 末行=09-24 12:53:39	386	1392176	69 / 清单汇总应为=09-24 12:53:39	386	1392176	69 ⇒ 数字三字段OK（时刻 09-24 12:53:39 vs 09-24 12:53:39，只并列不参与判决）
+TOTAL 行=TOTAL	386 / TOTAL_BYTES 行=TOTAL_BYTES	1392176 / 逐行求和=1392176 ⇒ OK
+VERDICT=MANIFEST_STILL_TRUE
+ABORT: 复核载体名 9 只全被占，拒绝覆写
+CARRIED_INNER_STDOUT_END
+WITNESS=本文件逐字收录内层 stdout，未做任何脱敏或改写；反斜杠若出现来自内层口径，不外层洗。
+VERDICT=VM_RUN_GREEN

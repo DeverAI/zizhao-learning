@@ -1,0 +1,16 @@
+R57 F 臂取证器（跨 900s 深睡边界）  MODE=CAPTURE-1000s
+本遍现跑于 2026-09-25 15:29:26；复位那步 2026-09-25 15:29:29（rc=0，esptool read_mac = 只读动作 + hard_reset）；抓取窗口 = 1000.172 s，结束于 2026-09-25 15:46:09
+PORT 进入前列口 = COM14, COM3, COM4, COM5, COM6 ⇒ COM14 在位 = True；抓完立刻再列 = COM14, COM3, COM4, COM5, COM6 ⇒ 端口仍在线 = True（这一格是本臂主判决之一：板子若真进了深睡，原生 USB 会从总线消失）
+COPY 原件 = 临时目录那只（引用名 r57_F臂_复位起抓1000s_跨900s深睡边界.log）/ 134780 B / md5 e823c5c12bc292f44966f59230765f6d
+COPY 仓库件 = hardware/20260925_R57_F臂复位起抓1000s跨900s深睡边界.log / 134780 B / md5 e823c5c12bc292f44966f59230765f6d；两侧逐字相等 = True
+MAC 复位那步现读 = 70:04:1d:d8:75:8c（两块同款板靠它自证身份，不看 COM 号）
+READINGS 原始 134780 B / 535 行 / ROM banner 0 次 / probe# 计数 194 次（1~194）/ AXP@0x34 行 194 条，其中应答 0 条 / 全总线路扫读数 [('0', '112'), ('0', '112'), ('0', '112'), ('0', '112'), ('0', '112'), ('0', '112')] / PWR_OUT 组合 [('1', '0')]
+READINGS uptime 跨度 = 0~998584 ms；最后一条非空行（截 220 字符，其中口令明文与反斜杠已按口径就地略去 = False）= W (998584) epd: panel rail not confirmed (AXP unreachable or ALDO3 off): 接电池 + 按住电源键 2 秒后松开（没反应再按满 4 秒）；再看 axp 行的 ACK/NACK/TMO 定案
+SLEEP 深睡边界判决：boot_idle_sec 从 main/power_policy.c 现读 = 900 s；抓取窗口 1000.172 s；最后一条日志的 uptime = 998584 ms ⇒ 若端口消失且日志在 900s 后停住，本臂给出**第一个正样本**；否则点名"到点没睡"。尾部静默 = 1.588 s（窗口长度减最后一条 uptime）
+MARK 分支标记逐格计数 = 复位原因(USB_UART)=0 / login ok=0 / board MAC=1 / clock page=0 / panel silent=0 / panel blanked=0 / witness=0 / low_no_high=0 / Deep sleep=0 / 按时关机=0 / 请现场配网=1 / 配网分支字样=2
+GATE §38.13 那两行判据本臂样本数 = panel silent 0 行 / panel blanked 0 行 / witness 0 行（历代 10 只样本这三格全为 0 行 ⇒ 出得来就是换代，出不来就照旧点名）
+DENOM 屏侧分母现算换代：hardware/ 单层 *.log = 13 只 / 官方例程对照 2 只不进分母 / 我方 = 11 只（上一格在册 10 只）
+IDENTITY 板上那只现算：boot ELF 前 16 位（E 臂在册）= 19906d9ded1aaf83 / 当前 build 产物 bin[176:184] = 19906d9ded1aaf83 ⇒ 同一种 = True；build 产物 md5 = fb32168af14d715b354e691edfa39fcd（32 个十六进制字符 = md5，不是 sha256）
+PLAIN 明文半径（口令只从 main/provision_ap.c 的宏体读出做计数，不打印、不进本载体正文）：本臂入库件命中 2 处 ⇒ 命中 > 0 就照旧**不 stage、不 push、不删**
+SEAL 写盘前 hardware/ht305_sync/ = 388 只 / 1427227 B / 聚合 md5 efda29538483bbc73e91941936512a2f（本批未新建清单代次，gen 24 仍是末版）
+NOTDONE 本臂没做（点名）：没烧录 / 没改 main/ 源码 / 没重建固件 / 没换电池 / 没万用表 / 没第二块板 / 没往 hardware/ht305_sync/ 落一字节 / 没新建备份根 / 没 push、没 amend / %TEMP% 原件不搬走不删 / 屏亮肉眼确认仍待用户回报 ⇒ 未确认就不播提示音
