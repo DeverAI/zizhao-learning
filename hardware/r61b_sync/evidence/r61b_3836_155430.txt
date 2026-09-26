@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\land_r61b_3836.py", line 489, in <module>
+    assert not _missing, 'ABORT: 本节点名了查无此物的载体/文件：%s' % _missing
+           ^^^^^^^^^^^^
+AssertionError: ABORT: 本节点名了查无此物的载体/文件：['MANIFEST.txt']

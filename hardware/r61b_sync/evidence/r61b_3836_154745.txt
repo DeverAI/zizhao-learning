@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\land_r61b_3836.py", line 115, in <module>
+    assert (gs_hits, gs_verdict, ps_eq, ps_arms, ps_verdict) == (0, 'CLEAN', 'True', '2/2',
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                                                 'POSITIVE_CONTROL_FIRES_AND_INDEX_CLEAN')
+                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

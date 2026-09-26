@@ -1,0 +1,11 @@
+PRE-IMAGE freqerr_pre19_20260926_163105.md (503833 B / md5 997e7928 == 写盘前原件)
+CITED 5/5 条自证引文在现读正文全中
+CRASH-READBACK 崩遍 r61b_3836_160241.txt 红在第 579 行 / 盘上 3930 行 vs 预期 3931 行 / 无 LANDED
+THREE-EQ 现件 750255 - 头段 730779 == 尾节 19476 B | 3930 - 3916 == 14 行 | 头段 3916 + 追加 15 == 终态 3931 行
+DERIVE-CRASH derive_r61c_161508.txt KeyError=r61bfinal 第 113 行 / 6 只派生件最早一只晚 11.811 s / WROTE=6 PTR=8 MISS=0
+BARE-VS-NEG r61c_roundtrip.py 裸子串 1 行 / 负向前视 0 行 | 前身 1 次 -> 本代 1 次
+SENTINEL 三步行序 A<E<A2 已核 / 两端 assert 2 处 / 产物残留 0 只
+ENTRIES 263 -> 267 (本批 +4) | LINES 2354 -> 2375 | BYTES 503833 -> 516900
+PREFIX 2354 行逐字等 / APPEND 21 行逐行等 / 后缀为空（三段式）
+MD5 997e7928 -> 64eda4d1
+VERDICT=LANDED rc=0

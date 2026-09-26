@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\land_r61b_3836.py", line 225, in <module>
+    src_n = int(g(NOTE, r'现读 (\d+) 只源全扫'))
+                ~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\land_r61b_3836.py", line 51, in g
+    assert m, 'ABORT: 载体 %s 里取不到 %r' % (os.path.basename(p), pat)
+           ^
+AssertionError: ABORT: 载体 SNAPSHOT_NOTE.txt 里取不到 '现读 (\\d+) 只源全扫'

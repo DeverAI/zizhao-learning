@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\land_r61b_3836.py", line 70, in <module>
+    assert bare_lf == 0, 'ABORT: 现读裸 LF 行数 = %d ≠ 0 ⇒ 追加体行尾要按现读口径重选' % bare_lf
+           ^^^^^^^^^^^^
+AssertionError: ABORT: 现读裸 LF 行数 = -1 ≠ 0 ⇒ 追加体行尾要按现读口径重选

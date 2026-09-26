@@ -1,0 +1,15 @@
+STALE-TAIL 核销：现件 750255 B / 3930 行，其中尾节 19476 B / 14 行 先整体归档进 record_stale3836_20260926_161042.md，头段与 2 只 pre-image 逐字节相等后回落到头段
+PRE-IMAGE record_pre3836_20260926_161043.md (730779 B / md5 81827561 == 写盘前原件)
+GATE 106/CLEAN/HITS0 POS DEL2 SCAN104 ARMS2/2 equalTrue VERDICTPOSITIVE_CONTROL_FIRES_AND_INDEX_CLEAN 门名==提交只数 106==2+104
+COMMIT d8f3136 FILES 106 TXT 104 BIN 2 +19847/-1 DELETED ['esp32s3_flash_backup_8mb.bin', 'esp32s3_partition_table.bin'] REVLIST 19 STATUS 49
+FREQERR 263 条 / 2354 行 / 503833 B / md5 997e7928
+README12 101477 B / 479 行 / md5 582cfd9b | DOCS AT 2026-09-26 14:56:51 源 49 表 49 目录 50 NEW 0
+ROOTS r43 13/13 r53 11/11 sourceonly 13 WT 32 只/707253 B r61close 35 只/22127426 B diff 0/0（五格在册==现跑，已 assert）
+BINS esp32s3_flash_backup_8mb.bin 8388608 B/ff48b175、esp32s3_partition_table.bin 3072 B/ce84da71 | BUILD 1108336 B md5 42b6b16f elf16 a23c5df6b46f8293 mtime 2026-09-26 11:12:51（与板档案在册三字段全等）
+SNAP12 AT 2026-09-26 14:56:51 < FREQERR18 2026-09-26 15:24:13 | NOTE 里 FreqErr 492501 B < 盘上 503833 B | STATUS 49 行（目录折叠 1）
+COMS ['COM3', 'COM4', 'COM5', 'COM6'] COM14=False | HT305_SYNC 388 只 最新 hardware/ht305_sync/MANIFEST.txt | ESPLOG 137 只含明文 17 只
+EV_TAIL 64 只（mtime 落在 141401 ~ 本遍进入 16:10:42 之间）
+DEFECTS 15 处（本遍进入前崩遍载体 ['r61b_3836_154140.txt', 'r61b_3836_154438.txt', 'r61b_3836_154745.txt', 'r61b_3836_154843.txt', 'r61b_3836_155007.txt', 'r61b_3836_155046.txt', 'r61b_3836_155144.txt', 'r61b_3836_155158.txt', 'r61b_3836_155349.txt', 'r61b_3836_155430.txt', 'r61b_3836_155605.txt', 'r61b_3836_155755.txt', 'r61b_3836_155919.txt', 'r61b_3836_160017.txt', 'r61b_3836_160241.txt']）| 十七批 1 条 / 十八批 4 条 / 复核点名 13 只载体 / +21-0
+PREFIX 3916 行逐字等 / APPEND 15 行逐行等 / 后缀为空（三段式）
+RECORD 3916 行 / 730779 B -> 3931 行 / 753399 B | MD5 81827561 -> 6fcb6791
+VERDICT=LANDED rc=0

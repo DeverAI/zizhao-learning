@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\land_r61b_3836.py", line 528, in <module>
+    assert not _stray, 'ABORT: 本节有 %d 行带未插值占位符：%r' % (len(_stray), _stray[:2])
+           ^^^^^^^^^^
+AssertionError: ABORT: 本节有 1 行带未插值占位符：['- **本遍 14 处缺陷（逐条点名，含修法与执行者；只数由 DEFECTS 列表自身给出，不写字面量）**：(a) `']

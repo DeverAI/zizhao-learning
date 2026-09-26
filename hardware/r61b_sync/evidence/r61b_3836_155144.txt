@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\land_r61b_3836.py", line 301, in <module>
+    A17, B17, n17 = batch_entries(os.path.join(EV, 'r61b_freqerr17_144314.txt'))
+                    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\land_r61b_3836.py", line 296, in batch_entries
+    a, b, n = g(carrier, r'ENTRIES (\d+) -> (\d+) \(本批 \+(\d+)\)').groups()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'groups'

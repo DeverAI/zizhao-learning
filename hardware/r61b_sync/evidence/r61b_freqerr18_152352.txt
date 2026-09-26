@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\land_r61b_freqerr18.py", line 215, in <module>
+    hdr = build(bytes_before)
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\land_r61b_freqerr18.py", line 188, in build
+    '**【%s 落地｜R61 第十八批 %d 条】** 追加之前现读磁盘：`^[错误类型]` = **%d** 条 / **%d** 行 / **%s** B；'
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ...<14 lines>...
+    '③**内容级闸** = 本批新写文本含 ASCII 撇号的行数 = 0（第十八批第④条：撇号会让单引号字面量提前闭合而 ast.parse 不报）、'
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    '含反斜杠字符的行数 = 0、未插值占位符 = 0、PROV_PASS 宏值命中 = 0（口令由脚本从宏现读、全程不打印）。' % (
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+        ts, len(ENTRIES), n_before, lines_before, format(bytes_before, ','),
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ...<6 lines>...
+        ('无' if not crash18 else '、'.join('`%s`' % x for x in crash18))))
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TypeError: not enough arguments for format string

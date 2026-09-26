@@ -1,0 +1,15 @@
+生成时刻 2026-09-26 14:53:34；口径：git diff --name-only(2) + git ls-files --others --exclude-standard(10)
+排除并点名（每条附理由，现跑明文扫描 HITS=0 才进清单）：5 只
+  DROP  hardware/zizhao-esp32s3/main/provision_ap.c  <- 带 PROV_PASS 宏值明文，入库即公开（索引侧门会 rc=1） [EXPLICIT]
+  DROP  .workbuddy/memory/2026-09-16.md  <- 第三方工具状态目录 [EXPLICIT]
+  DROP  .workbuddy/r31_record_update.py  <- 第三方工具状态目录 [EXPLICIT]
+  DROP  Agent_readme.txt  <- 外部项目发来的回信，非本仓库产出，等裁决 [EXPLICIT]
+  DROP  dev_log/20260919.md  <- 带 PROV_PASS 明文，第八次提交轮实测 HITS=1 [EXPLICIT]
+进清单 7 只：
+  ADD   hardware/r61b_sync/scripts/pw_pos_control_r61b.py
+  ADD   hardware/r61b_sync/evidence/r61b_stage_list_final_145334.txt
+  ADD   hardware/r61b_sync/evidence/staged_cred_gate_145203_ps.txt
+  ADD   hardware/r61b_sync/evidence/staged_cred_gate_r61b_index98.txt
+  ADD   hardware/r61b_sync/evidence/staged_cred_gate_r61b_index98_pos.txt
+  ADD   hardware/r61b_sync/evidence/staged_list_144941.txt
+  ADD   hardware/r61b_sync/gate/run_staged_cred_gate_r61b.ps1

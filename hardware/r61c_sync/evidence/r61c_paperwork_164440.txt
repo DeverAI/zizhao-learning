@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61c_sync\scripts\land_r61c_paperwork.py", line 140, in <module>
+    assert 'PRE-IMAGE' not in _t and 'VERDICT=LANDED' not in _t, 'ABORT: 崩遍载体其实动过盘：' + _f
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ABORT: 崩遍载体其实动过盘：r61c_freqerr19_163104.txt

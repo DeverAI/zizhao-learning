@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\derive_r61c.py", line 113, in <module>
+    assert hard['r61bfinal'] == 0 and hard['zsynctest16'] == 0 and hard[PH] == 0, \
+           ~~~~^^^^^^^^^^^^^
+KeyError: 'r61bfinal'

@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\land_r61b_3836.py", line 98, in <module>
+    assert 'Traceback' in _t, 'ABORT: 第十八批崩遍载体 %s 里不含 Traceback' % _c
+           ^^^^^^^^^^^^^^^^^
+AssertionError: ABORT: 第十八批崩遍载体 r61b_freqerr18_152145.txt 里不含 Traceback

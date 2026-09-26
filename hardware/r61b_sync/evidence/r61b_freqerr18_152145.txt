@@ -1,0 +1,4 @@
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\land_r61b_freqerr18.py", line 180
+    return (
+           ^
+SyntaxError: '(' was never closed

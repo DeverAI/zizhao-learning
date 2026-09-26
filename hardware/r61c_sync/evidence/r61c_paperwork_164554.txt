@@ -1,0 +1,10 @@
+PRE-IMAGE devlog_pre34_20260926_164554.md / done_pre26_20260926_164554.md（写盘前原件 10,687 B / 291,804 B）
+LIVE 五批台账 = 第 2311 行（第十五批 6 条）、第 2327 行（第十六批 3 条）、第 2333 行（第十七批 1 条）、第 2354 行（第十八批 4 条）、第 2375 行（第十九批 4 条） / 合计 18 条 / 全册 267 条
+S16 1138 只 / 14077617 B / zip 5963428 B / 聚合两侧同值 / FORBIDDEN=0 / 根 zsynctest18
+CARRIERS 第 16 代非空载体 15 只 / 第十九批崩遍 2 只 / 权威遍 r61c_freqerr19_163104.txt
+CRASH_RULE 崩遍分类只认「本遍自己有没有写出写盘后令牌」；按 Error 字样数会把成功遍引用的那一行 KeyError 也算成崩遍（本遍实测：那种尺命中 3 只，真崩遍 2 只）
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61c_sync\scripts\land_r61c_paperwork.py", line 288, in <module>
+    assert cl[len(pl):] == al, 'ABORT: 追加段逐行不等：' + os.path.basename(p)
+           ^^^^^^^^^^^^^^^^^^
+AssertionError: ABORT: 追加段逐行不等：20260926.md

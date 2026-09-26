@@ -1,0 +1,8 @@
+RAN_AT   = 2026-09-26 16:16:54
+staged   = 1138
+identical(内容逐字节等,  sha256) = 1138
+changed_since_cutoff = 0 []
+deleted_since_cutoff = 0 []
+new_since_cutoff     = 8 ['hardware/r61c_sync/evidence/r61c_local.txt', 'hardware/r61c_sync/evidence/r61c_local_names.txt', 'hardware/r61c_sync/evidence/r61c_parse_check.txt', 'hardware/r61c_sync/evidence/r61c_probe.txt', 'hardware/r61c_sync/evidence/r61c_remote_names.txt', 'hardware/r61c_sync/evidence/r61c_run_log.txt', 'hardware/r61c_sync/evidence/r61c_scp_err.txt', 'hardware/r61c_sync/evidence/r61c_verify.txt']
+SELF_CHECK = 四桶互斥且并集 == 当前候选集(1146)：PASS
+EXPLANATION = new_since 是本代**打包截止之后**才进仓库的取证/脚本件（取证直接落 evidence/ 的必然结果），不是包漏了东西；判"包 == 现状"看的是 changed/deleted 两桶。

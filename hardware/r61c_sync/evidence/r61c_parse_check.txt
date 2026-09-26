@@ -1,0 +1,11 @@
+﻿CHK_AT=2026-09-26 16:16:45
+SRC=C:\Users\david\Documents\all_projects\自招学习\hardware\r61c_sync\scripts\r61c_upload.ps1
+FIRST3=239,187,191
+UTF8_BOM=True
+PARSE_ERRORS=0
+REMOVE_ITEM_HITS=0
+SCRIPT_LINES=109
+SRC_LINES=109
+MD5_BOTH=E475FE5773865355FDD096AEE88F5FDD
+LINES_MATCH=SRC_EQ_COPY
+NOTE=本代实际执行的是归档那一只（直接 -File 仓库路径），这只 TEMP 副本只是"逐字节同孪生"的第二把尺 ⇒ md5 两侧同值即证明下面的解析结果描述的就是被执行的那只。

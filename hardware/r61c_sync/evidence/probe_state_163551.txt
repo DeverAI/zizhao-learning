@@ -1,0 +1,34 @@
+MEASUREMENTS
+  FreqErr.md | bytes=516900 | LF=2375 | CR=2341 | lines=2375 | md5=64eda4d1
+  done.md | bytes=291804 | LF=1456 | CR=0 | lines=1456 | md5=88895a77
+  todo.md | bytes=5533 | LF=52 | CR=52 | lines=52 | md5=e7eff6f6
+  hardware/烧录须知.md | bytes=124200 | LF=830 | CR=0 | lines=830 | md5=61efdb9d
+  hardware/20260919_墨水屏点屏排查记录.md | bytes=753399 | LF=3931 | CR=3931 | lines=3931 | md5=6fcb6791
+  dev_log/20260926.md | bytes=10687 | LF=97 | CR=0 | lines=97 | md5=9d96be6f
+  backups/README.md | bytes=101477 | LF=479 | CR=0 | lines=479 | md5=582cfd9b
+  backups/r43_20260922_131029/docs/SNAPSHOT_NOTE.txt | bytes=6150 | LF=60 | CR=0 | lines=60 | md5=8b60b13f
+FREQERR_ENTRIES 267
+HEAD d8f3136
+REVLIST 19
+PORCELAIN_LINES 52
+PORCELAIN_BY_OP {'M': 3, '??': 49}
+LSFILES_OTHERS 75
+--- r61c evidence carriers
+  derive_r61c_161508.txt                        300 B  16:15:08
+  derive_r61c_161520.txt                       2952 B  16:15:20
+  freqerr_pre19_20260926_163105.md           503833 B  16:31:05
+  probe_state_163551.txt                          0 B  16:35:51
+  r61c_cutoff_delta.txt                         856 B  16:16:54
+  r61c_freqerr19_163005.txt                     363 B  16:30:05
+  r61c_freqerr19_163040.txt                     469 B  16:30:40
+  r61c_freqerr19_163104.txt                     893 B  16:31:05
+  r61c_listdiff.txt                            1496 B  16:16:54
+  r61c_local.txt                                851 B  16:15:49
+  r61c_local_names.txt                        48167 B  16:15:49
+  r61c_parse_check.txt                          528 B  16:16:45
+  r61c_probe.txt                               2452 B  16:16:08
+  r61c_remote_names.txt                       48167 B  16:16:52
+  r61c_roundtrip.txt                            851 B  16:17:04
+  r61c_run_log.txt                             2320 B  16:16:25
+  r61c_scp_err.txt                              724 B  16:16:10
+  r61c_verify.txt                             50403 B  16:16:25

@@ -1,0 +1,18 @@
+sync_r61b.py -> sync_r61c.py | src_lines=128 dst_lines=128 | md5_src=eca7adf5 md5_dst=b96aaf8e | LEFT={'zsynctest16': 0, 'gen-15': 0, '<R61C-SENTINEL>': 0} | {'r61c': 9, 'zsynctest18': 0, '第 16 代': 1, '第 15 代': 1, 'gen-16': 0, 'R61C': 0, 'r61b_sync/scripts': 1, '守卫 ht305_sync 出现次数': 4, '余留 ht305_sync/scripts': 0}
+r61b_upload.ps1 -> r61c_upload.ps1 | src_lines=109 dst_lines=109 | md5_src=4df956af md5_dst=e475fe57 | LEFT={'zsynctest16': 0, 'gen-15': 0, '<R61C-SENTINEL>': 0} | {'r61c': 19, 'zsynctest18': 5, '第 16 代': 1, '第 15 代': 1, 'gen-16': 0, 'R61C': 0, 'r61b_sync/scripts': 1, '守卫 ht305_sync 出现次数': 3, '余留 ht305_sync/scripts': 0}
+chk_r61b.ps1 -> chk_r61c.ps1 | src_lines=44 dst_lines=44 | md5_src=a07aac4a md5_dst=9d6618a5 | LEFT={'zsynctest16': 0, 'gen-15': 0, '<R61C-SENTINEL>': 0} | {'r61c': 9, 'zsynctest18': 0, '第 16 代': 0, '第 15 代': 1, 'gen-16': 1, 'R61C': 0, 'r61b_sync/scripts': 1, '守卫 ht305_sync 出现次数': 3, '余留 ht305_sync/scripts': 0}
+r61b_listdiff.py -> r61c_listdiff.py | src_lines=89 dst_lines=89 | md5_src=af81a6bb md5_dst=04bee95d | LEFT={'zsynctest16': 0, 'gen-15': 0, '<R61C-SENTINEL>': 0} | {'r61c': 18, 'zsynctest18': 0, '第 16 代': 2, '第 15 代': 1, 'gen-16': 0, 'R61C': 0, 'r61b_sync/scripts': 1, '守卫 ht305_sync 出现次数': 2, '余留 ht305_sync/scripts': 0}
+r61b_cutoff_delta.py -> r61c_cutoff_delta.py | src_lines=81 dst_lines=81 | md5_src=918ef72f md5_dst=3bc45860 | LEFT={'zsynctest16': 0, 'gen-15': 0, '<R61C-SENTINEL>': 0} | {'r61c': 6, 'zsynctest18': 0, '第 16 代': 1, '第 15 代': 1, 'gen-16': 0, 'R61C': 0, 'r61b_sync/scripts': 1, '守卫 ht305_sync 出现次数': 2, '余留 ht305_sync/scripts': 0}
+r61b_roundtrip.py -> r61c_roundtrip.py | src_lines=105 dst_lines=105 | md5_src=5eb393fb md5_dst=f53de84e | LEFT={'zsynctest16': 0, 'gen-15': 0, '<R61C-SENTINEL>': 0} | {'r61c': 11, 'zsynctest18': 2, '第 16 代': 1, '第 15 代': 1, 'gen-16': 0, 'R61C': 1, 'r61b_sync/scripts': 1, '守卫 ht305_sync 出现次数': 2, '余留 ht305_sync/scripts': 0}
+sync_r61c.py  hardware/r61b_sync/scripts/sync_r61b.py  OK
+r61c_upload.ps1  hardware/r61b_sync/scripts/r61b_upload.ps1  OK
+chk_r61c.ps1  hardware/r61b_sync/scripts/chk_r61b.ps1  OK
+chk_r61c.ps1  hardware/r61c_sync/scripts/r61c_upload.ps1  OK
+r61c_listdiff.py  hardware/r61b_sync/scripts/r61b_listdiff.py  OK
+r61c_listdiff.py  hardware/r61c_sync/scripts/r61c_cutoff_delta.py  OK
+r61c_cutoff_delta.py  hardware/r61b_sync/scripts/r61b_cutoff_delta.py  OK
+r61c_roundtrip.py  hardware/r61b_sync/scripts/r61b_roundtrip.py  OK
+chk_r61c.ps1  hardware/r61c_sync/evidence/r61c_parse_check.txt  not-yet(=本代待写)
+WROTE=6 DIR=C:/Users/david/Documents/all_projects/自招学习\hardware\r61c_sync\scripts EV_DIR=C:/Users/david/Documents/all_projects/自招学习\hardware\r61c_sync\evidence
+POINTERS_SCRIPTS=8 MISSING=0 | EVIDENCE_POINTERS_REPORTED=1
+VERDICT=DERIVED rc=0

@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61c_sync\scripts\land_r61c_freqerr19.py", line 318, in <module>
+    assert not _stray, 'ABORT: 本遍新写文本有 %d 行带未插值占位符' % len(_stray)
+           ^^^^^^^^^^
+AssertionError: ABORT: 本遍新写文本有 1 行带未插值占位符

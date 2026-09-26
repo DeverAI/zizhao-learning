@@ -1,0 +1,6 @@
+PRE-IMAGE record_pre3836_20260926_155606.md (730779 B / md5 81827561 == 写盘前原件)
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\land_r61b_3836.py", line 514, in <module>
+    print('GATE %d/%s POS %s/%s/%s 门名==提交只数 %d==%d+%d' % (gs_files, gs_verdict, ps_del, ps_scan, ps_arms, ps_eq, ps_verdict, gs_files, ps_del, ps_scan))
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TypeError: %d format: a real number is required, not str

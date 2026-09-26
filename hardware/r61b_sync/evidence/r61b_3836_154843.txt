@@ -1,0 +1,7 @@
+C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\land_r61b_3836.py:330: SyntaxWarning: "\w" is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\w"? A raw string is also an option.
+  '汇总行里的 `equal=` 则连前缀一起锚（`(?m)^CROSS_CHECK.*equal=(\w+)$`）',
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\land_r61b_3836.py", line 179, in <module>
+    assert len(_i12) == 1 and len(_i11) == 1, 'ABORT: README 第十一/十二格标题现读 %d/%d 处' % (len(_i11), len(_i12))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ABORT: README 第十一/十二格标题现读 2/1 处

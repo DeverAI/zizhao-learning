@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\land_r61b_freqerr18.py", line 71, in <module>
+    assert fx_b == README_B, 'ABORT: 订正前字节 != proof 遍读到的 README 字节'
+           ^^^^^^^^^^^^^^^^
+AssertionError: ABORT: 订正前字节 != proof 遍读到的 README 字节

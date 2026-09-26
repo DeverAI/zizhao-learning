@@ -1,0 +1,7 @@
+PRE-IMAGE freqerr_pre18_20260926_152413.md (492501 B / md5 097cdce2 == 写盘前原件)
+CARRIER_GATE 点名载体 4 只全在盘上 / r61b_readme12_land_* 前缀现扫 = 0 只（预期 0）
+DRIFT 12 -> 14 / 差 2 == 新增取证 2：['r61b_readme12_proof_151116.txt', 'readme_pre12_20260926_150515.md']
+ENTRIES 259 -> 263 (本批 +4) | LINES 2333 -> 2354 | BYTES 492501 -> 503833
+PREFIX 2333 行逐字等 / APPEND 21 行逐行等 / 后缀为空（三段式）
+MD5 097cdce2 -> 997e7928
+VERDICT=LANDED rc=0
