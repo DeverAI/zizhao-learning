@@ -1,0 +1,16 @@
+R61_ROUNDTRIP_AT=2026-09-26 13:08:16
+REMOTE=ht305:C:/Users/Administrator/AppData/Local/Temp/zsynctest17/zizhao_20260926_r61bfinal/hardware/zizhao-esp32s3/main/provision_ap.c
+SCP_ATTEMPT=1 RC=0 STDERR_LINES=3
+  STDERR1| ** WARNING: connection is not using a post-quantum key exchange algorithm.
+  STDERR1| ** This session may be vulnerable to "store now, decrypt later" attacks.
+  STDERR1| ** The server may need to be upgraded. See https://openssh.com/pq.html
+REMOTE_BYTES=11118 md5=df6cc5c9cc3049f49a5945681b6acd96
+LOCAL_BYTES=11118 md5=df6cc5c9cc3049f49a5945681b6acd96
+BYTE_EQUAL_TO_WORKTREE=True
+PROV_PASS_HITS_REMOTE=1
+PROV_PASS_HITS_LOCAL=1
+MACRO_LINE_REMOTE=1
+RAN_END_AT=2026-09-26 13:08:18
+CONTROL_LANDER_HITS=0 (应 0；这只文件按宏名读口令、不含宏值)
+POSITIVE_CONTROL_WORKTREE_HITS=1 (应 >0)
+VERDICT=REMOTE_CARRIES_PLAINTEXT

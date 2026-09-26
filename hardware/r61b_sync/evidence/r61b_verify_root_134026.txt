@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\verify_root_r61close.py", line 51, in <module>
+    assert MAIN_N == 32, 'ABORT: 根内 main/ 只数不是 32（工作树口径变了，本节读数不能沿用）：%d' % MAIN_N
+           ^^^^^^^^^^^^
+AssertionError: ABORT: 根内 main/ 只数不是 32（工作树口径变了，本节读数不能沿用）：0

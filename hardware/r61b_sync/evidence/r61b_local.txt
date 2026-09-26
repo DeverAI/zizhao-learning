@@ -1,0 +1,14 @@
+git-listed (dupes)  = 1015 / dupes = 0
+selected            = 1012 | copy failures = 0 []
+dropped (逐只点名)   = 3 ['.workbuddy/memory/2026-09-16.md', '.workbuddy/r31_record_update.py', 'dev_log/20260919.md']
+staged files        = 1012 | bytes = 8214454
+plaintext in staging= 1 ['hardware/zizhao-esp32s3/main/provision_ap.c']
+any .log/.bin/.elf/.map = []
+any backups/nvs     = False False
+zip entries         = 1013 | utf8-flagged = 77
+zip size/md5        = 3547328 812bb9e00b64ab2bc55e641af6b0b05c
+content files/bytes = 1012 / 8214454
+LOCAL_AGGREGATE     = d36262e4663e5b7330dc6e3c1d8db5eb94abef21f533164521a72dd6fb39145a
+CUTOFF_COPY_BEGIN   = 2026-09-26 13:06:47
+CUTOFF_ZIP_MADE     = 2026-09-26 13:06:53
+EVIDENCE_IN_REPO    = r61b_local_names.txt（取证自 gen 13 起直接进仓库；本代进的是 r61b_sync/evidence，见文件头②）

@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\make_root_r61close.py", line 85, in <module>
+    da = _diffcnt(os.path.join(A, 'main'))
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\make_root_r61close.py", line 81, in _diffcnt
+    r = subprocess.run(['diff', '-rq', root_main, MAIN], capture_output=True, text=True, encoding='utf-8')
+        ^^^^^^^^^^
+NameError: name 'subprocess' is not defined. Did you forget to import 'subprocess'?

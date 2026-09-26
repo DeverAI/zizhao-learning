@@ -1,0 +1,10 @@
+DROP hardware/zizhao-esp32s3/main/provision_ap.c                            带 PROV_PASS 宏值明文，入库即公开（索引侧门会 rc=1） [EXPLICIT]
+DROP .workbuddy/memory/2026-09-16.md                                        第三方工具状态目录 [EXPLICIT]
+DROP .workbuddy/r31_record_update.py                                        第三方工具状态目录 [EXPLICIT]
+DROP Agent_readme.txt                                                       外部项目发来的回信，非本仓库产出，等裁决 [EXPLICIT]
+DROP dev_log/20260919.md                                                    带 PROV_PASS 明文，第八次提交轮实测 HITS=1 [EXPLICIT]
+BINS_IN_KEEP=0
+RULING_PROBE=2/2（两只原厂镜像：扩展名命中 + 已不在候选 + 盘上在位）
+MOD=2 UNTRACKED=10 DROP=5 KEEP=7
+LIST C:/Users/david/Documents/all_projects/自招学习\hardware\r61b_sync\evidence\staged_list_145334.txt 1182 md5 6d751b2e
+PATHSPEC C:/Users/david/Documents/all_projects/自招学习\hardware\r61b_sync\evidence\staged_paths_145334.bin 402

@@ -1,0 +1,11 @@
+PRE-IMAGE freqerr_pre17_20260926_144314.md (488391 B / md5 93e29c8f)
+CARRIER   r61b_freqerr17_144314.txt (1453 B)
+ON-DISK   FreqErr.md (492501 B / md5 097cdce2)
+ENTRIES 258 -> 259 (delta 1) | LINES 2327 -> 2333 (delta 6) | BYTES 488391 -> 492501 (delta 4110)
+FIXED line 2254: OLDSEG仍在=False | 加粗 26 -> 30 | 该行 1210 -> 1403 B
+BOLD_ODD_LINES 28 (应为 0) | 全册含反斜杠的行 105
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\verify_r61b_freqerr17.py", line 75, in <module>
+    assert bold == 0, 'ABORT: 有 %d 行加粗不配对' % bold
+           ^^^^^^^^^
+AssertionError: ABORT: 有 28 行加粗不配对

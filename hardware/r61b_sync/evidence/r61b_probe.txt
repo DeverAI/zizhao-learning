@@ -1,0 +1,43 @@
+﻿evidence header
+PROBE_AT 2026-09-26 13:07:14
+ssh.exe : ** WARNING: connection is not using a post-quantum key exchange algorithm.
+所在位置 C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\r61b_upload.ps1:48 字符: 1
++ & ssh -o StrictHostKeyChecking=accept-new ht305 "powershell -NoProfil ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (** WARNING: con...ange algorithm.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+#< CLIXML
+TARGET_EXISTS=False
+DESKTOP	deepseek-chat.bat	31
+DESKTOP	deepseek-reasoner.bat	35
+DESKTOP	idea_audit.bat	43
+DESKTOP	Microsoft Edge.lnk	2328
+DESKTOP	RDP.bat	204
+DESKTOP	serverDl.bat	990
+DESKTOP	Start_DS_Server.bat	272
+DESKTOP	SUPERSEDED-tar-cjk-mojibake_zizhao_sync_20260923_r43.tar.gz	1002599
+DESKTOP	zizhao_20260923_r44final.zip	1135781
+DESKTOP	zizhao_20260923_r45final.zip	1161539
+DESKTOP	zizhao_20260923_r46final.zip	1269250
+DESKTOP	zizhao_20260923_r47final.zip	1349354
+DESKTOP	zizhao_20260923_r48final.zip	1409955
+DESKTOP	zizhao_20260923_r49final.zip	1471082
+DESKTOP	zizhao_20260924_r50final.zip	1537565
+DESKTOP	zizhao_20260924_r51final.zip	1696912
+DESKTOP	zizhao_20260924_r52final.zip	1773469
+DESKTOP	zizhao_20260924_r53final.zip	1861210
+DESKTOP	zizhao_20260924_r54final.zip	1952829
+DESKTOP	zizhao_20260924_r55final.zip	2055096
+DESKTOP	zizhao_20260926_r61final.zip	3456580
+DESKTOP	zizhao_esp32s3_flash_notice_20260918.zip	9762
+DESKTOP	zizhao_sync_20260923_r43.zip	1117960
+DESKTOP	学习Agent部署.bat	116
+DESKTOP	此电脑.lnk	384
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="
+0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Recor
+d"><AV>正在准备首次使用模块。</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj><Obj
+ S="progress" RefId="1"><TNRef RefId="0" /><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>正在准备首次使用模块。</AV><AI>0</AI><N
+il /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

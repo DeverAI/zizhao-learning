@@ -1,0 +1,4 @@
+DRIVER_PS_COPY 2026-09-26 14:52:06
+LABEL=index-r61b-98
+OUT=staged_cred_gate_r61b_index98.txt
+PY_EXIT=0

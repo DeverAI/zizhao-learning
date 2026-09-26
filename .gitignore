@@ -37,6 +37,14 @@ backend/audit_probe_r03.py
 # Device provision blobs with passkeys
 backend/storage/device_provision/
 
+# 用户提供的原厂整片镜像（排查记录 §38.6/第 12 批那句"两只都是用户资料，只读、永不 stage"）：
+# 按**准确文件名**排除，不用 `*.bin` 通配 —— 通配会把以后真要入库的二进制一并吞掉且无声。
+/esp32s3_flash_backup_8mb.bin
+/esp32s3_partition_table.bin
+# 提交轮 pathspec 传输件（NUL 分隔清单，喂给 `git add --pathspec-file-nul`）：它是运输载体不是取证载荷，
+# 历轮都只落 %TEMP%/evidence 不入库；本仓库把它写进 evidence/ 顺带带上，故在此点名排除。
+**/staged_paths_*.bin
+
 # OS
 .DS_Store
 Thumbs.db

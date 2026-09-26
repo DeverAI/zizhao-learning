@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\land_r61b_freqerr15.py", line 208, in <module>
+    assert not _stray, 'ABORT: 本遍新写文本里有 %d 行带未插值占位符：%r' % (len(_stray), [l[:70] for l in _stray[:3]])
+           ^^^^^^^^^^
+AssertionError: ABORT: 本遍新写文本里有 1 行带未插值占位符：['[错误类型] **台账行里的三只 `{VAR}` 哨兵没插值就落盘，落笔之后那半句不再是读数而是空句，而它后面还跟着"本遍实测相等"**（R']

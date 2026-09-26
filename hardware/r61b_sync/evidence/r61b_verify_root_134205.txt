@@ -1,0 +1,8 @@
+ROOT_NAME r61close_20260926_133908
+A = backups/r61close_20260926_133908   B = hardware/zizhao-esp32s3/backups/r61close_20260926_133908
+FILES_PER_ROOT=35 (main/ 32 只 + 产物 3 只)  BYTES_PER_ROOT=22127426
+A_vs_B: 名单相同=OK  逐只 md5 全等=OK（含 3 只产物，共 35 只）
+DIFF_RQ_A_vs_worktree=0 行  DIFF_RQ_B_vs_worktree=0 行
+BIN md5=42b6b16fbb34505d083bd9dd0d3f33cb / 1108336 B / bin[176:184]=a23c5df6b46f8293 / bin[176:208]==sha256(elf) 成立
+OLD r59_post bin md5=714b9b84ce05b27f1a665c0fb75ee46a（不同值 ⇒ 板上那只镜像此前盘上无副本，本遍起有了）
+VERDICT=ROOT_VERIFIED rc=0

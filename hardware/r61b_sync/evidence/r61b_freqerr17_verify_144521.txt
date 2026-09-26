@@ -1,0 +1,8 @@
+PRE-IMAGE freqerr_pre17_20260926_144314.md (488391 B / md5 93e29c8f)
+CARRIER   r61b_freqerr17_144314.txt (1453 B)
+ON-DISK   FreqErr.md (492501 B / md5 097cdce2)
+ENTRIES 258 -> 259 (delta 1) | LINES 2327 -> 2333 (delta 6) | BYTES 488391 -> 492501 (delta 4110)
+FIXED line 2254: OLDSEG仍在=False | 加粗 26 -> 30 | 该行 1210 -> 1403 B
+BOLD_ODD_LINES 基线 4 -> 现读 4（增量必须 0） | 被改那一行 26 -> 30（必须都是偶数） | 全册含反斜杠的行 基线 105 -> 现读 105
+LEDGER claim (259, 2333, 492501) == on-disk (259, 2333, 492501) -> OK
+VERDICT=VERIFY_OK rc=0

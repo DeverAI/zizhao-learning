@@ -1,0 +1,5 @@
+FIXED %REPO%\backups\r61close_20260926_133908/main/ = 32 只（顶层余 4 只 = 3 只产物）搬前后 md5 逐只全等
+FIXED %REPO%\hardware\zizhao-esp32s3\backups\r61close_20260926_133908/main/ = 32 只（顶层余 4 只 = 3 只产物）搬前后 md5 逐只全等
+DIFF_RQ %REPO%\backups\r61close_20260926_133908\/main vs 工作树 main = 0 行
+DIFF_RQ %REPO%\hardware\zizhao-esp32s3\backups\r61close_20260926_133908\/main vs 工作树 main = 0 行
+VERDICT=ROOT_LAYOUT_FIXED rc=0

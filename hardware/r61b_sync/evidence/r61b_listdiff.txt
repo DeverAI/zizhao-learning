@@ -1,0 +1,20 @@
+第 15 代同步（r61bfinal）双向差集 + 行尾前置读数，现跑于 2026-09-26 13:08:10
+口径：两侧先剥 \r 再比（(56) 那条），行尾原样登记在下一段，不事后归一。
+EOL  LOCAL bytes=41397 lines=1012 CRLF=0 bareLF=1012 BOM=False
+EOL  REMOTE(剥后名单) bytes=41397 lines=1012 CRLF=0 bareLF=1012 BOM=False
+EOL  VERIFY(远端 stdout 落盘原件，差集就是从它切的) bytes=43506 lines=1035 CRLF=1035 bareLF=0 BOM=True
+LOCAL_LINES=1012 REMOTE_LINES=1012
+ONLY_IN_LOCAL=0 []
+ONLY_IN_REMOTE=0 []
+
+--- 包 ↔ 工作树差集（r61b_cutoff_delta.py 同批现跑）---
+RAN_AT   = 2026-09-26 13:08:10
+staged   = 1012
+identical(内容逐字节等,  sha256) = 1012
+changed_since_cutoff = 0 []
+deleted_since_cutoff = 0 []
+new_since_cutoff     = 8 ['hardware/r61b_sync/evidence/r61b_local.txt', 'hardware/r61b_sync/evidence/r61b_local_names.txt', 'hardware/r61b_sync/evidence/r61b_parse_check.txt', 'hardware/r61b_sync/evidence/r61b_probe.txt', 'hardware/r61b_sync/evidence/r61b_remote_names.txt', 'hardware/r61b_sync/evidence/r61b_run_log.txt', 'hardware/r61b_sync/evidence/r61b_scp_err.txt', 'hardware/r61b_sync/evidence/r61b_verify.txt']
+SELF_CHECK = 四桶互斥且并集 == 当前候选集(1020)：PASS
+EXPLANATION = new_since 是本代**打包截止之后**才进仓库的取证/脚本件（取证直接落 evidence/ 的必然结果），不是包漏了东西；判"包 == 现状"看的是 changed/deleted 两桶。
+
+VERDICT=LISTDIFF_EQUAL

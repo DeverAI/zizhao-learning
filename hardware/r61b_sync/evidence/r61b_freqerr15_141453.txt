@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\land_r61b_freqerr15.py", line 46, in <module>
+    assert OLDSEG.count('**') == 6 and '\n' not in OLDSEG, 'ABORT: 被替换段形状与预期不同：%r' % OLDSEG
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ABORT: 被替换段形状与预期不同：'{POST_E}** 条 / **{POST_L}** 行 / **{POST_B:,}'

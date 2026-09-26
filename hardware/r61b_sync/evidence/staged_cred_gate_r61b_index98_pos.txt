@@ -1,0 +1,15 @@
+提交前索引门的阳性对照（现跑于 2026-09-26 14:53:25）
+GATE_CARRIER=staged_cred_gate_r61b_index98.txt（本脚本与它互核，扫的是同一批已 stage blob）
+GATE_MTIME=2026-09-26 14:52:06
+SECRET_LEN_BYTES PROV=10 SSH=10 (只报长度，不报内容)
+SHOULD_FIRE PROV hardware/zizhao-esp32s3/main/provision_ap.c hits=1
+SHOULD_FIRE PROV dev_log/20260919.md hits=1
+SHOULD_FIRE SSH in-memory/bare hits=1
+SHOULD_FIRE SSH in-memory/wrapped hits=1
+SHOULD_FIRE SSH in-memory/twice hits=2
+INDEX_DELETED=2 ['esp32s3_flash_backup_8mb.bin', 'esp32s3_partition_table.bin']（删除在索引里没有 blob，扫不了，逐只点名而不静默）
+INDEX_SCANNED=98 INDEX_TOTAL_HITS=0 []
+SELF index_scanned=98 + deleted=2 = 100
+CROSS_CHECK gate FILES=100 PROV=0 SSH=0 HITS=0 VERDICT=CLEAN | self PROV=0 SSH=0 HITS=0 | equal=True
+ARMS_FIRED=2/2 ['PROV_worktree', 'SSH_inmemory_synth']
+VERDICT=POSITIVE_CONTROL_FIRES_AND_INDEX_CLEAN

@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\land_r61b_freqerr15.py", line 231, in <module>
+    assert chk[_i:_i + len(_newb)] == _newb, 'ABORT: 订正段逐字不等'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ABORT: 订正段逐字不等

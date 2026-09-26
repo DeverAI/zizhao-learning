@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\land_r61b_freqerr16.py", line 66, in <module>
+    P2 = fix_pair(F2_OLD, F2_NEW, '(b) 没有执行者的"还在盘上复量"')
+         ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\land_r61b_freqerr16.py", line 52, in fix_pair
+    assert len(hits) == 1, 'ABORT: 订正 %s 的锚文本命中 %d 行（应为 1）' % (tag, len(hits))
+           ^^^^^^^^^^^^^^
+AssertionError: ABORT: 订正 (b) 没有执行者的"还在盘上复量" 的锚文本命中 2 行（应为 1）

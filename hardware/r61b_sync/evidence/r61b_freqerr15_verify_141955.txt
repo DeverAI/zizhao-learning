@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\verify_freqerr15_r61b.py", line 72, in <module>
+    assert _w_now == _w_pre, 'ABORT: 宽口径花括号从 %d 处变到 %d 处 => 本遍写进了新的未插值文本' % (_w_pre, _w_now)
+           ^^^^^^^^^^^^^^^^
+AssertionError: ABORT: 宽口径花括号从 10 处变到 7 处 => 本遍写进了新的未插值文本

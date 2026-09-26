@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\land_r61b_freqerr15.py", line 194, in <module>
+    assert len(_mid) == bytes_before - len(OLDSEG) + len(NEWSEG), 'ABORT: 订正只该改字节不改行，实测尺寸变化与替换体长度不等'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ABORT: 订正只该改字节不改行，实测尺寸变化与替换体长度不等

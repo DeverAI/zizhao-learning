@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\land_r61b_freqerr15.py", line 34, in <module>
+    assert len(_bad) == 1, 'ABORT: 全册未插值哨兵行 %d 只（应为 1）=> 要么已订正过，要么还有别的漏网' % len(_bad)
+           ^^^^^^^^^^^^^^
+AssertionError: ABORT: 全册未插值哨兵行 8 只（应为 1）=> 要么已订正过，要么还有别的漏网

@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\land_r61b_freqerr16.py", line 158, in <module>
+    assert not re.search(r'）\s*B，', exp.decode('utf-8')), 'ABORT: 全册仍有"括号紧跟单位"的被劈开句'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ABORT: 全册仍有"括号紧跟单位"的被劈开句

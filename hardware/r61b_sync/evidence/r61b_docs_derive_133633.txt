@@ -1,0 +1,14 @@
+PRIOR  refresh_docs_snapshot_r57.py | 8982 B / 155 lines / md5 159f7139（写后复算同值）
+OUT    refresh_docs_snapshot_r61b.py | 10135 B / 168 lines / md5 d6c33984
+REPLACEMENTS=6 DIFF(+/-)=27/14 STRAYS=0
+SRCS_OLD=41 SRCS_NEW=49 ADDED=8 源全在盘上=OK 平铺名不撞=OK
+  + dev_log/20260926.md
+  + updates/20260926_墨水屏R60版面R61翻页与两件档案补齐.md
+  + updates/20260926_墨水屏R61尾巴提交轮9与第14代同步.md
+  + hardware/20260924_R56真机首烧fb32168a判据摘录_v2.txt
+  + hardware/20260925_R57_F臂判据摘录.txt
+  + hardware/20260925_R59板型鉴定判据摘录.txt
+  + hardware/BOARD_ePaper397.md
+  + hardware/BOARD_S3_ePaper_1_54.md
+EOL=LF BOM=False CR=0 守卫下限: 40 -> 48
+VERDICT=DERIVED rc=0

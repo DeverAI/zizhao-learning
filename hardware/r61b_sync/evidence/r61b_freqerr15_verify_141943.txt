@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\david\Documents\all_projects\自招学习\hardware\r61b_sync\scripts\verify_freqerr15_r61b.py", line 38, in <module>
+    assert _old.startswith('**【') and 'R61 第十三批' in _old.decode('utf-8') and _new.startswith(_old[:20]), \
+           ~~~~~~~~~~~~~~~^^^^^^^^
+TypeError: startswith first arg must be bytes or a tuple of bytes, not str
